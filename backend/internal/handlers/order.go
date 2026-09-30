@@ -28,6 +28,9 @@ func CreateOrder(pool *pgxpool.Pool, cfg *config.Config) http.HandlerFunc {
 			Name          string          `json:"name"`
 			Business      string          `json:"business"`
 			Industry      string          `json:"industry"`
+			Target        string          `json:"target"`
+			Vibes         []string        `json:"vibes"`
+			Colors        []string        `json:"colors"`
 			Notes         string          `json:"notes"`
 			CustomerEmail string          `json:"customer_email"`
 			Email         string          `json:"email"`
@@ -64,7 +67,9 @@ func CreateOrder(pool *pgxpool.Pool, cfg *config.Config) http.HandlerFunc {
 		id := uuid.NewString()
 		briefMap := map[string]any{
 			"name": name, "business": business, "contact": contact,
-			"industry": strings.TrimSpace(body.Industry), "notes": strings.TrimSpace(body.Notes),
+			"industry": strings.TrimSpace(body.Industry), "target": strings.TrimSpace(body.Target),
+			"vibes": body.Vibes, "colors": body.Colors,
+			"notes": strings.TrimSpace(body.Notes),
 		}
 		if len(body.Brief) > 0 {
 			var extra map[string]any

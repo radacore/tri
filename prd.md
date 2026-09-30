@@ -187,9 +187,11 @@ CTA sekunder diganti: Hero → "See Our Work", CTA Banner → "Browse Case Studi
 
 #### 4.2.5 Form Pemesanan (`/order`)
 
-**Step 1 — Brief Form:**
-- Nama (nama kamu), nama perusahaan/brand, industri, kontak (email/WA), penjelasan yang dimau
-- Preferensi gaya (modern, classic, playful, elegant, dll.) — multi-select
+**Step 1 — Micro-Brief (pengganti discovery call):**
+- Nama (nama kamu), nama perusahaan/brand, industri, target pasar, kontak (email/WA)
+- Vibe kata kunci — chip multi-pilih, maksimal 3 (Minimalis, Berani, Elegan, Playful, Klasik, Futuristis, Mewah, Organik)
+- Referensi warna — chip multi-pilih (7 warna + custom color picker)
+- Referensi / yang dihindari (textarea singkat)
 - Deskripsi bisnis (textarea)
 - Target audience
 - Preferensi gaya (modern, classic, playful, elegant, dll.) — multi-select
@@ -212,7 +214,7 @@ CTA sekunder diganti: Hero → "See Our Work", CTA Banner → "Browse Case Studi
   ```
 - Tombol **"Kirim via Email"** → `mailto:` dengan subject/body yang sama
 - Order juga disimpan ke backend (best-effort `POST /orders`) untuk rekap admin
-- Nomor WA & email tujuan via env `PUBLIC_WA_NUMBER` / `PUBLIC_ORDER_EMAIL`
+- Nomor WA (`6281241525485`, override via env `PUBLIC_WA_NUMBER`) & email tujuan (env `PUBLIC_ORDER_EMAIL`)
 
 **Step 3 — Konfirmasi:**
 - Halaman terima kasih

@@ -176,6 +176,27 @@ body {
 }
 .hanger:hover .hanger-card { transform: rotate(0deg) translateY(-4px); box-shadow: 0 16px 32px rgba(2, 8, 30, 0.1); }
 
+/* color picker modal — panel scale-in, transform+opacity only */
+#cp-modal.open { display: flex; }
+#cp-modal .cp-panel { animation: cp-in 0.25s cubic-bezier(0.2, 0, 0, 1); }
+@keyframes cp-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.cp-hue {
+  -webkit-appearance: none; appearance: none; height: 12px; border-radius: 9999px;
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  outline-offset: 4px;
+}
+.cp-hue::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%;
+  background: #fff; border: 3px solid #0f172a; box-shadow: 0 2px 6px rgba(2, 8, 30, 0.3); cursor: pointer;
+}
+.cp-hue::-moz-range-thumb {
+  height: 16px; width: 16px; border-radius: 50%;
+  background: #fff; border: 3px solid #0f172a; box-shadow: 0 2px 6px rgba(2, 8, 30, 0.3); cursor: pointer;
+}
+
 /* portfolio filter */
 .pf-item { transition: opacity .3s ease, transform .3s ease; }
 .pf-hidden { opacity: 0; transform: scale(.92); pointer-events: none; position: absolute; visibility: hidden; }

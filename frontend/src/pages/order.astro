@@ -10,10 +10,20 @@ const plans: Record<string, { name: string; price: number }> = {
 const q = (Astro.url.searchParams.get('plan') ?? 'professional').toLowerCase();
 const initial = plans[q] ?? plans['professional'];
 const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
-// TODO: ganti dengan nomor WA bisnis (format internasional tanpa +, cth 62812xxxxxxx)
-const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '6281234567890';
+// Nomor WA bisnis tujuan order
+const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '6281241525485';
 // TODO: ganti dengan email order bisnis
 const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
+const VIBES = ['minimalis', 'berani', 'elegan', 'playful', 'klasik', 'futuristis', 'mewah', 'organik'];
+const COLORS = [
+  { k: 'biru', hex: '#2563EB' },
+  { k: 'hitam', hex: '#111111' },
+  { k: 'emas', hex: '#C9A227' },
+  { k: 'hijau', hex: '#16A34A' },
+  { k: 'merah', hex: '#DC2626' },
+  { k: 'ungu', hex: '#7C3AED' },
+  { k: 'monokrom', hex: '#6B7280' },
+];
 ---
 <BaseLayout title="Order — LogoPulse">
   <Navbar />
@@ -37,12 +47,32 @@ const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
             </button>
           ))}
         </div>
-        <div class="mt-5 grid gap-4">
+        <div class="mt-5 grid gap-5">
           <label class="text-sm font-bold"><span data-i18n="order.f_name">Your name</span><input id="f-name" data-i18n-ph="order.ph_name" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Full name" /></label>
           <label class="text-sm font-bold"><span data-i18n="order.f_biz">Company / brand name</span><input id="f-business" data-i18n-ph="order.ph_biz" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Acme Inc." /></label>
-          <label class="text-sm font-bold"><span data-i18n="order.f_ind">Industry</span><input id="f-industry" data-i18n-ph="order.ph_ind" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="SaaS, café, fashion…" /></label>
+          <div class="grid gap-5 sm:grid-cols-2">
+            <label class="text-sm font-bold"><span data-i18n="order.f_ind">Industry</span><input id="f-industry" data-i18n-ph="order.ph_ind" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="SaaS, café, fashion…" /></label>
+            <label class="text-sm font-bold"><span data-i18n="order.f_target">Target market</span><input id="f-target" data-i18n-ph="order.ph_target" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="E.g. young moms 25–35, Jakarta" /></label>
+          </div>
           <label class="text-sm font-bold"><span data-i18n="order.f_contact">Email or WhatsApp number</span><input id="f-contact" data-i18n-ph="order.ph_contact" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="you@company.com / 0812…" /></label>
-          <label class="text-sm font-bold"><span data-i18n="order.f_notes">What do you want?</span><textarea id="f-notes" rows="4" data-i18n-ph="order.ph_notes" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Tell us about your business, styles you like, colors, and reference examples…"></textarea></label>
+          <fieldset>
+            <legend class="text-sm font-bold"><span data-i18n="order.f_vibe">Style / vibe</span> <span class="font-semibold text-slate-400" data-i18n="order.vibe_hint">Pick up to 3 — this replaces the discovery call.</span></legend>
+            <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Vibe">
+              {VIBES.map((v) => (
+                <button type="button" data-vibe={v} aria-pressed="false" class="vibe-chip btn-active rounded-full px-4 py-2 text-sm font-bold ring-1 ring-slate-200 bg-white text-slate-600 hover:ring-slate-400 transition"><span data-i18n={`vibe.${v}`}>{v}</span></button>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend class="text-sm font-bold" data-i18n="order.f_color">Color references</legend>
+            <div class="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label="Colors">
+              {COLORS.map((c) => (
+                <button type="button" data-color={c.k} aria-pressed="false" class="color-chip btn-active inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 ring-slate-200 bg-white text-slate-600 hover:ring-slate-400 transition"><span class="h-3.5 w-3.5 rounded-full ring-1 ring-black/10" style={`background:${c.hex}`}></span><span data-i18n={`color.${c.k}`}>{c.k}</span></button>
+              ))}
+              <button type="button" id="custom-chip" aria-pressed="false" class="btn-active inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold ring-1 ring-dashed ring-slate-300 bg-white text-slate-600 hover:ring-slate-400 transition"><span id="custom-dot" class="h-3.5 w-3.5 rounded-full ring-1 ring-black/10" style="background:#0158FE"></span><span data-i18n="order.f_custom">Custom</span></button>
+            </div>
+          </fieldset>
+          <label class="text-sm font-bold"><span data-i18n="order.f_notes">References / things to avoid</span><textarea id="f-notes" rows="3" data-i18n-ph="order.ph_notes" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Links you love, styles to avoid…"></textarea></label>
         </div>
         <button id="to-2" type="button" data-i18n="order.review" class="btn-active mt-6 w-full rounded-full bg-primary px-6 py-3.5 text-sm font-bold text-white hover:bg-primary-hover">Review my brief →</button>
       </div>
@@ -68,6 +98,27 @@ const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
         </div>
       </div>
     </div>
+    <!-- COLOR PICKER MODAL (ala Canva: kotak SV + slider hue + hex) -->
+    <div id="cp-modal" class="hidden fixed inset-0 z-[80] items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Custom color">
+      <div id="cp-backdrop" class="absolute inset-0 bg-slate-950/50"></div>
+      <div class="cp-panel relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl" style="border-radius:20px">
+        <h3 class="font-extrabold" data-i18n="order.cp_title">Pick a custom color</h3>
+        <div id="cp-sv" class="relative mt-3 h-44 w-full rounded-xl cursor-crosshair touch-none ring-1 ring-black/10" style="background:hsl(222,100%,50%)">
+          <span id="cp-cursor" class="absolute h-5 w-5 -ml-2.5 -mt-2.5 rounded-full border-[3px] border-white shadow pointer-events-none" style="left:100%;top:0%"></span>
+        </div>
+        <input id="cp-hue" type="range" min="0" max="360" step="1" value="222" class="cp-hue mt-4 w-full" aria-label="Hue" />
+        <div class="mt-3 flex items-center gap-3">
+          <span id="cp-preview" class="h-10 w-10 shrink-0 rounded-full ring-1 ring-black/10" style="background:#0158FE"></span>
+          <label class="flex-1 text-sm font-bold">HEX<input id="cp-hex" maxlength="7" spellcheck="false" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm font-normal uppercase" value="#0158FE" /></label>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button id="cp-remove" type="button" class="btn-active hidden rounded-full px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50" data-i18n="order.cp_remove">Remove</button>
+          <span class="flex-1"></span>
+          <button id="cp-cancel" type="button" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-300" data-i18n="order.cp_cancel">Cancel</button>
+          <button id="cp-use" type="button" class="btn-active rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover" data-i18n="order.cp_use">Use this color</button>
+        </div>
+      </div>
+    </div>
   </main>
   <Footer />
   <script define:vars={{ initialKey: (plans[q] ? q : 'professional'), initialPrice: initial.price, initialName: initial.name, apiBase: apiBase, waNumber: waNumber, orderEmail: orderEmail }}>
@@ -80,6 +131,7 @@ const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
         } catch (e) { return fb; }
       }
       var plan = initialKey, price = initialPrice, pname = initialName;
+      var vibes = [], colors = [], customOn = false;
       var s1 = document.getElementById('os-1'), s2 = document.getElementById('os-2'), s3 = document.getElementById('os-3');
       var dots = Array.from(document.querySelectorAll('#order-steps li'));
       function show(n) {
@@ -106,6 +158,126 @@ const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
           b.classList.add('ring-primary', 'bg-subtle/50'); b.classList.remove('ring-slate-200');
         });
       });
+      function paintChip(btn, on) {
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.classList.toggle('ring-primary', on);
+        btn.classList.toggle('bg-subtle/60', on);
+        btn.classList.toggle('text-primary', on);
+        btn.classList.toggle('ring-slate-200', !on);
+        btn.classList.toggle('bg-white', !on);
+        btn.classList.toggle('text-slate-600', !on);
+      }
+      document.querySelectorAll('.vibe-chip').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var k = b.getAttribute('data-vibe');
+          var at = vibes.indexOf(k);
+          if (at >= 0) { vibes.splice(at, 1); paintChip(b, false); }
+          else if (vibes.length < 3) { vibes.push(k); paintChip(b, true); }
+        });
+      });
+      document.querySelectorAll('.color-chip').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var k = b.getAttribute('data-color');
+          var at = colors.indexOf(k);
+          if (at >= 0) { colors.splice(at, 1); paintChip(b, false); }
+          else { colors.push(k); paintChip(b, true); }
+        });
+      });
+      var customChip = document.getElementById('custom-chip');
+      var customChip = document.getElementById('custom-chip');
+      var customDot = document.getElementById('custom-dot');
+      var customHex = '#0158FE';
+      // ---- color picker modal (kotak SV + hue + hex, tanpa library) ----
+      var cpModal = document.getElementById('cp-modal');
+      var cpSV = document.getElementById('cp-sv');
+      var cpCursor = document.getElementById('cp-cursor');
+      var cpHue = document.getElementById('cp-hue');
+      var cpHex = document.getElementById('cp-hex');
+      var cpPreview = document.getElementById('cp-preview');
+      var cpRemove = document.getElementById('cp-remove');
+      var hsv = { h: 222, s: 1, v: 1 };
+      function hsvToHex(h, s, v) {
+        h = ((h % 360) + 360) % 360;
+        var c = v * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = v - c, r = 0, g = 0, b = 0;
+        if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; }
+        else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; }
+        else if (h < 300) { r = x; b = c; } else { r = c; b = x; }
+        function hx(n) { var s2 = Math.round((n + m) * 255).toString(16); return s2.length < 2 ? '0' + s2 : s2; }
+        return ('#' + hx(r) + hx(g) + hx(b)).toUpperCase();
+      }
+      function hexToHsv(hex) {
+        var m = /^#?([0-9a-f]{6})$/i.exec(String(hex).trim());
+        if (!m) return null;
+        var r = parseInt(m[1].slice(0, 2), 16) / 255, g = parseInt(m[1].slice(2, 4), 16) / 255, b = parseInt(m[1].slice(4, 6), 16) / 255;
+        var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, h = 0;
+        if (d) { if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; if (h < 0) h += 360; }
+        return { h: h, s: mx === 0 ? 0 : d / mx, v: mx };
+      }
+      function paintPicker() {
+        var hex = hsvToHex(hsv.h, hsv.s, hsv.v);
+        if (cpSV) cpSV.style.background = 'linear-gradient(to top, #000, rgba(0,0,0,0)), linear-gradient(to right, #fff, rgba(255,255,255,0)), hsl(' + Math.round(hsv.h) + ',100%,50%)';
+        if (cpCursor) { cpCursor.style.left = (hsv.s * 100) + '%'; cpCursor.style.top = ((1 - hsv.v) * 100) + '%'; }
+        if (cpPreview) cpPreview.style.background = hex;
+        if (cpHex && document.activeElement !== cpHex) cpHex.value = hex;
+        if (cpHue && Number(cpHue.value) !== Math.round(hsv.h)) cpHue.value = String(Math.round(hsv.h));
+      }
+      function openPicker() {
+        var cur = hexToHsv(customHex);
+        if (cur) hsv = cur;
+        paintPicker();
+        if (cpRemove) cpRemove.classList.toggle('hidden', !customOn);
+        if (cpModal) cpModal.classList.add('open');
+      }
+      function closePicker() { if (cpModal) cpModal.classList.remove('open'); }
+      function svSet(ev) {
+        if (!cpSV) return;
+        var r = cpSV.getBoundingClientRect();
+        var x = (ev.clientX - r.left) / r.width, y = (ev.clientY - r.top) / r.height;
+        hsv.s = Math.min(1, Math.max(0, x));
+        hsv.v = 1 - Math.min(1, Math.max(0, y));
+        paintPicker();
+      }
+      var svDown = false;
+      if (cpSV) {
+        cpSV.addEventListener('pointerdown', function (e) { svDown = true; if (cpSV.setPointerCapture && e.pointerId !== undefined) { try { cpSV.setPointerCapture(e.pointerId); } catch (err) {} } svSet(e); });
+        cpSV.addEventListener('pointermove', function (e) { if (svDown) svSet(e); });
+        cpSV.addEventListener('pointerup', function () { svDown = false; });
+        cpSV.addEventListener('pointercancel', function () { svDown = false; });
+      }
+      if (cpHue) cpHue.addEventListener('input', function () { hsv.h = Number(cpHue.value) || 0; paintPicker(); });
+      if (cpHex) cpHex.addEventListener('change', function () {
+        var c = hexToHsv(cpHex.value);
+        if (c) hsv = c;
+        paintPicker();
+      });
+      var cpCancel = document.getElementById('cp-cancel');
+      if (cpCancel) cpCancel.addEventListener('click', closePicker);
+      var cpBackdrop = document.getElementById('cp-backdrop');
+      if (cpBackdrop) cpBackdrop.addEventListener('click', closePicker);
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePicker(); });
+      var cpUse = document.getElementById('cp-use');
+      if (cpUse) cpUse.addEventListener('click', function () {
+        customHex = hsvToHex(hsv.h, hsv.s, hsv.v);
+        customOn = true;
+        if (customDot) customDot.style.background = customHex;
+        if (customChip) paintChip(customChip, true);
+        closePicker();
+      });
+      if (cpRemove) cpRemove.addEventListener('click', function () {
+        customOn = false;
+        if (customChip) paintChip(customChip, false);
+        closePicker();
+      });
+      if (customChip) customChip.addEventListener('click', function () {
+        if (customOn) { customOn = false; paintChip(customChip, false); }
+        else openPicker();
+      });
+      function vibeLabels() { return vibes.map(function (k) { return T('vibe.' + k, k); }); }
+      function colorLabels() {
+        var out = colors.map(function (k) { return T('color.' + k, k); });
+        if (customOn) out.push(customHex.toUpperCase());
+        return out;
+      }
       function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
       function row(k, v) { return '<div class="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-2.5"><dt class="font-bold">' + k + '</dt><dd class="text-right text-slate-600">' + v + '</dd></div>'; }
       function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
@@ -117,8 +289,11 @@ const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
           row(esc(T('order.r_name', 'Name')), esc(val('f-name')) || '—') +
           row(esc(T('order.r_biz', 'Company')), esc(val('f-business')) || '—') +
           row(esc(T('order.r_ind', 'Industry')), esc(val('f-industry')) || '—') +
+          row(esc(T('order.r_target', 'Target')), esc(val('f-target')) || '—') +
+          row(esc(T('order.r_vibe', 'Vibe')), esc(vibeLabels().join(', ')) || '—') +
+          row(esc(T('order.r_color', 'Colors')), esc(colorLabels().join(', ')) || '—') +
           row(esc(T('order.r_contact', 'Contact')), esc(val('f-contact')) || '—') +
-          row(esc(T('order.r_notes', 'Details')), esc(val('f-notes')) || '—');
+          row(esc(T('order.r_notes', 'References')), esc(val('f-notes')) || '—');
       }
       var to2 = document.getElementById('to-2');
       if (to2) to2.addEventListener('click', function () {
@@ -126,8 +301,12 @@ const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
           alert(T('order.alert', 'Please fill in your name and company/brand first.'));
           return;
         }
-        renderSummary();
+        if (vibes.length < 1) {
+          alert(T('order.alert_vibe', 'Pick at least 1 vibe.'));
+          return;
+        }
         show(2);
+        renderSummary();
       });
       var b1 = document.getElementById('back-1'); if (b1) b1.addEventListener('click', function () { show(1); });
       var b2 = document.getElementById('back-2'); if (b2) b2.addEventListener('click', function () { show(2); });
@@ -141,8 +320,11 @@ const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
           '• ' + T('wa.biz', 'Company') + ': ' + encodeURIComponent(val('f-business')) + '%0A',
           '• ' + T('wa.plan', 'Plan') + ': ' + encodeURIComponent(pname + ' ($' + price + ')') + '%0A',
           '• ' + T('wa.ind', 'Industry') + ': ' + encodeURIComponent(val('f-industry') || '-') + '%0A',
+          '• ' + T('wa.target', 'Target') + ': ' + encodeURIComponent(val('f-target') || '-') + '%0A',
+          '• ' + T('wa.vibe', 'Vibe') + ': ' + encodeURIComponent(vibeLabels().join(', ') || '-') + '%0A',
+          '• ' + T('wa.color', 'Colors') + ': ' + encodeURIComponent(colorLabels().join(', ') || '-') + '%0A',
           '• ' + T('wa.contact', 'Contact') + ': ' + encodeURIComponent(val('f-contact') || '-') + '%0A',
-          '• ' + T('wa.notes', 'Details') + ': ' + encodeURIComponent(val('f-notes') || '-'),
+          '• ' + T('wa.notes', 'References') + ': ' + encodeURIComponent(val('f-notes') || '-'),
         ];
         var msg = lines.join('');
         var wa = document.getElementById('send-wa');
@@ -156,7 +338,7 @@ const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
           var base = typeof apiBase !== 'undefined' ? apiBase : 'http://localhost:8080/api/v1';
           fetch(base + '/orders', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ plan: plan, name: val('f-name'), business: val('f-business'), industry: val('f-industry'), notes: val('f-notes'), email: val('f-contact') }),
+            body: JSON.stringify({ plan: plan, name: val('f-name'), business: val('f-business'), industry: val('f-industry'), target: val('f-target'), vibes: vibes, colors: colorLabels(), notes: val('f-notes'), email: val('f-contact') }),
           }).catch(function () {});
         } catch (e) { /* WA/email tetap jalan tanpa backend */ }
         show(3);
