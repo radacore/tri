@@ -139,7 +139,7 @@ Landing page adalah halaman utama yang menjadi pusat konversi. Didesain sebagai 
 | 6 | **Portfolio Gallery** | Grid/masonry galeri karya-karya desain logo. Filterable by kategori (Tech, F&B, Fashion, dll.) | stagger fade-up + filter fade/scale + hover lift | Softriver |
 | 7 | **How It Works** | 3-4 langkah proses pemesanan dengan ikon/ilustrasi dan deskripsi singkat | stepper line-draw + stagger slide-in | Kedua |
 | 8 | **Pricing Table** | 3 tier paket harga dengan perbandingan fitur, tombol CTA per paket | highlight lift + badge pop + checklist stagger | Kedua |
-| 9 | **Testimonials / Reviews** | Grid testimonial dari pelanggan dengan rating, foto, dan nama | masonry stagger fade-up + star pop | Kedua |
+| 9 | **Testimonials / Reviews** | Hanging marquee testimoni (kartu digantung tali + tilt, jalan infinite) dengan rating, foto, dan nama | hanging-scroll 55s + hover straighten | Kedua |
 | 10 | **FAQ** | Accordion FAQ yang menjawab pertanyaan umum | height-expand + chevron rotate | Kedua |
 | 11 | **CTA Banner** | Banner besar untuk konversi akhir — "Ready to get started?" | static gradient + scale-in + hover brighten (tanpa infinite repaint) | Kedua |
 | 12 | **Footer** | Logo, navigasi, social media links, copyright, legal links | fade-in + link underline-slide | Kedua |

@@ -302,7 +302,7 @@ Sistem antarmuka **LogoPulse** menggabungkan presisi minimalis modern (gaya Stri
 | 6 | **Portfolio Gallery** | stagger fade-up + filter fade/scale + hover lift + lightbox fade | filter `200ms`, hover `-4px lift`, `shadow-lg` |
 | 7 | **How It Works** | stagger card slide-in + icon pop on inview | stagger `80ms` |
 | 8 | **Pricing Table** | highlighted card lift + badge pop + toggle scale + checklist stagger | highlight `translateY(-8px)`, `shadow-lg`, toggle `150ms` |
-| 9 | **Testimonials / Reviews** | masonry stagger fade-up + star pop + hover lift | stagger `80ms`, star scale `200ms` |
+| 9 | **Testimonials / Reviews** | hanging marquee (tali + tilt) + hover straighten + star | `55s linear infinite`, pause on hover |
 | 10 | **FAQ** | accordion height-expand + chevron rotate + fade-in answer | expand `300ms`, `easing-standard` |
 | 11 | **CTA Banner** | static gradient + button hover brighten + section scale-in (tanpa animasi background-position infinite — memicu repaint) | gradient statis, scale-in `600ms` |
 | 12 | **Footer** | fade-in + link underline-slide on hover | `duration-base`, underline `200ms` |

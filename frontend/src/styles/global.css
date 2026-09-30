@@ -150,6 +150,22 @@ body {
 .crossfade:hover .img-base { opacity: 0; }
 .crossfade:hover img { transform: scale(1.05); }
 
+/* hanging testimonials — kartu digantung tali, jalan marquee infinite.
+   transform-only (murah di GPU). Hover: kartu meluruskan diri. */
+@keyframes hanging-scroll { to { transform: translate3d(-50%, 0, 0); } }
+.hanging-track {
+  width: max-content;
+  animation: hanging-scroll 55s linear infinite;
+  will-change: transform; transform: translateZ(0);
+  backface-visibility: hidden;
+}
+.hanging-stage:hover .hanging-track { animation-play-state: paused; }
+.hanger-card {
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease;
+}
+.hanger:hover .hanger-card { transform: rotate(0deg) translateY(-4px); box-shadow: 0 16px 32px rgba(2, 8, 30, 0.1); }
+
 /* portfolio filter */
 .pf-item { transition: opacity .3s ease, transform .3s ease; }
 .pf-hidden { opacity: 0; transform: scale(.92); pointer-events: none; position: absolute; visibility: hidden; }
@@ -164,7 +180,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .tabular { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .scale-in, .marquee-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+  .reveal, .scale-in, .marquee-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
   #site-nav { animation: none !important; }
   html { scroll-behavior: auto; }
 }
