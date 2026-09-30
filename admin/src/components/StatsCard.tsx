@@ -27,7 +27,7 @@ export default function StatsCard({
   const t = TONES[tone];
   return (
     <div
-      className={`${t.bg} flex h-36 flex-col justify-between overflow-hidden rounded-[20px] p-4 shadow-xs relative`}
+      className={`${t.bg} lift flex h-36 flex-col justify-between overflow-hidden rounded-[20px] p-4 shadow-xs relative`}
     >
       <div className="flex items-center justify-between">
         <div

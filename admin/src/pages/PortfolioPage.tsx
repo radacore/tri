@@ -87,6 +87,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="space-y-4">
+      <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Portfolio</h1>
       <div className="flex items-center justify-between">
         <p className="text-sm text-ink-secondary">
           <span className="tabular font-semibold text-ink-primary">{items.length}</span> items
@@ -112,7 +113,7 @@ export default function PortfolioPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((p, i) => (
-            <div key={p.id} className="anim-rise overflow-hidden rounded-[24px] bg-white shadow-sm" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
+            <div key={p.id} className="anim-rise lift overflow-hidden rounded-[24px] bg-white shadow-sm" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
               {p.image_url && (
                 <img src={p.image_url} alt={p.title} className="h-40 w-full object-cover" />
               )}

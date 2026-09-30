@@ -66,6 +66,7 @@ export default function TestimonialsPage() {
 
   return (
     <div className="space-y-4">
+      <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Testimonials</h1>
       <div className="flex items-center justify-end">
         <button className="btn-primary inline-flex items-center gap-2" onClick={() => setModal({ ...EMPTY })}>
           <Plus className="h-4 w-4" /> Add Testimonial
@@ -85,7 +86,7 @@ export default function TestimonialsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {items.map((t, i) => (
-            <div key={t.id} className="anim-rise rounded-[24px] bg-white p-5 shadow-sm" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
+            <div key={t.id} className="anim-rise lift rounded-[24px] bg-white p-5 shadow-sm" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   {t.avatar_url ? (

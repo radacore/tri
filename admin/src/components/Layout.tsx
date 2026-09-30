@@ -41,18 +41,6 @@ const GROUPS: {
   },
 ];
 
-const TITLES: Record<string, string> = {
-  "/": "Dashboard",
-  "/orders": "Orders",
-  "/portfolio": "Portfolio",
-  "/case-studies": "Case Studies",
-  "/blog": "Blog",
-  "/testimonials": "Testimonials",
-  "/clients": "Clients",
-  "/settings": "Settings",
-  "/login": "Login",
-};
-
 let toastFn: ((msg: string) => void) | null = null;
 export function toast(msg: string) {
   toastFn?.(msg);
@@ -82,12 +70,6 @@ export default function Layout() {
   const loc = useLocation();
   const nav = useNavigate();
   const { logout } = useAuth();
-  const title =
-    TITLES[loc.pathname] ??
-    Object.entries(TITLES).find(([k]) =>
-      k !== "/" && loc.pathname.startsWith(k)
-    )?.[1] ??
-    "LogoPulse";
 
   return (
     <div className="flex min-h-screen">
@@ -145,10 +127,7 @@ export default function Layout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 px-4 py-6 md:px-8">
-          <h1 className="text-2xl font-bold tracking-tight text-ink-primary">
-            {title}
-          </h1>
+        <header className="flex items-center justify-end gap-4 px-4 py-6 md:px-8">
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-2.5 sm:flex">
               <span className="grid h-9 w-9 place-items-center rounded-full bg-brand text-xs font-bold text-white shadow-xs">

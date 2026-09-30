@@ -66,6 +66,7 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-4">
+      <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Orders</h1>
       <section className="rounded-[26px] bg-white p-6 shadow-sm">
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-base font-semibold tracking-tight text-ink-primary">

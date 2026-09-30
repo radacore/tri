@@ -70,6 +70,7 @@ export default function ClientsPage() {
 
   return (
     <div className="space-y-4">
+      <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Clients</h1>
       <div className="flex items-center justify-end">
         <button className="btn-primary inline-flex items-center gap-2" onClick={() => setModal({ ...EMPTY, sort_order: items.length })}>
           <Plus className="h-4 w-4" /> Add Logo
@@ -93,7 +94,7 @@ export default function ClientsPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((c, i) => (
-              <div key={c.id} className="anim-rise rounded-[20px] border border-[#e2eceb] p-5 text-center transition hover:bg-surface-hover" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
+              <div key={c.id} className="anim-rise lift rounded-[20px] border border-[#e2eceb] p-5 text-center hover:bg-surface-hover" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
                 {c.logo_url ? (
                   <div className="flex h-28 items-center justify-center rounded-[14px] bg-white">
                     <img src={c.logo_url} alt={c.name} className="max-h-24 w-auto max-w-full object-contain" />

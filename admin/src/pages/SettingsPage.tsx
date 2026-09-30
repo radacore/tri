@@ -73,6 +73,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-4">
+      <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Settings</h1>
       <div className="flex gap-1 text-sm">
         {TABS.map((t) => (
           <button

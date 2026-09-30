@@ -61,6 +61,7 @@ export default function CaseStudiesPage() {
 
   return (
     <div className="space-y-4">
+      <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Case Studies</h1>
       <div className="flex items-center justify-end">
         <button className="btn-primary inline-flex items-center gap-2" onClick={() => setModal({ ...EMPTY })}>
           <Plus className="h-4 w-4" /> Add Case Study
