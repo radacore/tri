@@ -152,6 +152,16 @@ body {
 
 /* hanging testimonials — kartu digantung tali, jalan marquee infinite.
    transform-only (murah di GPU). Hover: kartu meluruskan diri. */
+.hanging-stage {
+  /* blur tepi kiri-kanan agar kartu masuk/keluar dengan halus */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+/* tali jemuran: garis tempat semua tali kartu tertambat */
+.hanging-stage::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: #e2e8f0; border-radius: 2px;
+}
 @keyframes hanging-scroll { to { transform: translate3d(-50%, 0, 0); } }
 .hanging-track {
   width: max-content;
