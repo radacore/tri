@@ -19,12 +19,6 @@ const jsonLd = {
 ---
 <html lang="en">
 <head>
-  <script is:inline>
-    try {
-      var l = localStorage.getItem('lp-lang') || ((navigator.language || '').toLowerCase().indexOf('id') === 0 ? 'id' : 'en');
-      document.documentElement.lang = l === 'id' ? 'id' : 'en';
-    } catch (e) {}
-  </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
@@ -53,7 +47,6 @@ const jsonLd = {
 </head>
 <body class="bg-white text-slate-900 antialiased">
   <slot />
-  <script>import '../lib/lang.ts';</script>
   <script>
     (function () {
       var els = document.querySelectorAll('.reveal');

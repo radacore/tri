@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type Meta struct {
@@ -64,3 +66,26 @@ func decodeJSON(w http.ResponseWriter, r *http.Request, dst any) bool {
 	}
 	return true
 }
+
+// tsString menerima kolom timestamptz (NULL-able) menjadi string RFC3339.
+// pgx tidak bisa scan timestamptz langsung ke string, jadi semua handler
+// list/detail memakai tipe ini untuk created_at/updated_at/paid_at dsb.
+type tsString struct{ s string }
+
+func (t *tsString) Scan(v any) error {
+	switch x := v.(type) {
+	case nil:
+		t.s = ""
+	case time.Time:
+		t.s = x.UTC().Format(time.RFC3339)
+	case string:
+		t.s = x
+	case []byte:
+		t.s = string(x)
+	default:
+		t.s = fmt.Sprint(v)
+	}
+	return nil
+}
+
+func (t tsString) String() string { return t.s }

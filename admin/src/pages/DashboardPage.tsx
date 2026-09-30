@@ -1,16 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+  Calendar,
+  DollarSign,
+  Hourglass,
+  MoreHorizontal,
+  ShoppingCart,
+  Users,
+} from "lucide-react";
 import { centsToUSD, get, type DashboardStats } from "../api/client";
 import StatsCard from "../components/StatsCard";
 import Badge from "../components/Badge";
@@ -25,8 +22,39 @@ const EMPTY: DashboardStats = {
   recent_orders: [],
 };
 
+function Donut({ segments }: { segments: { value: number; color: string }[] }) {
+  const total = segments.reduce((a, s) => a + s.value, 0) || 1;
+  const R = 58;
+  const C = 2 * Math.PI * R;
+  let acc = 0;
+  return (
+    <svg className="h-56 w-56 -rotate-90" viewBox="0 0 160 160">
+      {segments.map((s, i) => {
+        const len = (s.value / total) * C;
+        const el = (
+          <circle
+            key={i}
+            cx="80"
+            cy="80"
+            r={R}
+            fill="none"
+            stroke={s.color}
+            strokeWidth="22"
+            strokeDasharray={`${len} ${C}`}
+            strokeDashoffset={-acc}
+          />
+        );
+        acc += len;
+        return el;
+      })}
+    </svg>
+  );
+}
+
+const STATUS_COLORS = ["#cde9a7", "#a9e4de", "#f8c0c8", "#c3d2fc", "#e2eceb"];
+
 export default function DashboardPage() {
-  const { data, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["dashboard"],
     queryFn: async (): Promise<DashboardStats> => {
       try {
@@ -38,128 +66,238 @@ export default function DashboardPage() {
   });
   const s = data ?? EMPTY;
 
-  const revenue = (s.revenue_by_month ?? []).map((r) => ({
-    month: r.month,
-    revenue: r.revenue_cents / 100,
-  }));
   const byStatus = (s.orders_by_status ?? []).map((r) => ({
     status: r.status,
     count: r.count,
   }));
+  const maxBar = Math.max(1, ...byStatus.map((b) => b.count));
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
-      {isError && (
-        <p className="text-sm text-amber-700">
-          API offline — menampilkan empty state.
-        </p>
-      )}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Revenue"
-          value={centsToUSD(s.revenue_cents)}
-          hint="Total revenue (USD)"
-        />
-        <StatsCard title="Total Orders" value={String(s.total_orders)} />
-        <StatsCard title="Pending" value={String(s.pending_orders)} />
-        <StatsCard
-          title="Featured"
-          value={String(s.featured_count ?? 0)}
-          hint={`New customers: ${s.new_customers ?? 0}`}
-        />
-      </div>
+      <p className="anim-rise text-2xl font-bold tracking-tight text-ink-primary">
+        Welcome back, Admin!
+      </p>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="card p-4">
-          <h2 className="mb-2 font-semibold">Revenue per bulan (USD)</h2>
-          {revenue.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-500">
-              Belum ada data revenue.
-            </p>
-          ) : (
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={revenue}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" fontSize={12} />
-                <YAxis fontSize={12} />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#0158FE"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
+      <section className="anim-rise rounded-[26px] bg-white p-5 shadow-sm md:p-6" style={{ "--i": 1 } as React.CSSProperties}>
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="text-base font-semibold tracking-tight text-ink-primary">
+            Business Results
+          </h2>
+          <span className="flex items-center gap-2 rounded-full border border-[#d6e5e4] px-3 py-1.5 text-xs font-medium text-ink-primary">
+            <Calendar className="h-3.5 w-3.5 text-ink-secondary" />
+            This Month
+          </span>
         </div>
-        <div className="card p-4">
-          <h2 className="mb-2 font-semibold">Orders per status</h2>
-          {byStatus.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-500">
-              Belum ada data status.
-            </p>
-          ) : (
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={byStatus}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="status" fontSize={11} />
-                <YAxis fontSize={12} allowDecimals={false} />
-                <Tooltip />
-                <Bar dataKey="count" fill="#0158FE" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </div>
-
-      <div className="card p-4">
-        <h2 className="mb-2 font-semibold">5 Order terbaru</h2>
-        {(s.recent_orders ?? []).length === 0 ? (
-          <p className="py-4 text-center text-sm text-slate-500">
-            Belum ada order.
-          </p>
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-36 animate-pulse rounded-[20px] bg-surface-muted"
+              />
+            ))}
+          </div>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b text-left text-xs uppercase text-slate-500">
-                <th className="py-2">ID</th>
-                <th>Customer</th>
-                <th>Tier</th>
-                <th>Status</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(s.recent_orders ?? []).slice(0, 5).map((o) => (
-                <tr key={o.id} className="border-b last:border-0">
-                  <td className="py-2 font-mono text-xs">{o.id.slice(0, 8)}</td>
-                  <td>{o.customer_name}</td>
-                  <td>{o.tier}</td>
-                  <td>
-                    <Badge status={o.status} />
-                  </td>
-                  <td>{centsToUSD(o.total_cents)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatsCard
+              title="Revenue"
+              value={centsToUSD(s.revenue_cents)}
+              hint="USD · paid orders"
+              tone="lime"
+              icon={DollarSign}
+              bars={[30, 55, 75, 100]}
+            />
+            <StatsCard
+              title="Total Orders"
+              value={String(s.total_orders)}
+              hint="All time"
+              tone="teal"
+              icon={ShoppingCart}
+              bars={[40, 65, 100, 55]}
+            />
+            <StatsCard
+              title="Pending Orders"
+              value={String(s.pending_orders)}
+              hint="Needs attention"
+              tone="pink"
+              icon={Hourglass}
+              bars={[50, 90, 60, 35]}
+            />
+            <StatsCard
+              title="Featured Items"
+              value={String(s.featured_count ?? 0)}
+              hint={`New customers: ${s.new_customers ?? 0}`}
+              tone="purple"
+              icon={Users}
+              bars={[35, 55, 80, 100]}
+            />
+          </div>
         )}
+      </section>
+
+      <div className="anim-rise grid grid-cols-1 gap-6 lg:grid-cols-12" style={{ "--i": 2 } as React.CSSProperties}>
+        <div className="flex flex-col justify-between rounded-[26px] bg-white p-6 shadow-sm lg:col-span-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-semibold tracking-tight text-ink-primary">
+              Orders by Status
+            </h2>
+            <button
+              aria-label="More options"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e4eeed] text-ink-secondary transition hover:text-ink-primary"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+          </div>
+          {isError && (
+            <p className="py-2 text-xs text-[#92400e]">
+              API offline — showing empty state.
+            </p>
+          )}
+          {byStatus.length === 0 ? (
+            <p className="py-8 text-center text-sm text-ink-secondary">
+              No status data yet.
+            </p>
+          ) : (
+            <>
+              <div className="relative my-3 flex items-center justify-center">
+                <Donut
+                  segments={byStatus.map((b, i) => ({
+                    value: b.count,
+                    color: STATUS_COLORS[i % STATUS_COLORS.length],
+                  }))}
+                />
+                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-xs font-medium text-ink-secondary">
+                    Total
+                  </span>
+                  <span className="tabular text-2xl font-extrabold tracking-tight text-ink-primary">
+                    {s.total_orders}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-4 pt-3 text-xs text-ink-secondary">
+                {byStatus.map((b, i) => (
+                  <span key={b.status} className="flex items-center gap-1.5">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{
+                        background: STATUS_COLORS[i % STATUS_COLORS.length],
+                      }}
+                    />
+                    <span className="capitalize">
+                      {b.status.replace(/_/g, " ")}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="flex flex-col justify-between rounded-[26px] bg-white p-6 shadow-sm lg:col-span-7">
+          <h2 className="mb-4 text-base font-semibold tracking-tight text-ink-primary">
+            Orders Overview
+          </h2>
+          {byStatus.length === 0 ? (
+            <p className="py-8 text-center text-sm text-ink-secondary">
+              No order data yet.
+            </p>
+          ) : (
+            <div className="flex h-64 items-stretch gap-4 pt-2">
+              <div className="flex shrink-0 flex-col justify-between py-2 text-[11px] font-medium tabular text-ink-muted">
+                <span>{maxBar}</span>
+                <span>{Math.round(maxBar * 0.66)}</span>
+                <span>{Math.round(maxBar * 0.33)}</span>
+                <span>0</span>
+              </div>
+              <div className="grid h-full flex-1 grid-cols-5 items-end gap-3 sm:gap-6">
+                {byStatus.slice(0, 5).map((b, i) => (
+                  <div
+                    key={b.status}
+                    className="flex h-full flex-col items-center justify-end"
+                  >
+                    <div className="flex h-full w-full max-w-[48px] flex-col justify-end rounded-full bg-surface-subtle bg-[#eef6f5] p-1.5">
+                      <div
+                        className="w-full rounded-full shadow-inner"
+                        style={{
+                          height: `${Math.max(8, (b.count / maxBar) * 100)}%`,
+                          background:
+                            STATUS_COLORS[i % STATUS_COLORS.length],
+                        }}
+                      />
+                    </div>
+                    <span className="mt-3 max-w-full truncate text-xs font-medium capitalize text-ink-secondary">
+                      {b.status.replace(/_/g, " ")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <section className="anim-rise rounded-[26px] bg-white p-6 shadow-sm" style={{ "--i": 3 } as React.CSSProperties}>
+        <h2 className="mb-5 text-base font-semibold tracking-tight text-ink-primary">
+          Recent Orders
+        </h2>
+        {(s.recent_orders ?? []).length === 0 ? (
+          <div className="px-4 py-12 text-center">
+            <p className="text-sm font-semibold text-ink-primary">
+              No orders yet
+            </p>
+            <p className="mt-1 text-xs text-ink-secondary">
+              New orders from the website will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-[#e2eceb] text-[11px] font-semibold uppercase tracking-wider text-ink-muted">
+                  <th className="px-4 py-3">Order</th>
+                  <th className="px-4 py-3">Customer</th>
+                  <th className="px-4 py-3">Tier</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Total</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#f2f7f6]">
+                {(s.recent_orders ?? []).slice(0, 5).map((o) => (
+                  <tr
+                    key={o.id}
+                    className="transition-colors hover:bg-surface-hover"
+                  >
+                    <td className="tabular px-4 py-3.5 font-mono text-xs">
+                      {o.id.slice(0, 8)}
+                    </td>
+                    <td className="px-4 py-3.5 font-medium">
+                      {o.customer_name}
+                    </td>
+                    <td className="px-4 py-3.5 capitalize">{o.tier}</td>
+                    <td className="px-4 py-3.5">
+                      <Badge status={o.status} />
+                    </td>
+                    <td className="tabular px-4 py-3.5 font-semibold">
+                      {centsToUSD(o.total_cents)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <div className="anim-rise flex flex-wrap gap-2" style={{ "--i": 4 } as React.CSSProperties}>
         <Link to="/portfolio" className="btn-primary">
-          + Tambah Portfolio
+          + Add Portfolio Item
         </Link>
-        <Link to="/blog" className="rounded-lg border px-4 py-2 text-sm font-semibold">
-          Tulis Artikel
+        <Link to="/blog" className="btn-secondary">
+          Write Article
         </Link>
-        <Link
-          to="/orders"
-          className="rounded-lg border px-4 py-2 text-sm font-semibold"
-        >
-          Lihat Pending Orders
+        <Link to="/orders" className="btn-secondary">
+          View Pending Orders
         </Link>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
 
 export interface Column<T> {
   key: string;
@@ -12,11 +13,13 @@ export default function DataTable<T extends { id?: string }>({
   columns,
   data,
   searchKeys = [],
+  searchPlaceholder = "Search…",
   pageSize = 10,
 }: {
   columns: Column<T>[];
   data: T[];
   searchKeys?: (keyof T)[];
+  searchPlaceholder?: string;
   pageSize?: number;
 }) {
   const [q, setQ] = useState("");
@@ -61,29 +64,37 @@ export default function DataTable<T extends { id?: string }>({
     safePage * pageSize,
     safePage * pageSize + pageSize
   );
+  const from = filtered.length === 0 ? 0 : safePage * pageSize + 1;
+  const to = Math.min(filtered.length, safePage * pageSize + pageSize);
 
   return (
     <div>
       {searchKeys.length > 0 && (
-        <input
-          className="input mb-3 max-w-sm"
-          placeholder="Search…"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(0);
-          }}
-        />
+        <div className="relative mb-4 max-w-xs">
+          <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
+          <input
+            className="input input-pill w-full pl-10"
+            placeholder={searchPlaceholder}
+            value={q}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setPage(0);
+            }}
+          />
+        </div>
       )}
       <div className="card overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full min-w-[640px] border-collapse text-left text-sm">
           <thead>
-            <tr className="border-b text-left text-xs uppercase text-slate-500">
+            <tr className="border-b border-[#e2eceb]">
               {columns.map((c) => (
-                <th key={c.key} className="px-4 py-2">
+                <th
+                  key={c.key}
+                  className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-ink-muted"
+                >
                   {c.sortable ? (
                     <button
-                      className="font-semibold hover:text-slate-800"
+                      className="inline-flex items-center gap-1 hover:text-ink-primary"
                       onClick={() => {
                         if (sortKey === c.key) {
                           setSortDir((d) => (d === 1 ? -1 : 1));
@@ -93,8 +104,10 @@ export default function DataTable<T extends { id?: string }>({
                         }
                       }}
                     >
-                      {c.label}{" "}
-                      {sortKey === c.key ? (sortDir === 1 ? "↑" : "↓") : ""}
+                      {c.label}
+                      <ChevronDown
+                        className={`h-3 w-3 transition-transform ${sortKey === c.key && sortDir === -1 ? "rotate-180" : ""} ${sortKey === c.key ? "opacity-100" : "opacity-30"}`}
+                      />
                     </button>
                   ) : (
                     c.label
@@ -103,11 +116,15 @@ export default function DataTable<T extends { id?: string }>({
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-[#f2f7f6]">
             {slice.map((row, i) => (
-              <tr key={(row as any).id ?? i} className="border-b last:border-0">
+              <tr
+                key={(row as any).id ?? i}
+                className="anim-rise transition-colors hover:bg-surface-hover"
+                style={{ "--i": Math.min(i, 8) } as React.CSSProperties}
+              >
                 {columns.map((c) => (
-                  <td key={c.key} className="px-4 py-2">
+                  <td key={c.key} className="px-4 py-3.5 text-ink-primary">
                     {c.render
                       ? c.render(row)
                       : String((row as any)[c.key] ?? "—")}
@@ -117,35 +134,44 @@ export default function DataTable<T extends { id?: string }>({
             ))}
             {slice.length === 0 && (
               <tr>
-                <td
-                  colSpan={columns.length}
-                  className="px-4 py-8 text-center text-slate-500"
-                >
-                  No data. API mungkin offline — tampilkan empty state.
+                <td colSpan={columns.length} className="px-4 py-12 text-center">
+                  <p className="text-sm font-semibold text-ink-primary">
+                    No results found
+                  </p>
+                  <p className="mt-1 text-xs text-ink-secondary">
+                    Try a different search, or check that the API is online.
+                  </p>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      <div className="mt-2 flex items-center gap-2 text-sm text-slate-600">
-        <button
-          className="rounded border px-2 py-1 disabled:opacity-40"
-          disabled={safePage <= 0}
-          onClick={() => setPage((p) => Math.max(0, p - 1))}
-        >
-          Prev
-        </button>
-        <span>
-          Page {safePage + 1} / {pages} · {filtered.length} rows
+      <div className="mt-4 flex items-center justify-between text-xs text-ink-secondary">
+        <span className="tabular">
+          Showing {from}–{to} of {filtered.length} items
         </span>
-        <button
-          className="rounded border px-2 py-1 disabled:opacity-40"
-          disabled={safePage >= pages - 1}
-          onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}
-        >
-          Next
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary disabled:opacity-40"
+            disabled={safePage <= 0}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="tabular font-semibold text-ink-primary">
+            {safePage + 1} / {pages}
+          </span>
+          <button
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary disabled:opacity-40"
+            disabled={safePage >= pages - 1}
+            onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );

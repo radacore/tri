@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       { email, password }
     );
     const t = res.token ?? res.access_token ?? "";
-    if (!t) throw new Error("Login gagal: token kosong");
+    if (!t) throw new Error("Login failed: empty token");
     localStorage.setItem(TOKEN_KEY, t);
     setToken(t);
   }, []);

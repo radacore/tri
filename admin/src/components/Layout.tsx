@@ -1,17 +1,57 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import {
+  BarChart2,
+  CheckCheck,
+  FileText,
+  Images,
+  LayoutDashboard,
+  LogOut,
+  Newspaper,
+  Quote,
+  Settings,
+  ShoppingCart,
+} from "lucide-react";
 import { useAuth } from "../lib/auth";
 
-const NAV = [
-  { to: "/", label: "Dashboard" },
-  { to: "/orders", label: "Orders" },
-  { to: "/portfolio", label: "Portfolio" },
-  { to: "/case-studies", label: "Case Studies" },
-  { to: "/blog", label: "Blog" },
-  { to: "/testimonials", label: "Testimonials" },
-  { to: "/clients", label: "Clients" },
-  { to: "/settings", label: "Settings" },
+const GROUPS: {
+  title: string;
+  items: { to: string; label: string; icon: typeof LayoutDashboard }[];
+}[] = [
+  {
+    title: "Main Menu",
+    items: [
+      { to: "/", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/orders", label: "Orders", icon: ShoppingCart },
+      { to: "/portfolio", label: "Portfolio", icon: Images },
+      { to: "/case-studies", label: "Case Studies", icon: BarChart2 },
+      { to: "/blog", label: "Blog", icon: Newspaper },
+    ],
+  },
+  {
+    title: "Content",
+    items: [
+      { to: "/testimonials", label: "Testimonials", icon: Quote },
+      { to: "/clients", label: "Clients", icon: CheckCheck },
+    ],
+  },
+  {
+    title: "System",
+    items: [{ to: "/settings", label: "Settings", icon: Settings }],
+  },
 ];
+
+const TITLES: Record<string, string> = {
+  "/": "Dashboard",
+  "/orders": "Orders",
+  "/portfolio": "Portfolio",
+  "/case-studies": "Case Studies",
+  "/blog": "Blog",
+  "/testimonials": "Testimonials",
+  "/clients": "Clients",
+  "/settings": "Settings",
+  "/login": "Login",
+};
 
 let toastFn: ((msg: string) => void) | null = null;
 export function toast(msg: string) {
@@ -29,7 +69,7 @@ export function Toaster() {
       {msgs.map((m, i) => (
         <div
           key={i}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white shadow"
+          className="anim-pop rounded-[20px] border border-[#e2eceb] bg-white px-5 py-3.5 text-sm text-ink-primary shadow-lg"
         >
           {m}
         </div>
@@ -42,49 +82,102 @@ export default function Layout() {
   const loc = useLocation();
   const nav = useNavigate();
   const { logout } = useAuth();
+  const title =
+    TITLES[loc.pathname] ??
+    Object.entries(TITLES).find(([k]) =>
+      k !== "/" && loc.pathname.startsWith(k)
+    )?.[1] ??
+    "LogoPulse";
+
   return (
     <div className="flex min-h-screen">
-      <aside className="w-56 shrink-0 border-r bg-white p-4">
-        <h1 className="mb-4 text-lg font-extrabold text-[#0158FE]">
-          LogoPulse Admin
-        </h1>
-        <nav className="space-y-1">
-          {NAV.map((n) => {
-            const active =
-              n.to === "/"
-                ? loc.pathname === "/"
-                : loc.pathname.startsWith(n.to);
-            return (
-              <Link
-                key={n.to}
-                to={n.to}
-                className={`block rounded-lg px-3 py-2 text-sm font-medium ${
-                  active
-                    ? "bg-[#0158FE] text-white"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
-              >
-                {n.label}
-              </Link>
-            );
-          })}
-        </nav>
+      <aside className="hidden w-60 shrink-0 flex-col justify-between px-6 py-7 md:flex">
+        <div>
+          <Link to="/" className="mb-9 flex items-center gap-2.5 px-1">
+            <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-sm font-extrabold text-white">
+              L
+            </span>
+            <span className="text-xl font-bold tracking-tight text-ink-primary">
+              LogoPulse
+            </span>
+          </Link>
+          {GROUPS.map((g) => (
+            <div key={g.title} className="mb-7">
+              <p className="mb-3 px-2 text-[11px] font-semibold uppercase tracking-wider text-ink-secondary">
+                {g.title}
+              </p>
+              <nav className="space-y-1">
+                {g.items.map((n) => {
+                  const active =
+                    n.to === "/"
+                      ? loc.pathname === "/"
+                      : loc.pathname.startsWith(n.to);
+                  const Icon = n.icon;
+                  return (
+                    <Link
+                      key={n.to}
+                      to={n.to}
+                      className={`flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium transition-all ${
+                        active
+                          ? "bg-brand text-white shadow-sm"
+                          : "text-ink-secondary hover:bg-surface-hover hover:text-ink-primary"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{n.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => {
+            logout();
+            nav("/login");
+          }}
+          className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-ink-secondary transition-all hover:bg-surface-hover hover:text-ink-primary"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Logout</span>
+        </button>
       </aside>
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b bg-white px-6 py-3">
-          <span className="text-sm text-slate-500">{loc.pathname}</span>
-          <button
-            className="rounded-lg border px-3 py-1.5 text-sm font-semibold"
-            onClick={() => {
-              logout();
-              nav("/login");
-            }}
-          >
-            Logout
-          </button>
+        <header className="flex items-center justify-between gap-4 px-4 py-6 md:px-8">
+          <h1 className="text-2xl font-bold tracking-tight text-ink-primary">
+            {title}
+          </h1>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2.5 sm:flex">
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-brand text-xs font-bold text-white shadow-xs">
+                A
+              </span>
+              <div className="hidden text-left lg:block">
+                <p className="text-xs font-semibold leading-tight text-ink-primary">
+                  Admin
+                </p>
+                <p className="text-[11px] leading-tight text-ink-secondary">
+                  Content manager
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                logout();
+                nav("/login");
+              }}
+              className="rounded-full bg-brand px-5 py-2 text-xs font-semibold tracking-wide text-white transition hover:bg-brand-hover md:hidden"
+            >
+              Logout
+            </button>
+          </div>
         </header>
-        <main className="flex-1 p-6">
-          <Outlet />
+        <main className="w-full flex-1 px-4 pb-10 md:px-8">
+          <div key={loc.pathname} className="anim-rise">
+            <Outlet />
+          </div>
         </main>
       </div>
       <Toaster />

@@ -339,11 +339,6 @@ Seluruh antarmuka **Admin Panel** dibangun menggunakan library komponen **[shadc
    - **DropdownMenu** (`@/components/ui/dropdown-menu`): Aksi baris tabel (Ubah Status, Download Deliverables, Hapus).
    - **Sonner / Toast** (`@/components/ui/sonner`): Feedback notifikasi sukses upload WebP, simpan data, atau error.
 
-# 🌍 LANGUAGE RULES (EN/ID)
-- Setiap teks baru yang tampil ke pengunjung WAJIB masuk kamus `src/i18n/ui.ts` (en + id) dan dipasang via `data-i18n` / `data-i18n-ph` / `data-l`.
-- Jangan menaruh kalimat hardcoded tanpa key kamus di halaman publik.
-- Pesan dinamis (validasi, template WA) wajib membaca bahasa aktif (`__lpGetLang` + `__lpT`).
-
 # 🚫 RULES TO NEVER BREAK
 - Jangan menambahkan bayangan hitam pekat (*hard drop shadow*).
 - Jangan menggunakan background gradasi berwarna-warni mencolok pada kanvas utama.

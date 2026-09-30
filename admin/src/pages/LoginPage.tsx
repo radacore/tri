@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
+import { LockKeyhole } from "lucide-react";
 import { useAuth } from "../lib/auth";
 
 const schema = z.object({
-  email: z.string().email("Email tidak valid"),
-  password: z.string().min(6, "Password minimal 6 karakter"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 type Form = z.infer<typeof schema>;
 
@@ -20,7 +21,7 @@ export default function LoginPage() {
   const onSubmit = async (v: Form) => {
     const parsed = schema.safeParse(v);
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Validasi gagal");
+      setError(parsed.error.issues[0]?.message ?? "Validation failed");
       return;
     }
     setBusy(true);
@@ -29,10 +30,10 @@ export default function LoginPage() {
       await login(parsed.data.email, parsed.data.password);
       nav("/", { replace: true });
     } catch (e: any) {
-      const msg = String(e?.message ?? "Login gagal");
+      const msg = String(e?.message ?? "Login failed");
       setError(
         /429/.test(msg)
-          ? "Terlalu banyak percobaan. Tunggu sebentar (rate-limit)."
+          ? "Too many attempts. Please wait a moment (rate-limited)."
           : msg
       );
     } finally {
@@ -44,33 +45,54 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="card w-full max-w-sm p-6"
+        className="anim-pop w-full max-w-sm rounded-[24px] bg-white p-7 shadow-sm"
       >
-        <h1 className="text-xl font-extrabold text-[#0158FE]">
+        <span className="grid h-12 w-12 place-items-center rounded-full bg-brand-subtle text-brand">
+          <LockKeyhole className="h-5 w-5" />
+        </span>
+        <h1 className="mt-4 text-2xl font-bold tracking-tight text-ink-primary">
           LogoPulse Admin
         </h1>
-        <p className="mb-4 text-sm text-slate-500">Login untuk mengelola konten</p>
-        <label className="label">Email</label>
-        <input className="input" type="email" {...register("email")} />
+        <p className="mb-5 mt-1 text-sm text-ink-secondary">
+          Sign in to manage content
+        </p>
+        <label className="label" htmlFor="email">
+          Email
+        </label>
+        <input
+          id="email"
+          className="input"
+          type="email"
+          autoComplete="email"
+          {...register("email")}
+        />
         {formState.errors.email && (
-          <p className="text-xs text-red-600">
+          <p className="mt-1 text-xs text-[#991b1b]">
             {formState.errors.email.message}
           </p>
         )}
-        <label className="label mt-3">Password</label>
-        <input className="input" type="password" {...register("password")} />
+        <label className="label mt-3" htmlFor="password">
+          Password
+        </label>
+        <input
+          id="password"
+          className="input"
+          type="password"
+          autoComplete="current-password"
+          {...register("password")}
+        />
         {formState.errors.password && (
-          <p className="text-xs text-red-600">
+          <p className="mt-1 text-xs text-[#991b1b]">
             {formState.errors.password.message}
           </p>
         )}
         {error && (
-          <p className="mt-3 rounded bg-red-50 p-2 text-xs text-red-700">
+          <p className="mt-3 rounded-[14px] bg-[#fee2e2] p-3 text-xs font-medium text-[#991b1b]">
             {error}
           </p>
         )}
-        <button className="btn-primary mt-4 w-full" disabled={busy}>
-          {busy ? "Logging in…" : "Login"}
+        <button className="btn-primary mt-5 w-full py-2.5" disabled={busy}>
+          {busy ? "Signing in…" : "Sign in"}
         </button>
       </form>
     </div>

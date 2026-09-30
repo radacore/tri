@@ -25,8 +25,8 @@ func Load() *Config {
 		JWTSecret:         getenv("JWT_SECRET", "changeme"),
 		Port:              getenv("PORT", "8080"),
 		FrontendURL:       getenv("FRONTEND_URL", "http://localhost:3000"),
-		AdminEmail:          getenv("ADMIN_EMAIL", "admin@logopulse.co"),
-		AdminPasswordHash:   getenv("ADMIN_PASSWORD_HASH", ""),
-		UploadDir:           getenv("UPLOAD_DIR", "uploads"),
+		AdminEmail:        getenv("ADMIN_EMAIL", "admin@logopulse.co"),
+		AdminPasswordHash: getenv("ADMIN_PASSWORD_HASH", ""),
+		UploadDir:         getenv("UPLOAD_DIR", "uploads"),
 	}
 }

@@ -20,13 +20,13 @@ try {
   <Navbar />
   <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
     <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">{item.industry} · {item.result}</p>
-    <h1 class="mt-2 text-4xl font-extrabold tracking-tight"><span data-l="en">{item.title}</span>{(item as any).titleId && <span data-l="id" hidden>{(item as any).titleId}</span>}</h1>
-    <p class="mt-2 text-slate-500"><span data-i18n="caseslug.client">Client: </span>{item.client}</p>
+    <h1 class="mt-2 text-4xl font-extrabold tracking-tight">{item.title}</h1>
+    <p class="mt-2 text-slate-500">Client: {item.client}</p>
     <img src={item.mockup} alt={item.client} class="mt-6 w-full object-cover" style="border-radius:16px" />
-    <p class="mt-6 text-lg text-slate-700 leading-relaxed"><span data-l="en">{item.excerpt}</span>{(item as any).excerptId && <span data-l="id" hidden>{(item as any).excerptId}</span>}</p>
+    <p class="mt-6 text-lg text-slate-700 leading-relaxed">{item.excerpt}</p>
     <div class="mt-8 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200" style="border-radius:20px">
-      <p class="font-extrabold"><span data-i18n="caseslug.want1">Want results like</span> {item.client}<span data-i18n="caseslug.want2">?</span></p>
-      <a href="/order?plan=professional" data-i18n="caseslug.cta" class="btn-active mt-3 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Start my project — $149</a>
+      <p class="font-extrabold">Want results like {item.client}?</p>
+      <a href="/order?plan=professional" class="btn-active mt-3 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Start my project — $149</a>
     </div>
   </main>
   <Footer />

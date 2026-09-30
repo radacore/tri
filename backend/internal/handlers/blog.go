@@ -37,7 +37,7 @@ func ListBlogPosts(pool *pgxpool.Pool) http.HandlerFunc {
 			var id, title, slug string
 			var content, cat, thumb, mt, md *string
 			var pub bool
-			var pat, ca, ua *string
+			var pat, ca, ua tsString
 			if err := rows.Scan(&id, &title, &slug, &content, &cat, &thumb, &mt, &md, &pub, &pat, &ca, &ua); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
@@ -46,8 +46,8 @@ func ListBlogPosts(pool *pgxpool.Pool) http.HandlerFunc {
 				"id": id, "title": title, "slug": slug, "content": strp(content),
 				"category": strp(cat), "thumbnail_url": strp(thumb),
 				"meta_title": strp(mt), "meta_description": strp(md),
-				"published": pub, "published_at": strp(pat),
-				"created_at": strp(ca), "updated_at": strp(ua),
+				"published": pub, "published_at": pat.String(),
+				"created_at": ca.String(), "updated_at": ua.String(),
 			})
 		}
 		if items == nil {
@@ -64,7 +64,7 @@ func GetBlogPost(pool *pgxpool.Pool) http.HandlerFunc {
 		var id, title string
 		var content, cat, thumb, mt, md *string
 		var pub bool
-		var pat, ca, ua *string
+		var pat, ca, ua tsString
 		err := pool.QueryRow(r.Context(), `SELECT id, title, slug, content, category, thumbnail_url, meta_title, meta_description, published, published_at, created_at, updated_at FROM blog_posts WHERE slug=$1 AND published=TRUE`, slug).Scan(&id, &title, &slug, &content, &cat, &thumb, &mt, &md, &pub, &pat, &ca, &ua)
 		if err != nil {
 			fail(w, http.StatusNotFound, "blog post not found")
@@ -74,8 +74,8 @@ func GetBlogPost(pool *pgxpool.Pool) http.HandlerFunc {
 			"id": id, "title": title, "slug": slug, "content": strp(content),
 			"category": strp(cat), "thumbnail_url": strp(thumb),
 			"meta_title": strp(mt), "meta_description": strp(md),
-			"published": pub, "published_at": strp(pat),
-			"created_at": strp(ca), "updated_at": strp(ua),
+			"published": pub, "published_at": pat.String(),
+			"created_at": ca.String(), "updated_at": ua.String(),
 		})
 	}
 }
@@ -100,7 +100,7 @@ func AdminListBlogPosts(pool *pgxpool.Pool) http.HandlerFunc {
 			var id, title, slug string
 			var content, cat, thumb, mt, md *string
 			var pub bool
-			var pat, ca, ua *string
+			var pat, ca, ua tsString
 			if err := rows.Scan(&id, &title, &slug, &content, &cat, &thumb, &mt, &md, &pub, &pat, &ca, &ua); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
@@ -109,8 +109,8 @@ func AdminListBlogPosts(pool *pgxpool.Pool) http.HandlerFunc {
 				"id": id, "title": title, "slug": slug, "content": strp(content),
 				"category": strp(cat), "thumbnail_url": strp(thumb),
 				"meta_title": strp(mt), "meta_description": strp(md),
-				"published": pub, "published_at": strp(pat),
-				"created_at": strp(ca), "updated_at": strp(ua),
+				"published": pub, "published_at": pat.String(),
+				"created_at": ca.String(), "updated_at": ua.String(),
 			})
 		}
 		if items == nil {

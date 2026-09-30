@@ -1,23 +1,24 @@
 import type { OrderStatus } from "../api/client";
 
+// Semantic badge palette (success / warning / danger / neutral / primary).
 const MAP: Record<OrderStatus, string> = {
-  pending: "bg-amber-100 text-amber-800 border-amber-200",
-  paid: "bg-blue-100 text-blue-800 border-blue-200",
-  in_progress: "bg-violet-100 text-violet-800 border-violet-200",
-  revision: "bg-orange-100 text-orange-800 border-orange-200",
-  completed: "bg-green-100 text-green-800 border-green-200",
-  delivered: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  pending: "bg-[#fef3c7] text-[#92400e]",
+  paid: "bg-[#e0f2fe] text-[#075985]",
+  in_progress: "bg-[#dceeed] text-[#0f3738]",
+  revision: "bg-[#fef3c7] text-[#92400e]",
+  completed: "bg-[#d1fae5] text-[#065f46]",
+  delivered: "bg-[#d1fae5] text-[#065f46]",
 };
 
 export default function Badge({ status }: { status: string }) {
   const cls =
     (MAP as Record<string, string>)[status] ??
-    "bg-slate-100 text-slate-700 border-slate-200";
+    "bg-[#f4f8f8] text-[#5c7676]";
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${cls}`}
+      className={`inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold capitalize ${cls}`}
     >
-      {status}
+      {status.replace(/_/g, " ")}
     </span>
   );
 }

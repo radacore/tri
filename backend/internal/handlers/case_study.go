@@ -30,7 +30,7 @@ func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			var id, title, slug string
 			var ind, hero, content *string
 			var pub bool
-			var ca, ua string
+			var ca, ua tsString
 			if err := rows.Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &ca, &ua); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
@@ -38,7 +38,7 @@ func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			items = append(items, map[string]any{
 				"id": id, "title": title, "slug": slug, "industry": strp(ind),
 				"hero_image": strp(hero), "content": strp(content), "published": pub,
-				"created_at": ca, "updated_at": ua,
+				"created_at": ca.String(), "updated_at": ua.String(),
 			})
 		}
 		if items == nil {
@@ -55,7 +55,7 @@ func GetCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 		var id, title string
 		var ind, hero, content *string
 		var pub bool
-		var ca, ua string
+		var ca, ua tsString
 		err := pool.QueryRow(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, created_at, updated_at FROM case_studies WHERE slug=$1 AND published=TRUE`, slug).Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &ca, &ua)
 		if err != nil {
 			fail(w, http.StatusNotFound, "case study not found")
@@ -64,7 +64,7 @@ func GetCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 		ok(w, map[string]any{
 			"id": id, "title": title, "slug": slug, "industry": strp(ind),
 			"hero_image": strp(hero), "content": strp(content), "published": pub,
-			"created_at": ca, "updated_at": ua,
+			"created_at": ca.String(), "updated_at": ua.String(),
 		})
 	}
 }
@@ -89,7 +89,7 @@ func AdminListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			var id, title, slug string
 			var ind, hero, content *string
 			var pub bool
-			var ca, ua string
+			var ca, ua tsString
 			if err := rows.Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &ca, &ua); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
@@ -97,7 +97,7 @@ func AdminListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			items = append(items, map[string]any{
 				"id": id, "title": title, "slug": slug, "industry": strp(ind),
 				"hero_image": strp(hero), "content": strp(content), "published": pub,
-				"created_at": ca, "updated_at": ua,
+				"created_at": ca.String(), "updated_at": ua.String(),
 			})
 		}
 		if items == nil {

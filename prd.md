@@ -296,13 +296,6 @@ Admin panel adalah SPA (Single Page Application) terpisah yang berkomunikasi den
 - Ganti password admin
 - Konfigurasi email notification templates
 
-#### 4.2.7 Multibahasa EN/ID (visitor-switchable)
-
-- Seluruh halaman publik bilingual penuh: Inggris + Indonesia, diganti via toggle pill **EN | ID** di navbar.
-- Bahasa awal = auto-detect (`navigator.language` → `id` bila browser Indonesia, selain itu `en`); pilihan disimpan di `localStorage` (`lp-lang`).
-- Implementasi: kamus `frontend/src/i18n/ui.ts`, atribut `data-i18n` (teks), `data-i18n-ph` (placeholder), `data-i18n-aria` (aria-label), dan `data-l="en|id"` (konten dinamis seperti testimoni/case/blog). Runtime `frontend/src/lib/lang.ts`, toggle `LanguageSwitcher.astro`.
-- Pesan WhatsApp order mengikuti bahasa aktif saat diklik. `document.lang` diupdate per pilihan.
-
 ---
 
 ## 5. Pricing Tiers

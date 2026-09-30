@@ -51,7 +51,7 @@ func ListPortfolio(pool *pgxpool.Pool) http.HandlerFunc {
 			var cat, desc *string
 			var feat, pub bool
 			var sort int
-			var ca, ua string
+			var ca, ua tsString
 			if err := rows.Scan(&id, &title, &cat, &image, &desc, &feat, &pub, &sort, &ca, &ua); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
@@ -59,7 +59,7 @@ func ListPortfolio(pool *pgxpool.Pool) http.HandlerFunc {
 			items = append(items, map[string]any{
 				"id": id, "title": title, "category": strp(cat), "image_url": image,
 				"description": strp(desc), "featured": feat, "published": pub,
-				"sort_order": sort, "created_at": ca, "updated_at": ua,
+				"sort_order": sort, "created_at": ca.String(), "updated_at": ua.String(),
 			})
 		}
 		if items == nil {
@@ -78,7 +78,7 @@ func GetPortfolio(pool *pgxpool.Pool) http.HandlerFunc {
 		var cat, desc *string
 		var feat, pub bool
 		var sort int
-		var ca, ua string
+		var ca, ua tsString
 		err := pool.QueryRow(r.Context(), `SELECT id, title, category, image_url, description, featured, published, sort_order, created_at, updated_at FROM portfolio_items WHERE id=$1`, id).Scan(&pid, &title, &cat, &image, &desc, &feat, &pub, &sort, &ca, &ua)
 		if err != nil {
 			fail(w, http.StatusNotFound, "portfolio item not found")
@@ -87,7 +87,7 @@ func GetPortfolio(pool *pgxpool.Pool) http.HandlerFunc {
 		m = map[string]any{
 			"id": pid, "title": title, "category": strp(cat), "image_url": image,
 			"description": strp(desc), "featured": feat, "published": pub,
-			"sort_order": sort, "created_at": ca, "updated_at": ua,
+			"sort_order": sort, "created_at": ca.String(), "updated_at": ua.String(),
 		}
 		ok(w, m)
 	}

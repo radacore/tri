@@ -21,7 +21,7 @@ func GetSettings(pool *pgxpool.Pool) http.HandlerFunc {
 		for rows.Next() {
 			var k string
 			var v []byte
-			var ua string
+			var ua tsString
 			if err := rows.Scan(&k, &v, &ua); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return

@@ -1,9 +1,17 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { del, get, post, put, type BlogPost } from "../api/client";
-import MarkdownEditor from "../components/MarkdownEditor";
-import ImageUploader from "../components/ImageUploader";
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  del,
+  get,
+  post,
+  put,
+  type BlogPost,
+} from "../api/client";
 import DataTable from "../components/DataTable";
+import Badge from "../components/Badge";
+import ImageUploader from "../components/ImageUploader";
+import MarkdownEditor from "../components/MarkdownEditor";
 import { useConfirm } from "../components/ConfirmDialog";
 import { toast } from "../components/Layout";
 
@@ -21,7 +29,7 @@ export default function BlogPage() {
   const { dialog, ask } = useConfirm();
   const [modal, setModal] = useState<null | (typeof EMPTY & { id?: string })>(null);
 
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["blog"],
     queryFn: async (): Promise<BlogPost[]> => {
       try {
@@ -32,77 +40,111 @@ export default function BlogPage() {
       }
     },
   });
-  const rows = data ?? [];
+  const items = data ?? [];
 
   const saveMut = useMutation({
     mutationFn: (f: typeof EMPTY & { id?: string }) =>
       f.id ? put(`/admin/blog/${f.id}`, { ...f, published_at: f.published_at || null }) : post("/admin/blog", { ...f, published_at: f.published_at || null }),
     onSuccess: () => {
-      toast("Artikel tersimpan");
+      toast("Article saved");
       setModal(null);
       void qc.invalidateQueries({ queryKey: ["blog"] });
     },
-    onError: (e: any) => toast(`Gagal simpan: ${e?.message ?? "error"}`),
+    onError: (e: any) => toast(`Save failed: ${e?.message ?? "error"}`),
   });
 
   const delMut = useMutation({
     mutationFn: (id: string) => del(`/admin/blog/${id}`),
     onSuccess: () => {
-      toast("Artikel dihapus");
+      toast("Article deleted");
       void qc.invalidateQueries({ queryKey: ["blog"] });
     },
-    onError: (e: any) => toast(`Gagal hapus: ${e?.message ?? "error"}`),
+    onError: (e: any) => toast(`Delete failed: ${e?.message ?? "error"}`),
   });
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Blog</h1>
-        <button className="btn-primary" onClick={() => setModal({ ...EMPTY })}>+ Tulis Artikel</button>
+      <div className="flex items-center justify-end">
+        <button className="btn-primary inline-flex items-center gap-2" onClick={() => setModal({ ...EMPTY })}>
+          <Plus className="h-4 w-4" /> New Article
+        </button>
       </div>
-      <DataTable<BlogPost>
-        data={rows}
-        searchKeys={["title", "slug", "category"]}
-        columns={[
-          { key: "title", label: "Title", sortable: true },
-          { key: "category", label: "Category", sortable: true },
-          { key: "published", label: "Status", render: (r) => (r.published ? "Published" : "Draft") },
-          { key: "published_at", label: "Schedule", render: (r) => <span className="text-xs">{(r.published_at ?? "").slice(0, 16) || "—"}</span> },
-          { key: "aksi", label: "Aksi", render: (r) => (
-            <div className="flex gap-1 text-xs">
-              <button className="rounded border px-2 py-1" onClick={() => setModal({ title: r.title, slug: r.slug, category: r.category ?? "", thumbnail: r.thumbnail ?? "", content: r.content ?? "", meta_title: r.meta_title ?? "", meta_description: r.meta_description ?? "", published: !!r.published, published_at: (r.published_at ?? "").slice(0, 16), id: r.id })}>Edit</button>
-              <button className="rounded border border-red-200 px-2 py-1 text-red-600" onClick={() => ask("Hapus artikel?", r.title, () => delMut.mutate(r.id))}>Hapus</button>
-            </div>
-          ) },
-        ]}
-      />
+      <section className="rounded-[26px] bg-white p-6 shadow-sm">
+        <h2 className="mb-5 text-base font-semibold tracking-tight text-ink-primary">
+          All Articles
+        </h2>
+        {isLoading ? (
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-12 animate-pulse rounded-[14px] bg-surface-muted" />
+            ))}
+          </div>
+        ) : (
+          <DataTable<BlogPost>
+            data={items}
+            searchKeys={["title", "slug", "category"]}
+            searchPlaceholder="Search articles…"
+            columns={[
+              { key: "title", label: "Title", sortable: true, render: (r) => <span className="font-semibold">{r.title}</span> },
+              { key: "category", label: "Category" },
+              { key: "published", label: "Status", render: (r) => <Badge status={r.published ? "completed" : "pending"} /> },
+              { key: "published_at", label: "Publish At", render: (r) => <span className="tabular text-xs text-ink-secondary">{(r.published_at ?? "").slice(0, 16).replace("T", " ") || "—"}</span> },
+              { key: "actions", label: "Actions", render: (r) => (
+                <div className="flex gap-1.5">
+                  <button aria-label="Edit" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary" onClick={() => setModal({ title: r.title, slug: r.slug, category: r.category ?? "", thumbnail: r.thumbnail ?? "", content: r.content ?? "", meta_title: r.meta_title ?? "", meta_description: r.meta_description ?? "", published: !!r.published, published_at: (r.published_at ?? "").slice(0, 16), id: r.id })}><Pencil className="h-3.5 w-3.5" /></button>
+                  <button aria-label="Delete" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#fee2e2] text-[#991b1b] transition hover:bg-[#fee2e2]" onClick={() => ask("Delete article?", r.title, () => delMut.mutate(r.id))}><Trash2 className="h-3.5 w-3.5" /></button>
+                </div>
+              ) },
+            ]}
+          />
+        )}
+      </section>
       {dialog}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-5">
-            <h2 className="font-bold">{modal.id ? "Edit" : "Tulis"} Artikel</h2>
-            <label className="label mt-3">Title</label>
-            <input className="input" value={modal.title} onChange={(e) => setModal({ ...modal, title: e.target.value, slug: modal.id ? modal.slug : slugify(e.target.value) })} />
-            <div className="grid grid-cols-2 gap-3">
-              <div><label className="label mt-3">Slug</label><input className="input" value={modal.slug} onChange={(e) => setModal({ ...modal, slug: slugify(e.target.value) })} /></div>
-              <div><label className="label mt-3">Category</label><input className="input" value={modal.category} onChange={(e) => setModal({ ...modal, category: e.target.value })} /></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f3738]/25 p-4 backdrop-blur-[4px]">
+          <div className="anim-pop max-h-[90vh] w-full max-w-[600px] overflow-y-auto rounded-[24px] bg-white p-7 shadow-xl">
+            <h2 className="text-base font-semibold text-ink-primary">{modal.id ? "Edit" : "New"} Article</h2>
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="label">Title</label>
+                <input className="input" value={modal.title} onChange={(e) => setModal({ ...modal, title: e.target.value, slug: modal.id ? modal.slug : slugify(e.target.value) })} />
+              </div>
+              <div>
+                <label className="label">Slug</label>
+                <input className="input font-mono" value={modal.slug} onChange={(e) => setModal({ ...modal, slug: slugify(e.target.value) })} />
+              </div>
+              <div>
+                <label className="label">Category</label>
+                <input className="input" value={modal.category} onChange={(e) => setModal({ ...modal, category: e.target.value })} />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Thumbnail</label>
+                <ImageUploader value={modal.thumbnail} onChange={(url) => setModal({ ...modal, thumbnail: url })} />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Content</label>
+                <MarkdownEditor value={modal.content} onChange={(v) => setModal({ ...modal, content: v })} />
+              </div>
+              <div>
+                <label className="label">Meta title</label>
+                <input className="input" value={modal.meta_title} onChange={(e) => setModal({ ...modal, meta_title: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Scheduled publish (optional)</label>
+                <input className="input tabular" type="datetime-local" value={modal.published_at} onChange={(e) => setModal({ ...modal, published_at: e.target.value })} />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Meta description</label>
+                <textarea className="input" rows={2} value={modal.meta_description} onChange={(e) => setModal({ ...modal, meta_description: e.target.value })} />
+              </div>
+              <label className="flex items-center gap-2 text-sm text-ink-primary">
+                <input type="checkbox" className="h-[18px] w-[18px] accent-[#0f3738]" checked={modal.published} onChange={(e) => setModal({ ...modal, published: e.target.checked })} /> Published
+              </label>
             </div>
-            <label className="label mt-3">Thumbnail</label>
-            <ImageUploader value={modal.thumbnail} onChange={(url) => setModal({ ...modal, thumbnail: url })} />
-            <label className="label mt-3">Content</label>
-            <MarkdownEditor value={modal.content} onChange={(v) => setModal({ ...modal, content: v })} />
-            <label className="label mt-3">Meta title</label>
-            <input className="input" value={modal.meta_title} onChange={(e) => setModal({ ...modal, meta_title: e.target.value })} />
-            <label className="label mt-3">Meta description</label>
-            <textarea className="input" rows={2} value={modal.meta_description} onChange={(e) => setModal({ ...modal, meta_description: e.target.value })} />
-            <div className="mt-3 flex items-center gap-3 text-sm">
-              <label><input type="checkbox" checked={modal.published} onChange={(e) => setModal({ ...modal, published: e.target.checked })} /> Published</label>
-              <label>Jadwal: <input type="datetime-local" className="input" value={modal.published_at} onChange={(e) => setModal({ ...modal, published_at: e.target.value })} /></label>
-            </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <button className="rounded border px-3 py-1.5 text-sm" onClick={() => setModal(null)}>Batal</button>
+            <div className="mt-5 flex justify-end gap-2">
+              <button className="btn-secondary" onClick={() => setModal(null)}>Cancel</button>
               <button className="btn-primary" disabled={saveMut.isPending} onClick={() => saveMut.mutate(modal)}>
-                {saveMut.isPending ? "Saving…" : "Simpan"}
+                {saveMut.isPending ? "Saving…" : "Save"}
               </button>
             </div>
           </div>

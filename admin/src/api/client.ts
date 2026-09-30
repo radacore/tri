@@ -25,7 +25,39 @@ async function handle<T>(res: Response): Promise<T> {
     throw new Error(msg);
   }
   if (res.status === 204) return undefined as unknown as T;
-  return (await res.json()) as T;
+  const body = (await res.json()) as unknown;
+  return normalize<T>(body);
+}
+
+// Backend membungkus semua respons dalam envelope { data } / { data, meta },
+// sementara halaman admin memakai bentuk mentah. Normalisasi di satu tempat
+// + samakan nama field (package_tier -> tier, amount -> total_cents,
+// pending_count -> pending_orders) agar tabel langsung terisi.
+function normalizeOrder<T>(o: T): T {
+  if (o && typeof o === "object" && "package_tier" in o) {
+    const r = o as Record<string, unknown>;
+    if (r.tier === undefined) r.tier = r.package_tier;
+    if (r.total_cents === undefined)
+      r.total_cents = (r.amount as number) ?? 0;
+  }
+  return o;
+}
+
+function normalize<T>(body: unknown): T {
+  const v =
+    body && typeof body === "object" && "data" in (body as Record<string, unknown>)
+      ? (body as Record<string, unknown>).data
+      : body;
+  if (Array.isArray(v)) return v.map(normalizeOrder) as unknown as T;
+  if (v && typeof v === "object") {
+    const r = v as Record<string, unknown>;
+    normalizeOrder(r);
+    if ("pending_count" in r && !("pending_orders" in r))
+      r.pending_orders = r.pending_count;
+    if (Array.isArray(r.recent_orders))
+      r.recent_orders = r.recent_orders.map(normalizeOrder);
+  }
+  return v as T;
 }
 
 export async function get<T>(path: string): Promise<T> {

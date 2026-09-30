@@ -6,23 +6,23 @@ const plans = [
 ];
 ---
 <section class="reveal reveal-stagger mx-auto max-w-content px-5 py-16 sm:py-20">
-  <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center" data-i18n="price.kicker">Pricing</p>
-  <h2 class="mt-2 text-center text-3xl sm:text-4xl font-extrabold tracking-tight" data-i18n="price.title">One payment. Yours forever.</h2>
-  <p class="mt-3 text-center text-slate-500" data-i18n="price.sub">No subscriptions. 100% money-back guarantee on every plan.</p>
+  <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center">Pricing</p>
+  <h2 class="mt-2 text-center text-3xl sm:text-4xl font-extrabold tracking-tight">One payment. Yours forever.</h2>
+  <p class="mt-3 text-center text-slate-500">No subscriptions. 100% money-back guarantee on every plan.</p>
   <div class="mt-10 grid gap-6 md:grid-cols-3 items-stretch">
     {plans.map((p, i) => (
       <article
         class={`relative flex flex-col p-7 bg-white transition-all duration-300 hover:-translate-y-2 ${p.popular ? 'ring-2 ring-primary shadow-2xl shadow-primary/15 hover:[transform:translateY(-8px)]' : 'ring-1 ring-slate-900/10 shadow-sm hover:shadow-xl'}`}
         style={`--i:${i};border-radius:20px`}
       >
-        {p.popular && <span class="badge-pop absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg" data-i18n="price.popular">Most Popular</span>}
+        {p.popular && <span class="badge-pop absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg">Most Popular</span>}
         <h3 class="text-lg font-extrabold">{p.name}</h3>
-        <p class="text-sm text-slate-500" data-i18n={p.tagKey}>{p.tag}</p>
-        <p class="mt-3"><span class="text-4xl font-extrabold tabular">${p.price}</span><span class="text-sm text-slate-500" data-i18n="price.onetime"> one-time</span></p>
+        <p class="text-sm text-slate-500">{p.tag}</p>
+        <p class="mt-3"><span class="text-4xl font-extrabold tabular">${p.price}</span><span class="text-sm text-slate-500"> one-time</span></p>
         <ul class="mt-5 space-y-2.5 text-sm flex-1">
-          {p.features.map((f) => (<li class="flex gap-2"><span class="text-primary font-bold" aria-hidden="true">✓</span><span data-i18n={f[0]}>{f[1]}</span></li>))}
+          {p.features.map((f) => (<li class="flex gap-2"><span class="text-primary font-bold" aria-hidden="true">✓</span><span>{f[1]}</span></li>))}
         </ul>
-        <a href={`/order?plan=${p.name.toLowerCase()}`} data-i18n={p.ctaKey} class={`btn-active mt-6 rounded-full px-6 py-3.5 text-center text-sm font-bold ${p.popular ? 'btn-shine cta-animated bg-gradient-to-r from-primary via-primary-hover to-primary text-white shadow-lg shadow-primary/25' : 'bg-dark text-white hover:bg-slate-800'}`}>{p.cta}</a>
+        <a href={`/order?plan=${p.name.toLowerCase()}`} class={`btn-active mt-6 rounded-full px-6 py-3.5 text-center text-sm font-bold ${p.popular ? 'btn-shine cta-animated bg-gradient-to-r from-primary via-primary-hover to-primary text-white shadow-lg shadow-primary/25' : 'bg-dark text-white hover:bg-slate-800'}`}>{p.cta}</a>
       </article>
     ))}
   </div>

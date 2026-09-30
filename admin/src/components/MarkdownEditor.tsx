@@ -9,33 +9,33 @@ export default function MarkdownEditor({
 }) {
   const [tab, setTab] = useState<"write" | "preview">("write");
   return (
-    <div className="rounded-lg border">
-      <div className="flex gap-1 border-b p-1 text-sm">
-        <button
-          className={`rounded px-3 py-1 ${tab === "write" ? "bg-slate-900 text-white" : "text-slate-600"}`}
-          onClick={() => setTab("write")}
-          type="button"
-        >
-          Write
-        </button>
-        <button
-          className={`rounded px-3 py-1 ${tab === "preview" ? "bg-slate-900 text-white" : "text-slate-600"}`}
-          onClick={() => setTab("preview")}
-          type="button"
-        >
-          Preview
-        </button>
+    <div className="overflow-hidden rounded-[14px] border border-[#e2eceb]">
+      <div className="flex gap-1 border-b border-[#e2eceb] bg-surface-muted p-1 text-sm">
+        {(["write", "preview"] as const).map((t) => (
+          <button
+            key={t}
+            className={`rounded-full px-3 py-1 font-medium capitalize transition ${
+              tab === t
+                ? "bg-brand text-white"
+                : "text-ink-secondary hover:text-ink-primary"
+            }`}
+            onClick={() => setTab(t)}
+            type="button"
+          >
+            {t}
+          </button>
+        ))}
       </div>
       {tab === "write" ? (
         <textarea
-          className="min-h-[180px] w-full p-3 font-mono text-sm outline-none"
+          className="min-h-[180px] w-full p-3 font-mono text-sm text-ink-primary outline-none placeholder:text-ink-muted"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="# Judul&#10;&#10;Tulis markdown…"
+          placeholder={"# Title\n\nWrite markdown…"}
         />
       ) : (
-        <pre className="min-h-[180px] whitespace-pre-wrap p-3 text-sm text-slate-700">
-          {value || "(kosong)"}
+        <pre className="min-h-[180px] whitespace-pre-wrap p-3 text-sm text-ink-secondary">
+          {value || "(empty)"}
         </pre>
       )}
     </div>

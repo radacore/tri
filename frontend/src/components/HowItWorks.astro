@@ -12,15 +12,15 @@ const steps = [
 ---
 <section class="reveal bg-slate-50/70 py-16 sm:py-20">
   <div class="mx-auto max-w-content px-5">
-    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center" data-i18n="how.kicker">How it works</p>
-    <h2 class="mt-2 text-center text-3xl sm:text-4xl font-extrabold tracking-tight" data-i18n="how.title">From brief to brand in 4 steps</h2>
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center">How it works</p>
+    <h2 class="mt-2 text-center text-3xl sm:text-4xl font-extrabold tracking-tight">From brief to brand in 4 steps</h2>
     <div class="mt-10 grid gap-6 sm:grid-cols-4">
       {steps.map((s, i) => (
         <div class="relative rounded-2xl bg-white p-6 ring-1 ring-slate-900/10 shadow-sm" style={`--i:${i};border-radius:20px`}>
           <span class="grid h-11 w-11 place-items-center rounded-full bg-subtle text-primary [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true" set:html={s.icon}></span>
-          <p class="mt-4 text-xs font-extrabold tracking-widest text-primary"><span data-i18n="how.step">STEP</span> {s.n}</p>
-          <h3 class="mt-1 text-lg font-extrabold" data-i18n={s.tk}>{s.title}</h3>
-          <p class="mt-1 text-sm text-slate-600" data-i18n={s.dk}>{s.text}</p>
+          <p class="mt-4 text-xs font-extrabold tracking-widest text-primary"><span>STEP</span> {s.n}</p>
+          <h3 class="mt-1 text-lg font-extrabold">{s.title}</h3>
+          <p class="mt-1 text-sm text-slate-600">{s.text}</p>
         </div>
       ))}
     </div>

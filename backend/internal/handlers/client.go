@@ -27,13 +27,13 @@ func ListClientLogos(pool *pgxpool.Pool) http.HandlerFunc {
 		for rows.Next() {
 			var id, name, logo string
 			var sort int
-			var ca string
+			var ca tsString
 			if err := rows.Scan(&id, &name, &logo, &sort, &ca); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
 			}
 			items = append(items, map[string]any{
-				"id": id, "name": name, "logo_url": logo, "sort_order": sort, "created_at": ca,
+				"id": id, "name": name, "logo_url": logo, "sort_order": sort, "created_at": ca.String(),
 			})
 		}
 		if items == nil {

@@ -1,5 +1,4 @@
 ---
-import LanguageSwitcher from './LanguageSwitcher.astro';
 ---
 <header id="site-nav" class="fixed top-4 left-1/2 z-50 w-[min(1200px,calc(100%-2rem))] transition-all duration-300">
   <nav id="site-nav-inner" class="flex items-center justify-between gap-4 rounded-full bg-black text-white ring-1 ring-white/10 px-4 sm:px-6 py-3 transition-all duration-300" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(2, 8, 30, 0.35);">
@@ -8,15 +7,14 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
       LogoPulse
     </a>
     <div class="hidden md:flex items-center gap-1 text-sm font-semibold text-white/70">
-      <a class="nav-link px-3 py-2 hover:text-white" href="/#portfolio" data-i18n="nav.portfolio">Portfolio</a>
-      <a class="nav-link px-3 py-2 hover:text-white" href="/case-studies" data-i18n="nav.cases">Case Studies</a>
-      <a class="nav-link px-3 py-2 hover:text-white" href="/#how-it-works" data-i18n="nav.how">How</a>
-      <a class="nav-link px-3 py-2 hover:text-white" href="/#pricing" data-i18n="nav.pricing">Pricing</a>
-      <a class="nav-link px-3 py-2 hover:text-white" href="/blog" data-i18n="nav.blog">Blog</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/#portfolio">Portfolio</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/case-studies">Case Studies</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/#how-it-works">How</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/#pricing">Pricing</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/blog">Blog</a>
     </div>
     <div class="flex items-center gap-2">
-      <LanguageSwitcher />
-      <a href="/#pricing" data-i18n="nav.cta" class="btn-active inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover">View Pricing</a>
+      <a href="/#pricing" class="btn-active inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover">View Pricing</a>
     </div>
   </nav>
 </header>

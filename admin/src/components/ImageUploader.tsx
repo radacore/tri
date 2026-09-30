@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { ImagePlus } from "lucide-react";
 import { uploadFile, type UploadResult } from "../api/client";
 
 export default function ImageUploader({
@@ -22,9 +23,9 @@ export default function ImageUploader({
       setInfo(r);
       onChange(r.url);
     } catch (e: any) {
-      // Fallback: preview lokal bila API mati
+      // Fallback: local preview when the API is offline
       setError(
-        `Upload gagal (${e?.message ?? "network"}). Preview lokal dipakai, URL tidak tersimpan permanen.`
+        `Upload failed (${e?.message ?? "network"}). Using a local preview; the URL is not permanently stored.`
       );
       const local = URL.createObjectURL(file);
       onChange(local);
@@ -36,8 +37,8 @@ export default function ImageUploader({
   return (
     <div>
       <div
-        className={`rounded-lg border-2 border-dashed p-4 text-center text-sm ${
-          drag ? "border-[#0158FE] bg-blue-50" : "border-slate-300"
+        className={`rounded-[20px] border-2 border-dashed p-5 text-center text-sm transition ${
+          drag ? "border-brand bg-brand-subtle" : "border-[#cbdcda]"
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -66,26 +67,31 @@ export default function ImageUploader({
           <img
             src={value}
             alt="preview"
-            className="mx-auto max-h-40 rounded object-contain"
+            className="mx-auto max-h-40 rounded-[14px] object-contain"
           />
         ) : (
-          <p className="text-slate-500">
-            Drag &amp; drop gambar di sini, atau klik untuk pilih file
-            {busy ? " — uploading…" : ""}
-          </p>
+          <div className="flex flex-col items-center gap-2 text-ink-secondary">
+            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-subtle text-brand">
+              <ImagePlus className="h-5 w-5" />
+            </span>
+            <p>
+              Drag &amp; drop an image here, or click to browse
+              {busy ? " — uploading…" : ""}
+            </p>
+          </div>
         )}
       </div>
       {value && (
-        <p className="mt-1 break-all text-xs text-slate-500">{value}</p>
+        <p className="mt-1 break-all text-xs text-ink-secondary">{value}</p>
       )}
       {info && (
-        <p className="mt-1 text-xs text-emerald-700">
+        <p className="tabular mt-1 text-xs text-[#065f46]">
           {info.format ?? "webp"}
           {info.width ? ` · ${info.width}x${info.height}` : ""}
           {info.size_kb ? ` · ${info.size_kb} KB` : ""}
         </p>
       )}
-      {error && <p className="mt-1 text-xs text-amber-700">{error}</p>}
+      {error && <p className="mt-1 text-xs text-[#92400e]">{error}</p>}
     </div>
   );
 }

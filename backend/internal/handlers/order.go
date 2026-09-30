@@ -177,8 +177,7 @@ func AdminListOrders(pool *pgxpool.Pool) http.HandlerFunc {
 			var amt int
 			var sess *string
 			// scan paid_at/created/updated as strings via text
-			var paidStr *string
-			var cStr, uStr string
+			var paidStr, cStr, uStr tsString
 			if err := rows.Scan(&id, &cn, &ce, &pt, &st, &brief, &amt, &cur, &sess, &paidStr, &cStr, &uStr); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
@@ -186,7 +185,7 @@ func AdminListOrders(pool *pgxpool.Pool) http.HandlerFunc {
 			m := map[string]any{
 				"id": id, "customer_name": cn, "customer_email": ce,
 				"package_tier": pt, "status": st, "amount": amt, "currency": cur,
-				"created_at": cStr, "updated_at": uStr,
+				"created_at": cStr.String(), "updated_at": uStr.String(),
 			}
 			if len(brief) > 0 {
 				var b any
@@ -197,8 +196,8 @@ func AdminListOrders(pool *pgxpool.Pool) http.HandlerFunc {
 			if sess != nil {
 				m["stripe_session"] = *sess
 			}
-			if paidStr != nil {
-				m["paid_at"] = *paidStr
+			if paidStr.String() != "" {
+				m["paid_at"] = paidStr.String()
 			}
 			items = append(items, m)
 		}

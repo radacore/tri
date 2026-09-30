@@ -34,7 +34,7 @@ func ListTestimonials(pool *pgxpool.Pool) http.HandlerFunc {
 			var pos, comp, photo *string
 			var rating int16
 			var feat, pub bool
-			var ca string
+			var ca tsString
 			if err := rows.Scan(&id, &name, &pos, &comp, &photo, &quote, &rating, &feat, &pub, &ca); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
@@ -42,7 +42,7 @@ func ListTestimonials(pool *pgxpool.Pool) http.HandlerFunc {
 			items = append(items, map[string]any{
 				"id": id, "name": name, "position": strp(pos), "company": strp(comp),
 				"photo_url": strp(photo), "quote": quote, "rating": rating,
-				"featured": feat, "published": pub, "created_at": ca,
+				"featured": feat, "published": pub, "created_at": ca.String(),
 			})
 		}
 		if items == nil {
@@ -73,7 +73,7 @@ func AdminListTestimonials(pool *pgxpool.Pool) http.HandlerFunc {
 			var pos, comp, photo *string
 			var rating int16
 			var feat, pub bool
-			var ca string
+			var ca tsString
 			if err := rows.Scan(&id, &name, &pos, &comp, &photo, &quote, &rating, &feat, &pub, &ca); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
@@ -81,7 +81,7 @@ func AdminListTestimonials(pool *pgxpool.Pool) http.HandlerFunc {
 			items = append(items, map[string]any{
 				"id": id, "name": name, "position": strp(pos), "company": strp(comp),
 				"photo_url": strp(photo), "quote": quote, "rating": rating,
-				"featured": feat, "published": pub, "created_at": ca,
+				"featured": feat, "published": pub, "created_at": ca.String(),
 			})
 		}
 		if items == nil {

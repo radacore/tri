@@ -27,14 +27,14 @@ import { FALLBACK_CASES } from '../lib/api';
     <section id="case-studies" class="reveal mx-auto max-w-content px-5 py-16 sm:py-20">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary" data-i18n="cases.kicker">Case studies</p>
-          <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight" data-i18n="cases.title">Logos that moved the numbers</h2>
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Case studies</p>
+          <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">Logos that moved the numbers</h2>
         </div>
-        <a href="/case-studies" data-i18n="cases.all" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-200 hover:ring-primary hover:text-primary">All case studies →</a>
+        <a href="/case-studies" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-200 hover:ring-primary hover:text-primary">All case studies →</a>
       </div>
       <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {FALLBACK_CASES.map((c) => (
-          <CaseStudyCard slug={c.slug} title={c.title} titleId={c.titleId} client={c.client} industry={c.industry} result={c.result} resultId={c.resultId} mockup={c.mockup} logo={c.logo} excerpt={c.excerpt} excerptId={c.excerptId} />
+          <CaseStudyCard slug={c.slug} title={c.title} client={c.client} industry={c.industry} result={c.result} mockup={c.mockup} logo={c.logo} excerpt={c.excerpt} />
         ))}
       </div>
     </section>
@@ -47,9 +47,9 @@ import { FALLBACK_CASES } from '../lib/api';
     <!-- 08 / TESTIMONIALS -->
     <section id="testimonials" class="reveal pt-12 pb-4 text-center">
       <div class="mx-auto max-w-content px-5">
-      <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary" data-i18n="rev.kicker">Reviews</p>
-      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight" data-i18n="rev.title">Loved by founders worldwide</h2>
-      <p class="mt-3 text-slate-500" data-i18n="rev.sub">★ 4.9 average across 500+ verified orders</p>
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Reviews</p>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">Loved by founders worldwide</h2>
+      <p class="mt-3 text-slate-500">★ 4.9 average across 500+ verified orders</p>
       </div>
     </section>
     <TestimonialCard />
@@ -58,8 +58,8 @@ import { FALLBACK_CASES } from '../lib/api';
       <div class="flex flex-col sm:flex-row items-center gap-5 rounded-2xl bg-subtle/60 p-8 ring-1 ring-primary/15" style="border-radius:20px">
         <span class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-primary text-3xl text-white" aria-hidden="true">✓</span>
         <div>
-          <h2 class="text-2xl font-extrabold" data-i18n="guar.title">100% money-back guarantee</h2>
-          <p class="mt-1 text-slate-600" data-i18n="guar.text">If the first concepts don&apos;t excite you, we refund every cent within 7 days. No forms, no hard feelings.</p>
+          <h2 class="text-2xl font-extrabold">100% money-back guarantee</h2>
+          <p class="mt-1 text-slate-600">If the first concepts don&apos;t excite you, we refund every cent within 7 days. No forms, no hard feelings.</p>
         </div>
       </div>
     </section>

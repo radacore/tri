@@ -15,11 +15,11 @@ const post = FALLBACK_POSTS.find((p) => p.slug === slug) ?? FALLBACK_POSTS[0];
   <Navbar />
   <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
     <p class="text-xs font-semibold text-slate-400">{post.date}</p>
-    <h1 class="mt-2 text-4xl font-extrabold tracking-tight"><span data-l="en">{post.title}</span>{post.titleId && <span data-l="id" hidden>{post.titleId}</span>}</h1>
+    <h1 class="mt-2 text-4xl font-extrabold tracking-tight">{post.title}</h1>
     <img src={post.cover} alt={post.title} class="mt-6 w-full object-cover" style="border-radius:16px" />
-    <p class="mt-6 text-lg text-slate-700 leading-relaxed"><span data-l="en">{post.excerpt}</span>{post.excerptId && <span data-l="id" hidden>{post.excerptId}</span>}</p>
-    <p class="mt-4 text-slate-600 leading-relaxed" data-i18n="blogslug.body">Good branding is a growth lever, not decoration. A clear, memorable mark raises perceived value, builds trust in seconds, and compounds across every touchpoint — your site, packaging, ads, and pitch deck. If your current logo was a placeholder, this is the cheapest high-ROI upgrade on your roadmap.</p>
-    <a href="/order?plan=professional" data-i18n="blogslug.cta" class="btn-active mt-8 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Get my logo — from $49</a>
+    <p class="mt-6 text-lg text-slate-700 leading-relaxed">{post.excerpt}</p>
+    <p class="mt-4 text-slate-600 leading-relaxed">Good branding is a growth lever, not decoration. A clear, memorable mark raises perceived value, builds trust in seconds, and compounds across every touchpoint — your site, packaging, ads, and pitch deck. If your current logo was a placeholder, this is the cheapest high-ROI upgrade on your roadmap.</p>
+    <a href="/order?plan=professional" class="btn-active mt-8 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Get my logo — from $49</a>
   </main>
   <Footer />
 </BaseLayout>
