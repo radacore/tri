@@ -67,18 +67,9 @@ export default function CaseStudiesPage() {
           <Plus className="h-4 w-4" /> Add Case Study
         </button>
       </div>
-      <section className="rounded-[26px] bg-white p-6 shadow-sm">
-        <h2 className="mb-5 text-base font-semibold tracking-tight text-ink-primary">
-          All Case Studies
-        </h2>
-        {isLoading ? (
-          <div className="space-y-3">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="h-12 animate-pulse rounded-[14px] bg-surface-muted" />
-            ))}
-          </div>
-        ) : (
           <DataTable<CaseStudy>
+            title="All Case Studies"
+            loading={isLoading}
             data={items}
             searchKeys={["title", "slug", "industry"]}
             searchPlaceholder="Search case studies…"
@@ -95,8 +86,6 @@ export default function CaseStudiesPage() {
               ) },
             ]}
           />
-        )}
-      </section>
       {dialog}
       {modal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f3738]/25 p-4 backdrop-blur-[4px]">

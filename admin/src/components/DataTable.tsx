@@ -15,12 +15,18 @@ export default function DataTable<T extends { id?: string }>({
   searchKeys = [],
   searchPlaceholder = "Search…",
   pageSize = 10,
+  title,
+  actions,
+  loading = false,
 }: {
   columns: Column<T>[];
   data: T[];
   searchKeys?: (keyof T)[];
   searchPlaceholder?: string;
   pageSize?: number;
+  title?: string;
+  actions?: React.ReactNode;
+  loading?: boolean;
 }) {
   const [q, setQ] = useState("");
   const [sortKey, setSortKey] = useState<string | null>(null);
@@ -67,23 +73,23 @@ export default function DataTable<T extends { id?: string }>({
   const from = filtered.length === 0 ? 0 : safePage * pageSize + 1;
   const to = Math.min(filtered.length, safePage * pageSize + pageSize);
 
-  return (
-    <div>
-      {searchKeys.length > 0 && (
-        <div className="relative mb-4 max-w-xs">
-          <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
-          <input
-            className="input input-pill w-full pl-10"
-            placeholder={searchPlaceholder}
-            value={q}
-            onChange={(e) => {
-              setQ(e.target.value);
-              setPage(0);
-            }}
-          />
-        </div>
-      )}
-      <div className="card overflow-x-auto">
+  const searchBox = searchKeys.length > 0 && (
+    <div className="relative w-full sm:w-auto sm:min-w-[220px]">
+      <Search className="absolute left-4 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
+      <input
+        className="input input-pill w-full pl-10"
+        placeholder={searchPlaceholder}
+        value={q}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setPage(0);
+        }}
+      />
+    </div>
+  );
+
+  const table = (
+    <div className="card overflow-x-auto">
         <table className="w-full min-w-[640px] border-collapse text-left text-sm">
           <thead>
             <tr className="border-b border-[#e2eceb]">
@@ -147,32 +153,70 @@ export default function DataTable<T extends { id?: string }>({
           </tbody>
         </table>
       </div>
-      <div className="mt-4 flex items-center justify-between text-xs text-ink-secondary">
-        <span className="tabular">
-          Showing {from}–{to} of {filtered.length} items
+  );
+
+  const footer = (
+    <div className="mt-4 flex items-center justify-between text-xs text-ink-secondary">
+      <span className="tabular">
+        Showing {from}–{to} of {filtered.length} items
+      </span>
+      <div className="flex items-center gap-2">
+        <button
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary disabled:opacity-40"
+          disabled={safePage <= 0}
+          onClick={() => setPage((p) => Math.max(0, p - 1))}
+          aria-label="Previous page"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <span className="tabular font-semibold text-ink-primary">
+          {safePage + 1} / {pages}
         </span>
-        <div className="flex items-center gap-2">
-          <button
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary disabled:opacity-40"
-            disabled={safePage <= 0}
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <span className="tabular font-semibold text-ink-primary">
-            {safePage + 1} / {pages}
-          </span>
-          <button
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary disabled:opacity-40"
-            disabled={safePage >= pages - 1}
-            onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}
-            aria-label="Next page"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
+        <button
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary disabled:opacity-40"
+          disabled={safePage >= pages - 1}
+          onClick={() => setPage((p) => Math.min(pages - 1, p + 1))}
+          aria-label="Next page"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
     </div>
+  );
+  const body = loading ? (
+    <div className="space-y-3">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="h-12 animate-pulse rounded-[14px] bg-surface-muted" />
+      ))}
+    </div>
+  ) : (
+    <>
+      {table}
+      {footer}
+    </>
+  );
+
+  if (!title) {
+    return (
+      <div>
+        {searchBox}
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <section className="rounded-[26px] bg-white p-6 shadow-sm">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-base font-semibold tracking-tight text-ink-primary">
+          {title}
+        </h2>
+        <div className="flex flex-wrap items-center gap-2">
+          {searchBox}
+          {actions}
+        </div>
+      </div>
+      {body}
+    </section>
   );
 }
