@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { FALLBACK_POSTS } from '../../lib/api';
+---
+<BaseLayout title="Blog — LogoPulse">
+  <Navbar />
+  <main class="mx-auto max-w-content px-5 pt-32 pb-20">
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Blog</p>
+    <h1 class="mt-2 text-4xl font-extrabold tracking-tight" data-i18n="blogidx.title">Branding advice for founders</h1>
+    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {FALLBACK_POSTS.map((p) => (
+        <a href={`/blog/${p.slug}`} class="block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:shadow-xl transition hover:-translate-y-1" style="border-radius:20px">
+          <img src={p.cover} alt={p.title} loading="lazy" class="aspect-[16/9] w-full object-cover" />
+          <div class="p-5">
+            <p class="text-xs text-slate-400 font-semibold">{p.date}</p>
+            <h2 class="mt-1 font-extrabold leading-snug"><span data-l="en">{p.title}</span>{p.titleId && <span data-l="id" hidden>{p.titleId}</span>}</h2>
+            <p class="mt-1 text-sm text-slate-500"><span data-l="en">{p.excerpt}</span>{p.excerptId && <span data-l="id" hidden>{p.excerptId}</span>}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

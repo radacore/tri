@@ -1,0 +1,27 @@
+---
+interface Props {
+  slug?: string;
+  title?: string;
+  titleId?: string;
+  client?: string;
+  industry?: string;
+  result?: string;
+  resultId?: string;
+  mockup?: string;
+  logo?: string;
+  excerpt?: string;
+  excerptId?: string;
+}
+const { slug = '#', title = 'Case study', titleId, client = 'Client', industry = 'Industry', result = 'Result', resultId, mockup = '', logo = '', excerpt = '', excerptId } = Astro.props as Props;
+---
+<a href={slug === '#' ? '/case-studies' : `/case-studies/${slug}`} class="crossfade group block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300" style="border-radius:20px">
+  <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
+    {mockup && <img src={mockup} alt={`${client} brand mockup`} loading="lazy" decoding="async" class="img-base absolute inset-0 h-full w-full object-cover" />}
+    {logo && <img src={logo} alt={`${client} logo`} loading="lazy" decoding="async" class="img-top absolute inset-0 h-full w-full object-cover" />}
+  </div>
+  <div class="p-5">
+    <p class="text-xs font-bold uppercase tracking-wider text-primary">{industry} · <span data-l="en">{result}</span>{resultId && <span data-l="id" hidden>{resultId}</span>}</p>
+    <h3 class="mt-1 font-extrabold leading-snug group-hover:text-primary transition-colors"><span data-l="en">{title}</span>{titleId && <span data-l="id" hidden>{titleId}</span>}</h3>
+    <p class="mt-1 text-sm text-slate-500"><span data-l="en">{excerpt || client}</span>{(excerptId || excerpt) && <span data-l="id" hidden>{excerptId ?? excerpt}</span>}</p>
+  </div>
+</a>

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+uploads/
+pg_data/
+backend/*.test
+.DS_Store
+.backup/

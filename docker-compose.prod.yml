@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: logopulse
+      POSTGRES_USER: logopulse
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    restart: unless-stopped
+  api:
+    build: ./backend
+    depends_on: [db]
+    environment:
+      DATABASE_URL: postgres://logopulse:${DB_PASSWORD}@db:5432/logopulse?sslmode=disable
+      JWT_SECRET: ${JWT_SECRET}
+      UPLOAD_DIR: /app/uploads
+      PORT: 8080
+    volumes:
+      - uploads:/app/uploads
+    restart: unless-stopped
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./frontend/dist:/usr/share/nginx/html
+      - ./admin/dist:/usr/share/nginx/html/admin
+      - uploads:/usr/share/nginx/uploads:ro
+      - certs:/etc/letsencrypt
+    depends_on: [api]
+    restart: unless-stopped
+volumes:
+  pg_data:
+  uploads:
+  certs:

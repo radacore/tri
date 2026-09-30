@@ -1,0 +1,59 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+---
+<header id="site-nav" class="fixed top-4 left-1/2 z-50 w-[min(1200px,calc(100%-2rem))] transition-all duration-300">
+  <nav id="site-nav-inner" class="flex items-center justify-between gap-4 rounded-full bg-black text-white ring-1 ring-white/10 px-4 sm:px-6 py-3 transition-all duration-300" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(2, 8, 30, 0.35);">
+    <a href="/" class="flex items-center gap-2 font-extrabold text-lg tracking-tight">
+      <span class="grid h-8 w-8 place-items-center rounded-full bg-primary text-white text-sm">L</span>
+      LogoPulse
+    </a>
+    <div class="hidden md:flex items-center gap-1 text-sm font-semibold text-white/70">
+      <a class="nav-link px-3 py-2 hover:text-white" href="/#portfolio" data-i18n="nav.portfolio">Portfolio</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/case-studies" data-i18n="nav.cases">Case Studies</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/#how-it-works" data-i18n="nav.how">How</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/#pricing" data-i18n="nav.pricing">Pricing</a>
+      <a class="nav-link px-3 py-2 hover:text-white" href="/blog" data-i18n="nav.blog">Blog</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <LanguageSwitcher />
+      <a href="/#pricing" data-i18n="nav.cta" class="btn-active inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover">View Pricing</a>
+    </div>
+  </nav>
+</header>
+<script>
+  (function () {
+    var header = document.getElementById('site-nav');
+    if (!header) return;
+    var nav = document.getElementById('site-nav-inner');
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var lastY = window.scrollY || 0;
+    var HIDE_AFTER = 140; // dead-zone: jangan sembunyikan di area hero
+    var TOLERANCE = 4;    // abaikan micro-scroll biar tidak kedip
+    var ticking = false;
+    function apply() {
+      ticking = false;
+      var y = window.scrollY || 0;
+      if (!nav) return;
+      // efek ramping yang sudah ada
+      var shrink = y > 40;
+      nav.style.paddingTop = shrink ? '0.5rem' : '';
+      nav.style.paddingBottom = shrink ? '0.5rem' : '';
+      // mengecil ke tengah + hilang saat scroll turun (ala obsidian);
+      // muncul lagi saat scroll naik — transform-only, murah di GPU
+      if (!reduceMotion) {
+        var scrollingDown = y > lastY + TOLERANCE;
+        var scrollingUp = y < lastY - TOLERANCE;
+        if (scrollingDown && y > HIDE_AFTER) {
+          header.classList.add('nav-gone');
+        } else if (scrollingUp || y <= HIDE_AFTER) {
+          header.classList.remove('nav-gone');
+        }
+      }
+      lastY = y;
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(apply); }
+    }, { passive: true });
+    apply();
+  })();
+</script>

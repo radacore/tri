@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+---
+<BaseLayout title="Page not found — LogoPulse">
+  <Navbar />
+  <main class="mx-auto max-w-xl px-5 pt-40 pb-24 text-center">
+    <p class="font-serif-accent text-7xl text-primary">404</p>
+    <h1 class="mt-4 text-3xl font-extrabold" data-i18n="n404.title">This page went off-brand</h1>
+    <p class="mt-2 text-slate-500" data-i18n="n404.text">The link you followed doesn&apos;t exist. Let&apos;s get you back to good design.</p>
+    <div class="mt-6 flex justify-center gap-3">
+      <a href="/" data-i18n="n404.home" class="btn-active rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Back home</a>
+      <a href="/#pricing" data-i18n="n404.pricing" class="btn-active rounded-full bg-dark px-6 py-3 text-sm font-bold text-white hover:bg-slate-800">View pricing</a>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

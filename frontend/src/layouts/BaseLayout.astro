@@ -1,0 +1,78 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'LogoPulse — Logo & Brand Identity in 48 Hours',
+  description = 'Custom logo & brand identity. From $49, ready in 48 hours, 100% money-back guarantee.',
+} = Astro.props as Props;
+import '../styles/global.css';
+const site = 'https://logopulse.example.com';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    { '@type': 'Organization', name: 'LogoPulse', url: site, logo: `${site}/logo.svg` },
+    { '@type': 'WebSite', name: 'LogoPulse', url: site },
+  ],
+};
+---
+<html lang="en">
+<head>
+  <script is:inline>
+    try {
+      var l = localStorage.getItem('lp-lang') || ((navigator.language || '').toLowerCase().indexOf('id') === 0 ? 'id' : 'en');
+      document.documentElement.lang = l === 'id' ? 'id' : 'en';
+    } catch (e) {}
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={site + Astro.url.pathname} />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="LogoPulse" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={site + Astro.url.pathname} />
+  <meta property="og:image" content={site + '/og-cover.jpg'} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={site + '/og-cover.jpg'} />
+  <meta name="theme-color" content="#0158FE" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap"
+  />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <noscript><style>.reveal { opacity: 1 !important; transform: none !important; }</style></noscript>
+</head>
+<body class="bg-white text-slate-900 antialiased">
+  <slot />
+  <script>import '../lib/lang.ts';</script>
+  <script>
+    (function () {
+      var els = document.querySelectorAll('.reveal');
+      var show = function (el) { el.classList.add('reveal-visible'); };
+      var hide = function (el) { el.classList.remove('reveal-visible'); };
+      if (!('IntersectionObserver' in window)) {
+        els.forEach(show);
+        return;
+      }
+      // replay: animasi main lagi setiap section masuk viewport,
+      // reset saat keluar supaya scroll bolak-balik tetap hidup
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { show(e.target); }
+          else { hide(e.target); }
+        });
+      }, { threshold: 0.1 });
+      els.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+</body>
+</html>

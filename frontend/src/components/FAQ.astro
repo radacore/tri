@@ -1,0 +1,37 @@
+---
+const faqs = [
+  { qk: 'faq.q1', q: 'How fast is delivery, really?', ak: 'faq.a1', a: 'First concepts land within 48 hours of your brief. Most projects finalize within 3–5 days including revisions.' },
+  { qk: 'faq.q2', q: 'What if I hate the designs?', ak: 'faq.a2', a: 'Then you pay nothing. Every plan carries a 100% money-back guarantee — just tell us within 7 days and we refund you in full.' },
+  { qk: 'faq.q3', q: 'Do I own the logo?', ak: 'faq.a3', a: 'Yes. Full ownership transfers to you on delivery, including vector source files and a signed transfer note on Premium.' },
+  { qk: 'faq.q4', q: 'What files do I get?', ak: 'faq.a4', a: 'Starter: PNG + JPG. Professional and Premium add AI, SVG, EPS, PDF vectors plus color/font guides and social packs.' },
+  { qk: 'faq.q5', q: 'How do revisions work?', ak: 'faq.a5', a: 'Reply with notes and we turn a new round around fast — usually same-day. Professional includes unlimited rounds for 7 days.' },
+  { qk: 'faq.q6', q: 'Can you match my existing brand?', ak: 'faq.a6', a: 'Absolutely. Share your colors, fonts, or references in the brief and we design within (or evolve) your system.' },
+];
+---
+<section class="reveal mx-auto max-w-3xl px-5 py-16 sm:py-20">
+  <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center" data-i18n="faq.kicker">FAQ</p>
+  <h2 class="mt-2 text-center text-3xl sm:text-4xl font-extrabold tracking-tight" data-i18n="faq.title">Questions, answered</h2>
+  <div class="mt-8 space-y-3">
+    {faqs.map((f) => (
+      <div class="faq-item rounded-2xl bg-white ring-1 ring-slate-900/10 overflow-hidden" style="border-radius:20px">
+        <button type="button" class="faq-toggle flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-bold hover:text-primary transition-colors" aria-expanded="false">
+          <span data-i18n={f.qk}>{f.q}</span>
+          <svg class="faq-chevron h-5 w-5 shrink-0 text-primary" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 7.5 10 12.5 15 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="faq-answer"><div><p class="px-5 pb-5 text-[15px] text-slate-600 leading-relaxed" data-i18n={f.ak}>{f.a}</p></div></div>
+      </div>
+    ))}
+  </div>
+</section>
+<script>
+  (function () {
+    document.querySelectorAll('.faq-item').forEach(function (item) {
+      var btn = item.querySelector('.faq-toggle');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var open = item.classList.toggle('faq-open');
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+  })();
+</script>

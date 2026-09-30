@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+const plans: Record<string, { name: string; price: number }> = {
+  starter: { name: 'Starter', price: 49 },
+  professional: { name: 'Professional', price: 149 },
+  premium: { name: 'Premium', price: 399 },
+};
+const q = (Astro.url.searchParams.get('plan') ?? 'professional').toLowerCase();
+const initial = plans[q] ?? plans['professional'];
+const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+// TODO: ganti dengan nomor WA bisnis (format internasional tanpa +, cth 62812xxxxxxx)
+const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '6281234567890';
+// TODO: ganti dengan email order bisnis
+const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
+---
+<BaseLayout title="Order — LogoPulse">
+  <Navbar />
+  <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center" data-i18n="order.kicker">Order</p>
+    <h1 class="mt-2 text-center text-4xl font-extrabold tracking-tight" data-i18n="order.title">Start your logo</h1>
+    <p class="mt-3 text-center text-sm text-slate-500" data-i18n="order.sub">Fill a short brief, then send it straight via WhatsApp or email — no upfront payment.</p>
+    <ol class="mt-8 flex items-center justify-center gap-2 text-xs font-bold" id="order-steps">
+      <li data-step="1" data-i18n="order.s1" class="rounded-full bg-dark px-4 py-2 text-white">1 · Brief</li>
+      <li data-step="2" data-i18n="order.s2" class="rounded-full bg-slate-100 px-4 py-2 text-slate-500">2 · Review</li>
+      <li data-step="3" data-i18n="order.s3" class="rounded-full bg-slate-100 px-4 py-2 text-slate-500">3 · Send</li>
+    </ol>
+    <div class="mt-6 rounded-2xl bg-white p-6 sm:p-8 ring-1 ring-slate-900/10 shadow-sm" style="border-radius:20px">
+      <!-- STEP 1 -->
+      <div id="os-1">
+        <div class="grid gap-4 sm:grid-cols-3" role="radiogroup" aria-label="Choose a plan">
+          {Object.entries(plans).map(([key, p]) => (
+            <button type="button" data-plan={key} data-price={p.price} class={`plan-btn btn-active rounded-2xl px-4 py-4 text-left ring-2 transition ${key === (plans[q] ? q : 'professional') ? 'ring-primary bg-subtle/50' : 'ring-slate-200'}`}>
+              <span class="block font-extrabold">{p.name}</span>
+              <span class="tabular text-2xl font-extrabold">${p.price}</span>
+            </button>
+          ))}
+        </div>
+        <div class="mt-5 grid gap-4">
+          <label class="text-sm font-bold"><span data-i18n="order.f_name">Your name</span><input id="f-name" data-i18n-ph="order.ph_name" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Full name" /></label>
+          <label class="text-sm font-bold"><span data-i18n="order.f_biz">Company / brand name</span><input id="f-business" data-i18n-ph="order.ph_biz" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Acme Inc." /></label>
+          <label class="text-sm font-bold"><span data-i18n="order.f_ind">Industry</span><input id="f-industry" data-i18n-ph="order.ph_ind" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="SaaS, café, fashion…" /></label>
+          <label class="text-sm font-bold"><span data-i18n="order.f_contact">Email or WhatsApp number</span><input id="f-contact" data-i18n-ph="order.ph_contact" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="you@company.com / 0812…" /></label>
+          <label class="text-sm font-bold"><span data-i18n="order.f_notes">What do you want?</span><textarea id="f-notes" rows="4" data-i18n-ph="order.ph_notes" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Tell us about your business, styles you like, colors, and reference examples…"></textarea></label>
+        </div>
+        <button id="to-2" type="button" data-i18n="order.review" class="btn-active mt-6 w-full rounded-full bg-primary px-6 py-3.5 text-sm font-bold text-white hover:bg-primary-hover">Review my brief →</button>
+      </div>
+      <!-- STEP 2 -->
+      <div id="os-2" class="hidden">
+        <h2 class="text-xl font-extrabold" data-i18n="order.review_title">Review your order</h2>
+        <dl id="os-summary" class="mt-4 space-y-2 text-sm"></dl>
+        <div class="mt-6 flex gap-3">
+          <button id="back-1" type="button" data-i18n="order.back" class="btn-active rounded-full bg-white px-6 py-3 text-sm font-bold ring-1 ring-slate-300">← Back</button>
+          <button id="to-3" type="button" data-i18n="order.continue" class="btn-active flex-1 rounded-full bg-dark px-6 py-3 text-sm font-bold text-white hover:bg-slate-800">Continue to send →</button>
+        </div>
+      </div>
+      <!-- STEP 3 -->
+      <div id="os-3" class="hidden text-center">
+        <h2 class="text-xl font-extrabold" data-i18n="order.send_title">Send your order</h2>
+        <p id="os-total" class="tabular mt-2 text-4xl font-extrabold"></p>
+        <p class="mt-1 text-sm text-slate-500" data-i18n="order.send_sub">Pick how to send — your brief arrives neatly formatted. 100% money-back guarantee.</p>
+        <p id="os-error" class="mt-3 hidden text-sm font-bold text-amber-600"></p>
+        <div class="mt-6 grid gap-3">
+          <a id="send-wa" href="#" target="_blank" rel="noopener" data-i18n="order.wa" class="btn-active btn-shine rounded-full bg-[#25D366] px-6 py-3.5 text-sm font-bold text-white hover:brightness-95">Send via WhatsApp →</a>
+          <a id="send-mail" href="#" data-i18n="order.mail" class="btn-active rounded-full bg-dark px-6 py-3.5 text-sm font-bold text-white hover:bg-slate-800">Send via Email →</a>
+          <button id="back-2" type="button" data-i18n="order.back" class="btn-active rounded-full bg-white px-6 py-3 text-sm font-bold ring-1 ring-slate-300">← Back</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <Footer />
+  <script define:vars={{ initialKey: (plans[q] ? q : 'professional'), initialPrice: initial.price, initialName: initial.name, apiBase: apiBase, waNumber: waNumber, orderEmail: orderEmail }}>
+    (function () {
+      function T(key, fb) {
+        try {
+          var w = window, lang = w.__lpGetLang ? w.__lpGetLang() : 'en';
+          var d = (w.__lpT || {})[lang] || {};
+          return d[key] || fb;
+        } catch (e) { return fb; }
+      }
+      var plan = initialKey, price = initialPrice, pname = initialName;
+      var s1 = document.getElementById('os-1'), s2 = document.getElementById('os-2'), s3 = document.getElementById('os-3');
+      var dots = Array.from(document.querySelectorAll('#order-steps li'));
+      function show(n) {
+        if (s1) s1.classList.toggle('hidden', n !== 1);
+        if (s2) s2.classList.toggle('hidden', n !== 2);
+        if (s3) s3.classList.toggle('hidden', n !== 3);
+        dots.forEach(function (d) {
+          var on = Number(d.getAttribute('data-step')) <= n;
+          d.className = 'rounded-full px-4 py-2 ' + (on ? 'bg-dark text-white' : 'bg-slate-100 text-slate-500');
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      function currentStep() {
+        if (s2 && !s2.classList.contains('hidden')) return 2;
+        if (s3 && !s3.classList.contains('hidden')) return 3;
+        return 1;
+      }
+      document.querySelectorAll('.plan-btn').forEach(function (b) {
+        b.addEventListener('click', function () {
+          plan = b.getAttribute('data-plan') || plan;
+          price = Number(b.getAttribute('data-price')) || price;
+          pname = (b.querySelector('span') || {}).textContent || pname;
+          document.querySelectorAll('.plan-btn').forEach(function (x) { x.classList.remove('ring-primary', 'bg-subtle/50'); x.classList.add('ring-slate-200'); });
+          b.classList.add('ring-primary', 'bg-subtle/50'); b.classList.remove('ring-slate-200');
+        });
+      });
+      function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+      function row(k, v) { return '<div class="flex justify-between gap-4 rounded-xl bg-slate-50 px-4 py-2.5"><dt class="font-bold">' + k + '</dt><dd class="text-right text-slate-600">' + v + '</dd></div>'; }
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+      function renderSummary() {
+        var sum = document.getElementById('os-summary');
+        if (!sum || currentStep() !== 2) return;
+        sum.innerHTML =
+          row(esc(T('order.r_plan', 'Plan')), esc(pname) + ' — $' + price) +
+          row(esc(T('order.r_name', 'Name')), esc(val('f-name')) || '—') +
+          row(esc(T('order.r_biz', 'Company')), esc(val('f-business')) || '—') +
+          row(esc(T('order.r_ind', 'Industry')), esc(val('f-industry')) || '—') +
+          row(esc(T('order.r_contact', 'Contact')), esc(val('f-contact')) || '—') +
+          row(esc(T('order.r_notes', 'Details')), esc(val('f-notes')) || '—');
+      }
+      var to2 = document.getElementById('to-2');
+      if (to2) to2.addEventListener('click', function () {
+        if (!val('f-name') || !val('f-business')) {
+          alert(T('order.alert', 'Please fill in your name and company/brand first.'));
+          return;
+        }
+        renderSummary();
+        show(2);
+      });
+      var b1 = document.getElementById('back-1'); if (b1) b1.addEventListener('click', function () { show(1); });
+      var b2 = document.getElementById('back-2'); if (b2) b2.addEventListener('click', function () { show(2); });
+      document.addEventListener('lp-lang', renderSummary);
+      var t3 = document.getElementById('to-3');
+      if (t3) t3.addEventListener('click', function () {
+        var t = document.getElementById('os-total'); if (t) t.textContent = '$' + price + ' · ' + pname;
+        var lines = [
+          T('wa.greet', 'Hello LogoPulse! I want to order a logo:') + '%0A%0A',
+          '• ' + T('wa.name', 'Name') + ': ' + encodeURIComponent(val('f-name')) + '%0A',
+          '• ' + T('wa.biz', 'Company') + ': ' + encodeURIComponent(val('f-business')) + '%0A',
+          '• ' + T('wa.plan', 'Plan') + ': ' + encodeURIComponent(pname + ' ($' + price + ')') + '%0A',
+          '• ' + T('wa.ind', 'Industry') + ': ' + encodeURIComponent(val('f-industry') || '-') + '%0A',
+          '• ' + T('wa.contact', 'Contact') + ': ' + encodeURIComponent(val('f-contact') || '-') + '%0A',
+          '• ' + T('wa.notes', 'Details') + ': ' + encodeURIComponent(val('f-notes') || '-'),
+        ];
+        var msg = lines.join('');
+        var wa = document.getElementById('send-wa');
+        if (wa) wa.setAttribute('href', 'https://wa.me/' + waNumber + '?text=' + msg);
+        var mail = document.getElementById('send-mail');
+        if (mail) mail.setAttribute('href',
+          'mailto:' + orderEmail + '?subject=' + encodeURIComponent(T('mail.subj', 'Logo order') + ' ' + pname + ' — ' + val('f-business')) +
+          '&body=' + msg.replace(/%0A/g, '\n'));
+        // simpan ke backend bila tersedia (best-effort, tanpa payment)
+        try {
+          var base = typeof apiBase !== 'undefined' ? apiBase : 'http://localhost:8080/api/v1';
+          fetch(base + '/orders', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan: plan, name: val('f-name'), business: val('f-business'), industry: val('f-industry'), notes: val('f-notes'), email: val('f-contact') }),
+          }).catch(function () {});
+        } catch (e) { /* WA/email tetap jalan tanpa backend */ }
+        show(3);
+      });
+    })();
+  </script>
+</BaseLayout>

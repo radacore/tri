@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+---
+<BaseLayout title="Terms of Service — LogoPulse">
+  <Navbar />
+  <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
+    <h1 class="text-4xl font-extrabold tracking-tight">Terms of Service</h1>
+    <div class="mt-6 space-y-4 text-slate-600 leading-relaxed text-[15px]">
+      <p><strong class="text-slate-900" data-i18n="terms.t1h">1. Service.</strong> <span data-i18n="terms.t1b">LogoPulse provides custom logo and brand-identity design with first concepts delivered within 48 hours of a complete brief.</span></p>
+      <p><strong class="text-slate-900" data-i18n="terms.t2h">2. Revisions.</strong> <span data-i18n="terms.t2b">Starter includes 2 revision rounds; Professional includes unlimited rounds for 7 days; Premium includes unlimited rounds for 14 days plus priority support.</span></p>
+      <p><strong class="text-slate-900" data-i18n="terms.t3h">3. Refunds.</strong> <span data-i18n="terms.t3b">If you are unhappy with the first concepts, request a full refund within 7 days of delivery. Refunded orders grant no license to use the concepts.</span></p>
+      <p><strong class="text-slate-900" data-i18n="terms.t4h">4. Ownership.</strong> <span data-i18n="terms.t4b">Full ownership of the final approved artwork transfers to you upon final delivery (and completed payment), including vector source files.</span></p>
+      <p><strong class="text-slate-900" data-i18n="terms.t5h">5. Acceptable use.</strong> <span data-i18n="terms.t5b">You agree not to request designs that infringe third-party trademarks or contain unlawful content.</span></p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

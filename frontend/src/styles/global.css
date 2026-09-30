@@ -1,0 +1,170 @@
+/* fonts dimuat via <link> di BaseLayout (bukan @import agar tidak render-blocking) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #0158FE;
+  --primary-hover: #2177FE;
+  --subtle: #E2E7F9;
+  --dark: #0A0A0A;
+  --radius-pill: 9999px;
+  --radius-card: 20px;
+  --radius-image: 16px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
+  color: #040815;
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+.font-serif-accent { font-family: 'Newsreader', Georgia, serif; font-style: italic; }
+
+::selection { background: var(--primary); color: #fff; }
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #f1f3fa; }
+::-webkit-scrollbar-thumb { background: #c3cde8; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* scroll reveal — all 12 homepage sections */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .6s cubic-bezier(0.2,0,0,1), transform .6s cubic-bezier(0.2,0,0,1);
+}
+.reveal-visible { opacity: 1; transform: none; }
+.reveal-stagger > * { transition-delay: calc(var(--i, 0) * 80ms); }
+
+/* marquee — compositor-only (transform), GPU layer */
+@keyframes marquee { to { transform: translate3d(-50%, 0, 0); } }
+.marquee { overflow: hidden; }
+.marquee-track {
+  display: flex; gap: 2.5rem; width: max-content;
+  animation: marquee 36s linear infinite;
+  will-change: transform; transform: translateZ(0);
+  backface-visibility: hidden;
+}
+.marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee-track img { -webkit-user-drag: none; user-select: none; }
+
+/* CTA — static gradient (tanpa animasi background-position: memicu repaint).
+   Kemeriahan diganti shine sweep di bawah (transform+opacity only, area kecil). */
+.cta-animated { background-size: 100% 100%; }
+.cta-animated:hover { filter: brightness(1.06); }
+
+/* shine sweep — kilau melintasi tombol, transform+opacity only (murah) */
+.btn-shine { position: relative; overflow: hidden; isolation: isolate; }
+.btn-shine::after {
+  content: ''; position: absolute; top: -20%; bottom: -20%; width: 35%; z-index: 1;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: translateX(-220%) skewX(-12deg); opacity: 0;
+  animation: shine 3.4s ease-in-out infinite; pointer-events: none;
+}
+@keyframes shine {
+  0% { transform: translateX(-220%) skewX(-12deg); opacity: 0; }
+  12% { opacity: 1; }
+  45%, 100% { transform: translateX(340%) skewX(-12deg); opacity: 0; }
+}
+
+/* glow drift — blob cahaya hero melayang pelan, transform only */
+@keyframes glow-drift {
+  0%, 100% { transform: translate3d(-6%, -4%, 0) scale(1); }
+  50% { transform: translate3d(6%, 5%, 0) scale(1.12); }
+}
+.glow-drift { animation: glow-drift 9s ease-in-out infinite; will-change: transform; }
+
+/* dot pulse — titik badge, area 8px */
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.6); opacity: .5; }
+}
+.dot-pulse { display: inline-block; animation: dot-pulse 1.8s ease-in-out infinite; }
+
+/* FAQ accordion */
+.faq-answer {
+  display: grid; grid-template-rows: 0fr;
+  transition: grid-template-rows .3s cubic-bezier(0.4,0,0.2,1);
+}
+.faq-answer > div { overflow: hidden; }
+.faq-open .faq-answer { grid-template-rows: 1fr; }
+.faq-chevron { transition: transform .3s ease; }
+.faq-open .faq-chevron { transform: rotate(180deg); }
+
+/* nav pill glide */
+.nav-link { position: relative; transition: color .2s ease; }
+.nav-link::after {
+  content: ''; position: absolute; left: 12px; right: 12px; bottom: 6px;
+  height: 2px; border-radius: 2px; background: var(--primary);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .25s ease;
+}
+.nav-link:hover::after { transform: scaleX(1); }
+
+/* smart navbar — default pill HITAM; entrance scale dari tengah;
+   scroll turun = mengecil ke tengah + hilang; scroll naik = muncul lagi */
+#site-nav {
+  transform: translate(-50%, 0) translateZ(0);
+  transform-origin: center;
+  /* fill backwards (bukan both): setelah entrance selesai, kontrol kembali
+     ke stylesheet agar class .nav-gone bisa menyembunyikan navbar */
+  animation: nav-in 0.45s cubic-bezier(0.2, 0, 0, 1) 0.1s backwards;
+  will-change: transform, opacity;
+}
+@keyframes nav-in {
+  from { opacity: 0; transform: translate(-50%, 0) translateZ(0) scale(0.5); }
+  to { opacity: 1; transform: translate(-50%, 0) translateZ(0) scale(1); }
+}
+#site-nav.nav-gone {
+  transform: translate(-50%, 0) translateZ(0) scale(0.5);
+  opacity: 0;
+  pointer-events: none;
+}
+/* toggle bahasa di atas pill hitam */
+#site-nav-inner .lang-switch { background-color: rgba(255, 255, 255, 0.12); }
+#site-nav-inner [data-lang-btn][aria-pressed="true"] { background-color: #fff; color: #0a0a0a; }
+#site-nav-inner [data-lang-btn][aria-pressed="false"] { color: rgba(255, 255, 255, 0.6); }
+
+/* buttons */
+.btn-active:active { transform: scale(.97); }
+.btn-active { transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease; }
+
+/* star pop */
+@keyframes star-pop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+.reveal-visible .star-pop { animation: star-pop .4s cubic-bezier(0.2,0,0,1) both; animation-delay: calc(var(--i, 0) * 90ms); }
+
+/* badge pop */
+@keyframes badge-pop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.reveal-visible .badge-pop { animation: badge-pop .45s cubic-bezier(0.2,0,0,1) both; }
+
+/* scale-in */
+.scale-in { opacity: 0; transform: scale(.94); transition: opacity .6s ease, transform .6s cubic-bezier(0.2,0,0,1); }
+.reveal-visible.scale-in, .reveal-visible .scale-in { opacity: 1; transform: scale(1); }
+
+/* crossfade card */
+.crossfade img { transition: opacity .4s ease, transform .5s ease; }
+.crossfade .img-top { opacity: 0; }
+.crossfade:hover .img-top { opacity: 1; }
+.crossfade:hover .img-base { opacity: 0; }
+.crossfade:hover img { transform: scale(1.05); }
+
+/* portfolio filter */
+.pf-item { transition: opacity .3s ease, transform .3s ease; }
+.pf-hidden { opacity: 0; transform: scale(.92); pointer-events: none; position: absolute; visibility: hidden; }
+
+/* focus ring */
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid rgba(1,88,254,.35);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .scale-in, .marquee-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+  #site-nav { animation: none !important; }
+  html { scroll-behavior: auto; }
+}

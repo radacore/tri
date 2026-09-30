@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { FALLBACK_CASES } from '../../lib/api';
+---
+<BaseLayout title="Case Studies — LogoPulse">
+  <Navbar />
+  <main class="mx-auto max-w-content px-5 pt-32 pb-20">
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary" data-i18n="cases.kicker">Case studies</p>
+    <h1 class="mt-2 text-4xl font-extrabold tracking-tight" data-i18n="casesidx.title">Results, not just pretty marks</h1>
+    <div class="mt-8 grid gap-5 sm:grid-cols-2">
+      {FALLBACK_CASES.map((c) => (
+        <a href={`/case-studies/${c.slug}`} class="block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:shadow-xl transition hover:-translate-y-1" style="border-radius:20px">
+          <img src={c.mockup} alt={c.client} loading="lazy" class="aspect-[16/9] w-full object-cover" />
+          <div class="p-5">
+            <p class="text-xs font-bold uppercase tracking-wider text-primary">{c.industry} · <span data-l="en">{c.result}</span>{c.resultId && <span data-l="id" hidden>{c.resultId}</span>}</p>
+            <h2 class="mt-1 font-extrabold"><span data-l="en">{c.title}</span>{c.titleId && <span data-l="id" hidden>{c.titleId}</span>}</h2>
+            <p class="mt-1 text-sm text-slate-500"><span data-l="en">{c.excerpt}</span>{c.excerptId && <span data-l="id" hidden>{c.excerptId}</span>}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,29 @@
+---
+---
+<section class="reveal px-5 pb-20 pt-4">
+  <div id="cta-banner" class="cta-animated scale-in mx-auto max-w-content overflow-hidden bg-gradient-to-br from-[#0A0A0A] via-[#101c3f] to-[#0158FE] px-6 py-14 sm:p-16 text-center text-white" style="border-radius:20px">
+    <p class="text-xs font-bold uppercase tracking-[0.25em] text-white/60" data-i18n="cta.kicker">100% money-back guarantee</p>
+    <h2 class="mx-auto mt-3 max-w-2xl text-3xl sm:text-5xl font-extrabold tracking-tight"><span data-i18n="cta.t1">Your new logo is </span><em class="font-serif-accent font-medium" data-i18n="cta.t2">48 hours</em><span data-i18n="cta.t3"> away</span></h2>
+    <p class="mx-auto mt-4 max-w-xl text-white/70" data-i18n="cta.sub">Join 2,400+ founders who stopped worrying about branding and got back to building.</p>
+    <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+      <a href="/order?plan=professional" data-i18n="cta.b1" class="btn-active btn-shine magnetic rounded-full bg-white px-8 py-4 font-bold text-slate-950 hover:bg-subtle">Start My Logo — $149</a>
+      <a href="/case-studies" data-i18n="cta.b2" class="btn-active magnetic rounded-full px-8 py-4 font-bold text-white ring-1 ring-white/40 hover:bg-white/10">Browse Case Studies</a>
+    </div>
+  </div>
+</section>
+<script>
+  (function () {
+    var el = document.getElementById('cta-banner');
+    if (!el) return;
+    el.querySelectorAll('.magnetic').forEach(function (btn) {
+      var b = btn;
+      b.addEventListener('mousemove', function (ev) {
+        var r = b.getBoundingClientRect();
+        var x = ev.clientX - r.left - r.width / 2;
+        var y = ev.clientY - r.top - r.height / 2;
+        b.style.transform = 'translate(' + x * 0.08 + 'px,' + y * 0.12 + 'px)';
+      });
+      b.addEventListener('mouseleave', function () { b.style.transform = ''; });
+    });
+  })();
+</script>

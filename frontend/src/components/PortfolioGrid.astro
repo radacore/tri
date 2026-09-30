@@ -1,0 +1,78 @@
+---
+import { FALLBACK_PORTFOLIO } from '../lib/api';
+const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
+---
+<section class="reveal mx-auto max-w-content px-5 py-16 sm:py-20">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary" data-i18n="pf.kicker">Portfolio</p>
+      <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight" data-i18n="pf.title">Fresh work, shipped weekly</h2>
+    </div>
+    <div class="flex flex-wrap gap-2" role="tablist" data-i18n-aria="pf.filter" aria-label="Filter portfolio">
+      {filters.map((f, i) => (
+        <button
+          type="button"
+          data-filter={f}
+          aria-pressed={i === 0 ? 'true' : 'false'}
+          class={`pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold ring-1 transition ${i === 0 ? 'bg-dark text-white ring-dark' : 'bg-white text-slate-600 ring-slate-200 hover:ring-slate-400'}`}
+        >{f === 'All' ? <span data-i18n="pf.all">All</span> : f}</button>
+      ))}
+    </div>
+  </div>
+  <div id="pf-grid" class="relative mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
+    {FALLBACK_PORTFOLIO.map((p) => (
+      <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class="pf-item group overflow-hidden bg-slate-100 text-left ring-1 ring-slate-900/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 hover:[transform:translateY(-4px)]" style="border-radius:16px">
+        <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <span class="block p-3 text-sm font-bold">{p.title} <span class="ml-1 rounded-full bg-subtle px-2 py-0.5 text-[11px] text-primary">{p.category}</span></span>
+      </button>
+    ))}
+  </div>
+  <dialog id="pf-lightbox" class="rounded-2xl p-0 backdrop:bg-slate-950/70 max-w-3xl w-[calc(100%-2rem)]">
+    <div class="relative">
+      <img id="pf-lightbox-img" src="" alt="" class="w-full rounded-t-2xl object-cover" />
+      <p id="pf-lightbox-cap" class="p-4 font-bold"></p>
+      <button id="pf-lightbox-close" type="button" data-i18n-aria="pf.close" aria-label="Close" class="btn-active absolute right-3 top-3 rounded-full bg-dark/80 px-4 py-2 text-sm font-bold text-white">✕</button>
+    </div>
+  </dialog>
+</section>
+<script>
+  (function () {
+    var btns = Array.from(document.querySelectorAll('.pf-btn'));
+    var items = Array.from(document.querySelectorAll('.pf-item'));
+    var grid = document.getElementById('pf-grid');
+    function paint(active) {
+      btns.forEach(function (b) {
+        var on = b.getAttribute('data-filter') === active;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.className = 'pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold ring-1 transition ' +
+          (on ? 'bg-dark text-white ring-dark' : 'bg-white text-slate-600 ring-slate-200 hover:ring-slate-400');
+      });
+    }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        var f = b.getAttribute('data-filter') || 'All';
+        paint(f);
+        items.forEach(function (it) {
+          var show = f === 'All' || it.getAttribute('data-category') === f;
+          it.classList.toggle('pf-hidden', !show);
+        });
+      });
+    });
+    var dlg = document.getElementById('pf-lightbox');
+    var img = document.getElementById('pf-lightbox-img');
+    var cap = document.getElementById('pf-lightbox-cap');
+    items.forEach(function (it) {
+      it.addEventListener('click', function () {
+        if (img && cap && dlg && typeof dlg.showModal === 'function') {
+          img.setAttribute('src', it.getAttribute('data-full') || '');
+          img.setAttribute('alt', it.getAttribute('data-title') || '');
+          cap.textContent = it.getAttribute('data-title') || '';
+          dlg.showModal();
+        }
+      });
+    });
+    var close = document.getElementById('pf-lightbox-close');
+    if (close && dlg) close.addEventListener('click', function () { dlg.close(); });
+    if (grid) grid.style.minHeight = '';
+  })();
+</script>
