@@ -11,7 +11,7 @@ const faqs = [
 <section class="reveal mx-auto max-w-3xl px-5 py-16 sm:py-20">
   <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center" data-site="sections.faq_kicker">FAQ</p>
   <h2 class="mt-2 text-center text-3xl sm:text-4xl font-extrabold tracking-tight" data-site="sections.faq_title">Questions, answered</h2>
-  <div class="mt-8 space-y-3">
+  <div class="mt-8 space-y-3" data-site-faq="faqs">
     {faqs.map((f, i) => (
       <div class="faq-item rounded-2xl bg-white ring-1 ring-slate-900/10 overflow-hidden" style="border-radius:20px">
         <button type="button" class="faq-toggle flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-bold hover:text-primary transition-colors" aria-expanded="false">
@@ -24,14 +24,16 @@ const faqs = [
   </div>
 </section>
 <script>
+  // delegasi (bukan binding per item) agar item hasil render dinamis ikut bisa dibuka
   (function () {
-    document.querySelectorAll('.faq-item').forEach(function (item) {
-      var btn = item.querySelector('.faq-toggle');
+    document.addEventListener('click', function (ev) {
+      var t = ev.target;
+      var btn = t && t.closest ? t.closest('.faq-toggle') : null;
       if (!btn) return;
-      btn.addEventListener('click', function () {
-        var open = item.classList.toggle('faq-open');
-        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-      });
+      var item = btn.closest('.faq-item');
+      if (!item) return;
+      var open = item.classList.toggle('faq-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
   })();
 </script>

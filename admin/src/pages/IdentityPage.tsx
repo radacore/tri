@@ -189,7 +189,7 @@ export default function IdentityPage() {
   });
 
   const SaveBar = ({ k }: { k: string }) => (
-    <div className="sticky bottom-4 mt-5 flex justify-end">
+    <div className="mt-5 flex justify-end">
       <button
         className="btn-primary shadow-lg"
         disabled={saveMut.isPending}
@@ -297,7 +297,7 @@ export default function IdentityPage() {
               </div>
             ))}
           </div>
-          <div className="sticky bottom-4 mt-5 flex justify-end">
+          <div className="mt-5 flex justify-end">
             <button
               className="btn-primary shadow-lg"
               disabled={saveMut.isPending}
@@ -380,6 +380,7 @@ export default function IdentityPage() {
                   <textarea
                     className="input"
                     rows={5}
+                    spellCheck={false}
                     value={(t.features ?? []).join("\n")}
                     onChange={(e) => setTiers((tiers ?? []).map((x, j) => (j === i ? { ...x, features: e.target.value.split("\n") } : x)))}
                   />
@@ -387,7 +388,7 @@ export default function IdentityPage() {
               </div>
             </div>
           ))}
-          <div className="sticky bottom-4 mt-5 flex justify-end">
+          <div className="mt-5 flex justify-end">
             <button
               className="btn-primary shadow-lg"
               disabled={saveMut.isPending}
@@ -428,7 +429,7 @@ export default function IdentityPage() {
               + Add question
             </button>
           </div>
-          <div className="sticky bottom-4 mt-5 flex justify-end">
+          <div className="mt-5 flex justify-end">
             <button
               className="btn-primary shadow-lg"
               disabled={saveMut.isPending}

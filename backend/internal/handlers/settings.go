@@ -11,6 +11,8 @@ import (
 // GetSettings returns all site_settings (admin).
 func GetSettings(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// no-store: nilai sering berubah dari admin, jangan di-cache browser/CDN
+		w.Header().Set("Cache-Control", "no-store")
 		rows, err := pool.Query(r.Context(), `SELECT key, value, updated_at FROM site_settings`)
 		if err != nil {
 			fail(w, http.StatusInternalServerError, "query failed")
