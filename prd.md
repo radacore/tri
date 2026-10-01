@@ -102,6 +102,7 @@ Membangun **LogoPulse** — sebuah **aplikasi web profesional** untuk jasa desai
 │   ├── /admin/blog         → Kelola Blog / Artikel
 │   ├── /admin/testimonials → Kelola Testimonial
 │   ├── /admin/clients      → Kelola Logo Klien
+│   ├── /admin/identity     → Identitas Website (hero, sections, pricing, FAQ, media, footer)
 │   ├── /admin/settings     → Pengaturan Website
 │   └── /admin/login        → Login Admin
 │
@@ -289,6 +290,10 @@ Admin panel adalah SPA (Single Page Application) terpisah yang berkomunikasi den
 - CRUD logo klien untuk marquee carousel
 - Upload SVG/PNG logo
 - Reorder (drag to sort)
+
+**Identitas Website (`/admin/identity`):**
+- Tab Hero / Sections / Pricing & FAQ / Media / Footer & Socials — semua teks & gambar landing
+- disimpan per-key (`hero`, `sections`, `pricing`, `faqs`, `how_steps`, `media`, `footer`), landing override saat load, API mati = fallback bawaan
 
 **Pengaturan (`/admin/settings`):**
 - Ubah harga paket

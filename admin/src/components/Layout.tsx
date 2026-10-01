@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   Newspaper,
+  Palette,
   Quote,
   Settings,
   ShoppingCart,
@@ -33,6 +34,7 @@ const GROUPS: {
     items: [
       { to: "/testimonials", label: "Testimonials", icon: Quote },
       { to: "/clients", label: "Clients", icon: CheckCheck },
+      { to: "/identity", label: "Website Identity", icon: Palette },
     ],
   },
   {
