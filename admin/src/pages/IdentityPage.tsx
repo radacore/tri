@@ -5,11 +5,12 @@ import ImageUploader from "../components/ImageUploader";
 import SitePreview from "../components/SitePreview";
 import { toast } from "../components/Layout";
 
-type Tab = "hero" | "sections" | "pricing" | "faq" | "media" | "footer";
+type Tab = "hero" | "sections" | "steps" | "pricing" | "media" | "footer";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "hero", label: "Hero" },
   { id: "sections", label: "Sections" },
+  { id: "steps", label: "Steps & Highlight" },
   { id: "pricing", label: "Pricing & FAQ" },
   { id: "media", label: "Media" },
   { id: "footer", label: "Footer & Socials" },
@@ -101,6 +102,14 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
       ["cta_b2", "Secondary button"],
     ],
   },
+  {
+    title: "Small texts",
+    fields: [
+      ["badge_by", "Rating badge suffix"],
+      ["price_popular", "Popular plan badge"],
+      ["price_onetime", "Price suffix"],
+    ],
+  },
 ];
 
 const FOOTER_FIELDS: [string, string, string][] = [
@@ -169,10 +178,10 @@ export default function IdentityPage() {
     mutationFn: ({ key, body }: { key: string; body: unknown }) =>
       put(`/admin/settings/${key}`, body),
     onSuccess: (_d, v) => {
+      // JANGAN reset state form di sini: invalidate memicu refetch async,
+      // dan reset akan membuat form terisi data lama sebelum data baru tiba
+      // (form tampak revert + preview reload dengan nilai lama).
       toast(`${v.key} saved — preview reloaded`);
-      setLocal(null);
-      setTiers(null);
-      setFaqs(null);
       setPreviewKey((k) => k + 1);
       void qc.invalidateQueries({ queryKey: ["settings"] });
     },
@@ -194,13 +203,16 @@ export default function IdentityPage() {
   // Pricing tiers + FAQ (structures, not flat strings)
   const [tiers, setTiers] = useState<any[] | null>(null);
   const [faqs, setFaqs] = useState<{ q: string; a: string }[] | null>(null);
+  const [steps, setSteps] = useState<{ t: string; d: string }[] | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
   useEffect(() => {
     if (tiers === null && Array.isArray((server as any)?.pricing?.tiers))
       setTiers((server as any).pricing.tiers);
     if (faqs === null && Array.isArray((server as any)?.faqs))
       setFaqs((server as any).faqs);
-  }, [server, tiers, faqs]);
+    if (steps === null && Array.isArray((server as any)?.how_steps))
+      setSteps((server as any).how_steps);
+  }, [server, tiers, faqs, steps]);
 
   return (
     <div className="space-y-4">
@@ -259,6 +271,65 @@ export default function IdentityPage() {
             </div>
           ))}
           <SaveBar k="sections" />
+        </div>
+      )}
+
+      {tab === "steps" && (
+        <div className="max-w-2xl space-y-4">
+          <div className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
+            <h2 className="text-base font-semibold text-ink-primary">How-it-works steps</h2>
+            {(steps ?? []).map((s, i) => (
+              <div key={i} className="space-y-2 rounded-[14px] border border-[#e2eceb] p-3">
+                <p className="text-xs font-bold text-ink-secondary">STEP {String(i + 1).padStart(2, "0")}</p>
+                <input
+                  className="input"
+                  value={s.t}
+                  placeholder="Step title"
+                  onChange={(e) => setSteps((steps ?? []).map((x, j) => (j === i ? { ...x, t: e.target.value } : x)))}
+                />
+                <textarea
+                  className="input"
+                  rows={2}
+                  value={s.d}
+                  placeholder="Step description"
+                  onChange={(e) => setSteps((steps ?? []).map((x, j) => (j === i ? { ...x, d: e.target.value } : x)))}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="sticky bottom-4 mt-5 flex justify-end">
+            <button
+              className="btn-primary shadow-lg"
+              disabled={saveMut.isPending}
+              onClick={() => saveMut.mutate({ key: "how_steps", body: steps ?? [] })}
+            >
+              {saveMut.isPending ? "Saving…" : "Save steps"}
+            </button>
+          </div>
+          <div className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
+            <h2 className="text-base font-semibold text-ink-primary">Featured testimonial</h2>
+            <p className="text-xs text-ink-secondary">
+              The big quote under the client logos.
+            </p>
+            <div>
+              <label className="label">Quote</label>
+              <textarea
+                className="input"
+                rows={3}
+                value={cur.highlight?.quote ?? ""}
+                onChange={(e) => set("highlight", "quote", e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label">Attribution</label>
+              <input
+                className="input"
+                value={cur.highlight?.role ?? ""}
+                onChange={(e) => set("highlight", "role", e.target.value)}
+              />
+            </div>
+          </div>
+          <SaveBar k="highlight" />
         </div>
       )}
 

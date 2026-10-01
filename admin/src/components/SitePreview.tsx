@@ -5,6 +5,7 @@ import { ExternalLink, RotateCw } from "lucide-react";
 const TAB_ANCHOR: Record<string, string> = {
   hero: "/",
   sections: "/#how-it-works",
+  steps: "/#how-it-works",
   pricing: "/#pricing",
   media: "/",
   footer: "/#site-footer",
@@ -73,11 +74,13 @@ export default function SitePreview({
         title="Website preview"
         src={src}
         loading="lazy"
-        className="h-[70vh] w-full border-0 bg-white xl:h-[calc(100vh-220px)]"
+        scrolling="no"
+        tabIndex={-1}
+        className="pointer-events-none h-[70vh] w-full select-none overflow-hidden border-0 bg-white xl:h-[calc(100vh-220px)]"
       />
       <p className="border-t border-[#e2eceb] px-4 py-2 text-[11px] text-ink-secondary">
-        Preview shows the saved version — it reloads automatically after every
-        save.
+        Preview-only: locked on this section (no scrolling) and reloads
+        automatically after every save. Open in a new tab to interact.
       </p>
     </div>
   );

@@ -17,10 +17,10 @@ const FALLBACK_TIERS = [
         class={`relative flex flex-col p-7 bg-white transition-all duration-300 hover:-translate-y-2 ${p.popular ? 'ring-2 ring-primary shadow-2xl shadow-primary/15 hover:[transform:translateY(-8px)]' : 'ring-1 ring-slate-900/10 shadow-sm hover:shadow-xl'}`}
         style={`--i:${i};border-radius:20px`}
       >
-        {p.popular && <span class="badge-pop absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg">Most Popular</span>}
+        {p.popular && <span class="badge-pop absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-4 py-1 text-xs font-extrabold uppercase tracking-wider text-white shadow-lg" data-site="sections.price_popular">Most Popular</span>}
         <h3 class="text-lg font-extrabold" data-site={`pricing.tiers.${i}.name`}>{p.name}</h3>
         <p class="text-sm text-slate-500" data-site={`pricing.tiers.${i}.tag`}>{p.tag}</p>
-        <p class="mt-3"><span class="text-4xl font-extrabold tabular" data-site-price={`pricing.tiers.${i}.price_cents`}>{p.price}</span><span class="text-sm text-slate-500"> one-time</span></p>
+        <p class="mt-3"><span class="text-4xl font-extrabold tabular" data-site-price={`pricing.tiers.${i}.price_cents`}>{p.price}</span><span class="text-sm text-slate-500" data-site="sections.price_onetime"> one-time</span></p>
         <ul class="mt-5 space-y-2.5 text-sm flex-1">
           {p.features.map((f, j) => (<li class="flex gap-2"><span class="text-primary font-bold" aria-hidden="true">✓</span><span data-site={`pricing.tiers.${i}.features.${j}`}>{f}</span></li>))}
         </ul>
