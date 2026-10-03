@@ -16,7 +16,8 @@ const steps = [
     <h2 class="mt-2 text-center text-3xl sm:text-4xl font-extrabold tracking-tight" data-site="sections.how_title">From brief to brand in 4 steps</h2>
     <div class="mt-10 grid gap-6 sm:grid-cols-4">
       {steps.map((s, i) => (
-        <div class="relative rounded-2xl bg-white p-6 ring-1 ring-slate-900/10 shadow-sm" style={`--i:${i};border-radius:20px`}>
+        <div class="relative overflow-hidden rounded-2xl bg-white p-6 ring-1 ring-slate-900/10 shadow-sm" style={`--i:${i};border-radius:20px`}>
+          <span class="tabular pointer-events-none absolute -top-2 right-3 text-6xl font-extrabold text-slate-100 select-none" aria-hidden="true">{s.n}</span>
           <span class="grid h-11 w-11 place-items-center rounded-full bg-subtle text-primary [&>svg]:h-5 [&>svg]:w-5" aria-hidden="true" set:html={s.icon}></span>
           <p class="mt-4 text-xs font-extrabold tracking-widest text-primary"><span>STEP</span> {s.n}</p>
           <h3 class="mt-1 text-lg font-extrabold" data-site={`how_steps.${i}.t`}>{s.title}</h3>

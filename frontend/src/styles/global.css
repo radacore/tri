@@ -48,6 +48,7 @@ body {
   backface-visibility: hidden;
 }
 .marquee:hover .marquee-track { animation-play-state: paused; }
+.marquee:focus-within .marquee-track { animation-play-state: paused; }
 .marquee-track img { -webkit-user-drag: none; user-select: none; }
 
 /* CTA — static gradient (tanpa animasi background-position: memicu repaint).

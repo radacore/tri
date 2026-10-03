@@ -67,7 +67,7 @@ export function applySite(s: Settings) {
     ul.innerHTML = arr
       .map(
         (f) =>
-          `<li class="flex gap-2"><span class="text-primary font-bold" aria-hidden="true">✓</span><span>${escHtml(String(f))}</span></li>`
+          `<li class="flex gap-2.5"><svg class="mt-0.5 h-4 w-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M4 10.5 8.5 15 16 6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${escHtml(String(f))}</span></li>`
       )
       .join("");
   });

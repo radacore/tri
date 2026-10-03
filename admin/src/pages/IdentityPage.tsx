@@ -17,7 +17,6 @@ const TABS: { id: Tab; label: string }[] = [
 ];
 
 const HERO_FIELDS: [string, string][] = [
-  ["badge", "Badge"],
   ["t1", "Title part 1"],
   ["t2", "Title accent 1 (italic)"],
   ["t3", "Title part 2"],
