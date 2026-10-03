@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/Navbar.astro';
 import Hero from '../components/Hero.astro';
 import ClientLogos from '../components/ClientLogos.astro';
-import TestimonialHighlight from '../components/TestimonialHighlight.astro';
 import CaseStudyCard from '../components/CaseStudyCard.astro';
 import PortfolioGrid from '../components/PortfolioGrid.astro';
 import HowItWorks from '../components/HowItWorks.astro';
@@ -21,9 +20,7 @@ import { FALLBACK_CASES } from '../lib/api';
     <Hero />
     <!-- 02 / CLIENT LOGOS -->
     <ClientLogos />
-    <!-- 03 / TESTIMONIAL HIGHLIGHT -->
-    <TestimonialHighlight />
-    <!-- 04 / CASE STUDIES -->
+    <!-- 03 / CASE STUDIES -->
     <section id="case-studies" class="reveal mx-auto max-w-content px-5 py-16 sm:py-20">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -33,8 +30,8 @@ import { FALLBACK_CASES } from '../lib/api';
         <a href="/case-studies" data-site="sections.cases_all" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-200 hover:ring-primary hover:text-primary">All case studies →</a>
       </div>
       <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {FALLBACK_CASES.map((c) => (
-          <CaseStudyCard slug={c.slug} title={c.title} client={c.client} industry={c.industry} result={c.result} mockup={c.mockup} logo={c.logo} excerpt={c.excerpt} />
+        {FALLBACK_CASES.map((c, i) => (
+          <CaseStudyCard index={i} slug={c.slug} title={c.title} client={c.client} industry={c.industry} result={c.result} mockup={c.mockup} logo={c.logo} excerpt={c.excerpt} />
         ))}
       </div>
     </section>

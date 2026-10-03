@@ -1,13 +1,34 @@
 ---
-const logos = ['NEXORA', 'Cloudgrid', 'Saffron&Co', 'VitalCare', 'Atelier Nord', 'PulseFit', 'Kopi Lantai', 'Maison Rue'];
+const rowA = ['wks.svg', 'f631.avif', 'cart.svg', 'f632.avif', 'f633.avif', 'f634.avif', 'f635.avif', 'f636.avif', 'f637.avif'];
+const rowB = ['fujifilm.svg', 'f638.avif', 'f639.avif', 'f640.avif', 'f641.avif', 'f642.avif', 'f643.avif', 'f644.avif', 'f645.avif'];
+const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 grayscale transition hover:opacity-100 hover:grayscale-0";
 ---
-<section class="reveal border-y border-slate-100 bg-slate-50/60 py-8" aria-label="Trusted by">
-  <p class="text-center text-xs font-bold uppercase tracking-[0.2em] text-slate-400" data-site="sections.logos_heading">Trusted by 2,400+ startups</p>
-  <div class="marquee mt-5" role="presentation">
-    <div class="marquee-track items-center">
-      {[...logos, ...logos].map((name) => (
-        <span class="shrink-0 text-lg font-extrabold tracking-tight text-slate-400 grayscale hover:text-slate-700 hover:grayscale-0 transition">{name}</span>
-      ))}
+<section class="reveal relative bg-slate-50/60 py-12" aria-label="Trusted by">
+  <p class="whitespace-nowrap text-center text-base sm:text-xl font-extrabold tracking-tight text-slate-700" data-site="sections.logos_heading">Trusted by 2,400+ startups</p>
+  <div class="relative mt-5 space-y-4">
+    <span class="logo-fade-l" aria-hidden="true"></span>
+    <span class="logo-fade-r" aria-hidden="true"></span>
+    <div class="marquee overflow-hidden" role="presentation">
+      <div class="marquee-track-rev">
+        {[0, 1, 2].map((dup) => (
+          <div class="logo-group" aria-hidden={dup > 0 ? 'true' : undefined}>
+            {rowA.map((f) => (
+              <img src={`/logos/${f}`} alt="" width="160" height="64" loading="eager" decoding="async" class={imgCls} />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+    <div class="marquee overflow-hidden" role="presentation">
+      <div class="marquee-track items-center">
+        {[0, 1, 2].map((dup) => (
+          <div class="logo-group" aria-hidden={dup > 0 ? 'true' : undefined}>
+            {rowB.map((f) => (
+              <img src={`/logos/${f}`} alt="" width="160" height="64" loading={dup === 0 ? 'eager' : 'lazy'} decoding="async" class={imgCls} />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 </section>

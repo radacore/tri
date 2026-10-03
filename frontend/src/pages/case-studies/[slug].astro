@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
+import CTABanner from '../../components/CTABanner.astro';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
 import { FALLBACK_CASES } from '../../lib/api';
 
 export async function getStaticPaths() {
@@ -10,24 +12,117 @@ export async function getStaticPaths() {
 
 const { slug } = Astro.params;
 const found = FALLBACK_CASES.find((c) => c.slug === slug) ?? FALLBACK_CASES[0];
-let item = found;
+let item: any = found;
 try {
   const r = await fetch(`http://localhost:8080/api/v1/case-studies/${slug}`);
   if (r.ok) item = await r.json();
 } catch { /* fallback to static */ }
+
+const client = item.client ?? item.title;
+const industry = item.industry ?? 'Brand identity';
+const result = item.result ?? '';
+const excerpt = item.excerpt ?? item.content ?? '';
+// Gambar lokal diutamakan untuk case bawaan (picsum di DB sering diblokir);
+// case custom dari admin tetap pakai gambarnya sendiri.
+const KNOWN_GALLERIES: Record<string, string> = {
+  'nexora-rebrand': 'nexora',
+  'kopi-lantai': 'kopi',
+  'maison-rue': 'maison',
+  'vitalcare': 'vital',
+};
+const gslug = KNOWN_GALLERIES[item.slug ?? slug] ?? '';
+const mockup = gslug ? `/cases/${gslug}-mockup.svg` : (item.mockup ?? item.hero_image ?? '');
+const logo = gslug ? `/cases/${gslug}-logo.svg` : (item.logo ?? '');
+const year = item.year ?? '2026';
+const website = item.website ?? '';
+const idx = FALLBACK_CASES.findIndex((c) => c.slug === (item.slug ?? slug));
+const next = idx >= 0 ? FALLBACK_CASES[(idx + 1) % FALLBACK_CASES.length] : null;
+const others = FALLBACK_CASES.filter((c) => c.slug !== (item.slug ?? slug)).slice(0, 3);
+const deliverables = ['Logo design', 'Logo variations', 'Typography', 'Color palette', 'Brand mockups', 'Social media kit'];
+const gallery: { src: string; alt: string }[] = logo ? [{ src: logo, alt: `${client} logo variations` }] : [];
+if (gslug) {
+  gallery.push(
+    { src: `/cases/${gslug}-palette.svg`, alt: `${client} color palette` },
+    { src: `/cases/${gslug}-type.svg`, alt: `${client} typography specimen` },
+    { src: `/cases/${gslug}-pattern.svg`, alt: `${client} brand pattern` },
+  );
+}
 ---
-<BaseLayout title={`${item.title} — LogoPulse`}>
+<BaseLayout title={`${client} — LogoPulse Case Study`}>
   <Navbar />
-  <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
-    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">{item.industry} · {item.result}</p>
-    <h1 class="mt-2 text-4xl font-extrabold tracking-tight">{item.title}</h1>
-    <p class="mt-2 text-slate-500">Client: {item.client}</p>
-    <img src={item.mockup} alt={item.client} class="mt-6 w-full object-cover" style="border-radius:16px" />
-    <p class="mt-6 text-lg text-slate-700 leading-relaxed">{item.excerpt}</p>
-    <div class="mt-8 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200" style="border-radius:20px">
-      <p class="font-extrabold">Want results like {item.client}?</p>
-      <a href="/order?plan=professional" class="btn-active mt-3 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Start my project — $149</a>
+  <main class="pt-32 pb-20">
+    <div class="mx-auto max-w-3xl px-5">
+      <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-slate-500">
+        <a href="/" class="hover:text-primary">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href="/case-studies" class="hover:text-primary">Case studies</a>
+        <span aria-hidden="true">/</span>
+        <span class="font-semibold text-slate-900">{client}</span>
+      </nav>
+      <p class="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-primary">{industry} · Brand identity</p>
+      <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold tracking-tight">{client}</h1>
+      <p class="mt-4 text-lg text-slate-600 leading-relaxed">{excerpt}</p>
+      <dl class="mt-8 grid grid-cols-2 gap-6 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 sm:grid-cols-4" style="border-radius:20px">
+        <div><dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Client</dt><dd class="mt-1 font-extrabold">{client}</dd></div>
+        <div><dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Industry</dt><dd class="mt-1 font-extrabold">{industry}</dd></div>
+        <div><dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Year</dt><dd class="mt-1 font-extrabold tabular">{year}</dd></div>
+        <div><dt class="text-xs font-bold uppercase tracking-wider text-slate-400">Result</dt><dd class="mt-1 font-extrabold text-primary">{result || '—'}</dd></div>
+      </dl>
+      {website && website !== '#' && (
+        <p class="mt-4 text-sm text-slate-500">Website: <a href={website} target="_blank" rel="noreferrer" class="font-bold text-primary hover:underline">{website}</a></p>
+      )}
+    </div>
+    {mockup && (
+      <div class="mx-auto mt-10 max-w-5xl px-5">
+        <img src={mockup} alt={`${client} brand mockup`} loading="eager" decoding="async" class="w-full object-cover" style="border-radius:20px" />
+      </div>
+    )}
+    <div class="mx-auto max-w-3xl px-5">
+      <h2 class="mt-12 text-2xl sm:text-3xl font-extrabold tracking-tight">About the project</h2>
+      <p class="mt-4 text-slate-600 leading-relaxed">{item.content ?? excerpt} The brand had to earn trust at first glance — modern, distinctive, and flexible enough to work everywhere from favicons to signage.</p>
+      <h2 class="mt-10 text-2xl sm:text-3xl font-extrabold tracking-tight">What we designed</h2>
+      <p class="mt-4 text-slate-600 leading-relaxed">We designed the {client} logo to communicate professionalism and character in a crowded market — a custom mark with thoughtful construction, paired with typography and colors that scale from a 16-pixel favicon to a full storefront.</p>
+      <h2 class="mt-10 text-2xl sm:text-3xl font-extrabold tracking-tight">What we delivered</h2>
+      <ul class="mt-4 grid gap-2.5 sm:grid-cols-2">
+        {deliverables.map((d) => (
+          <li class="flex items-center gap-2.5 rounded-xl bg-white px-4 py-3 text-sm font-semibold ring-1 ring-slate-900/10">
+            <svg class="h-4 w-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M4 10.5 8.5 15 16 6" stroke-linecap="round" stroke-linejoin="round"/></svg>{d}
+          </li>
+        ))}
+      </ul>
+      <div class="mt-10 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 sm:p-8" style="border-radius:20px">
+        <p class="text-xl font-extrabold">Want a brand like {client}?</p>
+        <p class="mt-1 text-sm text-slate-500">First concepts in 48 hours, from $49, or your money back.</p>
+        <a href="/#pricing" class="btn-active mt-4 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">View Pricing</a>
+      </div>
+    </div>
+    {gallery.length > 0 && (
+      <div class="mx-auto mt-10 max-w-5xl space-y-6 px-5">
+        {gallery.map((g) => (
+          <img src={g.src} alt={g.alt} loading="lazy" decoding="async" class="w-full object-cover" style="border-radius:20px" />
+        ))}
+      </div>
+    )}
+    {next && (
+      <div class="mx-auto mt-14 max-w-3xl px-5">
+        <a href={`/case-studies/${next.slug}`} class="group flex items-center justify-between gap-4 rounded-2xl bg-dark px-6 py-5 text-white transition hover:bg-slate-800" style="border-radius:20px">
+          <span class="text-sm font-semibold text-white/60">Next case study · {idx + 1} / {FALLBACK_CASES.length}</span>
+          <span class="text-lg font-extrabold transition group-hover:translate-x-1">{next.client} →</span>
+        </a>
+      </div>
+    )}
+    <div class="mx-auto mt-14 max-w-content px-5">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">More case studies</h2>
+        <a href="/case-studies" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-200 hover:ring-primary hover:text-primary">All case studies →</a>
+      </div>
+      <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {others.map((c) => (
+          <CaseStudyCard slug={c.slug} title={c.title} client={c.client} industry={c.industry} result={c.result} mockup={c.mockup} logo={c.logo} excerpt={c.excerpt} />
+        ))}
+      </div>
     </div>
   </main>
+  <CTABanner />
   <Footer />
 </BaseLayout>

@@ -39,18 +39,38 @@ body {
 .reveal-visible { opacity: 1; transform: none; }
 .reveal-stagger > * { transition-delay: calc(var(--i, 0) * 80ms); }
 
-/* marquee — compositor-only (transform), GPU layer */
-@keyframes marquee { to { transform: translate3d(-50%, 0, 0); } }
+/* marquee — 3 grup identik per baris, loop tepat -33.333% (tak berujung) */
+@keyframes marquee { to { transform: translate3d(-33.3333%, 0, 0); } }
 .marquee { overflow: hidden; }
 .marquee-track {
-  display: flex; gap: 2.5rem; width: max-content;
+  display: flex; width: max-content;
   animation: marquee 36s linear infinite;
   will-change: transform; transform: translateZ(0);
   backface-visibility: hidden;
 }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 .marquee:focus-within .marquee-track { animation-play-state: paused; }
-.marquee-track img { -webkit-user-drag: none; user-select: none; }
+/* logo rows 2 arah (ala ManyPixels): 3 grup identik, loop -33.333% eksak */
+@keyframes marquee-rev { from { transform: translate3d(-33.3333%, 0, 0); } to { transform: translateZ(0); } }
+.marquee-track-rev {
+  display: flex; width: max-content; align-items: center;
+  animation: marquee-rev 42s linear infinite;
+  will-change: transform; transform: translateZ(0);
+  backface-visibility: hidden;
+}
+/* tiap set identik + padding kanan = gap: titik loop -50% jadi eksak */
+.logo-group {
+  display: flex; gap: 2.5rem; align-items: center;
+  padding-right: 2.5rem;
+}
+.marquee:hover .marquee-track-rev { animation-play-state: paused; }
+.marquee:focus-within .marquee-track-rev { animation-play-state: paused; }
+.marquee-track-rev img { -webkit-user-drag: none; user-select: none; }
+.logo-fade-l, .logo-fade-r {
+  position: absolute; top: 0; bottom: 0; width: 6rem; z-index: 1; pointer-events: none;
+}
+.logo-fade-l { left: 0; background: linear-gradient(to right, #fff, transparent); }
+.logo-fade-r { right: 0; background: linear-gradient(to left, #fff, transparent); }
 
 /* vertical collage (2 arah ala ManyPixels) — transform-only */
 @keyframes v-marquee-up { to { transform: translate3d(0, -50%, 0); } }
@@ -163,12 +183,11 @@ body {
 .scale-in { opacity: 0; transform: scale(.94); transition: opacity .6s ease, transform .6s cubic-bezier(0.2,0,0,1); }
 .reveal-visible.scale-in, .reveal-visible .scale-in { opacity: 1; transform: scale(1); }
 
-/* crossfade card */
-.crossfade img { transition: opacity .4s ease, transform .5s ease; }
-.crossfade .img-top { opacity: 0; }
-.crossfade:hover .img-top { opacity: 1; }
-.crossfade:hover .img-base { opacity: 0; }
-.crossfade:hover img { transform: scale(1.05); }
+/* crossfade card — mockup default, ganti ke logo saat hover / fokus keyboard */
+.crossfade .case-media { transition: opacity .4s ease; }
+.crossfade .case-media-hover { opacity: 0; transition: opacity .4s ease; }
+.crossfade:hover .case-media-hover,
+.crossfade:focus-within .case-media-hover { opacity: 1; }
 
 /* hanging testimonials — kartu digantung tali, jalan marquee infinite.
    transform-only (murah di GPU). Hover: kartu meluruskan diri. */
@@ -217,9 +236,9 @@ body {
   background: #fff; border: 3px solid #0f172a; box-shadow: 0 2px 6px rgba(2, 8, 30, 0.3); cursor: pointer;
 }
 
-/* portfolio filter */
-.pf-item { transition: opacity .3s ease, transform .3s ease; }
-.pf-hidden { opacity: 0; transform: scale(.92); pointer-events: none; position: absolute; visibility: hidden; }
+/* portfolio filter — display:none agar grid menutup rapat (dense flow
+   mengisi ulang otomatis, tidak ada lubang di kombinasi filter apapun) */
+.pf-hidden { display: none; }
 
 /* focus ring */
 a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
@@ -231,7 +250,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .tabular { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .scale-in, .marquee-track, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+  .reveal, .scale-in, .marquee-track, .marquee-track-rev, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
   #site-nav { animation: none !important; }
   html { scroll-behavior: auto; }
 }

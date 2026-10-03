@@ -8,6 +8,7 @@ export interface Portfolio {
   category: 'Tech' | 'F&B' | 'Fashion' | 'Health' | string;
   image: string;
   logo?: string;
+  featured?: boolean;
 }
 
 export interface CaseStudy {
@@ -54,10 +55,10 @@ async function safe<T>(path: string, fallback: T): Promise<T> {
 const pic = (seed: string, w = 600, h = 450) => `https://picsum.photos/seed/${seed}/${w}/${h}.webp`;
 
 export const FALLBACK_PORTFOLIO: Portfolio[] = [
-  { id: 'p1', title: 'Nexora SaaS', category: 'Tech', image: pic('nexora') },
-  { id: 'p2', title: 'Kopi Lantai', category: 'F&B', image: pic('kopi') },
-  { id: 'p3', title: 'Maison Rue', category: 'Fashion', image: pic('maison') },
-  { id: 'p4', title: 'VitalCare', category: 'Health', image: pic('vital') },
+  { id: 'p1', title: 'Nexora SaaS', category: 'Tech', image: pic('nexora'), featured: true },
+  { id: 'p2', title: 'Kopi Lantai', category: 'F&B', image: pic('kopi'), featured: true },
+  { id: 'p3', title: 'Maison Rue', category: 'Fashion', image: pic('maison'), featured: true },
+  { id: 'p4', title: 'VitalCare', category: 'Health', image: pic('vital'), featured: true },
   { id: 'p5', title: 'Cloudgrid', category: 'Tech', image: pic('cloudgrid') },
   { id: 'p6', title: 'Saffron House', category: 'F&B', image: pic('saffron') },
   { id: 'p7', title: 'Atelier Nord', category: 'Fashion', image: pic('atelier') },
@@ -65,10 +66,10 @@ export const FALLBACK_PORTFOLIO: Portfolio[] = [
 ];
 
 export const FALLBACK_CASES: CaseStudy[] = [
-  { slug: 'nexora-rebrand', title: 'Nexora doubles signup conversion', client: 'Nexora', industry: 'SaaS', result: '+112% signup conversion', mockup: pic('nexora-mockup'), logo: pic('nexora-logo', 400, 300), excerpt: 'A 48-hour rebrand that turned a generic SaaS mark into a conversion asset.' },
-  { slug: 'kopi-lantai', title: 'Kopi Lantai brews a franchise-ready brand', client: 'Kopi Lantai', industry: 'F&B', result: '3 new outlets in 90 days', mockup: pic('kopi-mockup'), logo: pic('kopi-logo', 400, 300), excerpt: 'Warm, memorable identity built for cups, signage, and social.' },
-  { slug: 'maison-rue', title: 'Maison Rue goes premium', client: 'Maison Rue', industry: 'Fashion', result: '+68% average order value', mockup: pic('maison-mockup'), logo: pic('maison-logo', 400, 300), excerpt: 'Serif wordmark and system that lifted perceived value overnight.' },
-  { slug: 'vitalcare', title: 'VitalCare earns patient trust', client: 'VitalCare', industry: 'Health', result: '4.9★ across 2k reviews', mockup: pic('vital-mockup'), logo: pic('vital-logo', 400, 300), excerpt: 'Calm, clinical identity designed for trust at first glance.' },
+  { slug: 'nexora-rebrand', title: 'Nexora doubles signup conversion', client: 'Nexora', industry: 'SaaS', result: '+112% signup conversion', mockup: '/cases/nexora-mockup.svg', logo: '/cases/nexora-logo.svg', excerpt: 'A 48-hour rebrand that turned a generic SaaS mark into a conversion asset.' },
+  { slug: 'kopi-lantai', title: 'Kopi Lantai brews a franchise-ready brand', client: 'Kopi Lantai', industry: 'F&B', result: '3 new outlets in 90 days', mockup: '/cases/kopi-mockup.svg', logo: '/cases/kopi-logo.svg', excerpt: 'Warm, memorable identity built for cups, signage, and social.' },
+  { slug: 'maison-rue', title: 'Maison Rue goes premium', client: 'Maison Rue', industry: 'Fashion', result: '+68% average order value', mockup: '/cases/maison-mockup.svg', logo: '/cases/maison-logo.svg', excerpt: 'Serif wordmark and system that lifted perceived value overnight.' },
+  { slug: 'vitalcare', title: 'VitalCare earns patient trust', client: 'VitalCare', industry: 'Health', result: '4.9★ across 2k reviews', mockup: '/cases/vital-mockup.svg', logo: '/cases/vital-logo.svg', excerpt: 'Calm, clinical identity designed for trust at first glance.' },
 ];
 
 export const FALLBACK_POSTS: BlogPost[] = [

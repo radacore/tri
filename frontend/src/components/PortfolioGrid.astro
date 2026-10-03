@@ -1,6 +1,13 @@
 ---
 import { FALLBACK_PORTFOLIO } from '../lib/api';
 const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
+// Bento 3 ukuran, pola berulang L M S S — total selalu kelipatan 4 unit.
+const SIZES = ['l', 'm', 's', 's', 'l', 'm', 's', 's'] as const;
+const SIZE_CLS: Record<string, string> = {
+  l: 'col-span-2 row-span-2',
+  m: 'col-span-2',
+  s: '',
+};
 ---
 <section class="reveal mx-auto max-w-content px-5 py-16 sm:py-20">
   <div class="flex flex-wrap items-end justify-between gap-4">
@@ -19,11 +26,14 @@ const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
       ))}
     </div>
   </div>
-  <div id="pf-grid" class="relative mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4">
-    {FALLBACK_PORTFOLIO.map((p) => (
-      <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class="pf-item group overflow-hidden bg-slate-100 text-left ring-1 ring-slate-900/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 hover:[transform:translateY(-4px)]" style="border-radius:16px">
-        <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <span class="block p-3 text-sm font-bold">{p.title} <span class="ml-1 rounded-full bg-subtle px-2 py-0.5 text-[11px] text-primary">{p.category}</span></span>
+  <div id="pf-grid" class="relative mt-8 grid auto-rows-[150px] grid-cols-2 gap-4 sm:auto-rows-[180px] lg:grid-cols-4 [grid-auto-flow:dense]">
+    {FALLBACK_PORTFOLIO.map((p, i) => (
+      <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class={`pf-item group relative overflow-hidden text-left ring-1 ring-slate-900/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 hover:[transform:translateY(-4px)] ${SIZE_CLS[SIZES[i % SIZES.length]]}`} style="border-radius:16px">
+        <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <span class="absolute left-3 top-3 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">{p.category}</span>
+        <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent p-4 pt-10 text-left">
+          <span class="block text-sm font-bold text-white sm:text-base">{p.title}</span>
+        </span>
       </button>
     ))}
   </div>
@@ -39,7 +49,6 @@ const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
   (function () {
     var btns = Array.from(document.querySelectorAll('.pf-btn'));
     var items = Array.from(document.querySelectorAll('.pf-item'));
-    var grid = document.getElementById('pf-grid');
     function paint(active) {
       btns.forEach(function (b) {
         var on = b.getAttribute('data-filter') === active;
@@ -73,6 +82,5 @@ const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
     });
     var close = document.getElementById('pf-lightbox-close');
     if (close && dlg) close.addEventListener('click', function () { dlg.close(); });
-    if (grid) grid.style.minHeight = '';
   })();
 </script>

@@ -10,7 +10,7 @@ type Tab = "hero" | "sections" | "steps" | "pricing" | "media" | "footer";
 const TABS: { id: Tab; label: string }[] = [
   { id: "hero", label: "Hero" },
   { id: "sections", label: "Sections" },
-  { id: "steps", label: "Steps & Highlight" },
+  { id: "steps", label: "Steps" },
   { id: "pricing", label: "Pricing & FAQ" },
   { id: "media", label: "Media" },
   { id: "footer", label: "Footer & Socials" },
@@ -299,30 +299,6 @@ export default function IdentityPage() {
               {saveMut.isPending ? "Saving…" : "Save steps"}
             </button>
           </div>
-          <div className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
-            <h2 className="text-base font-semibold text-ink-primary">Featured testimonial</h2>
-            <p className="text-xs text-ink-secondary">
-              The big quote under the client logos.
-            </p>
-            <div>
-              <label className="label">Quote</label>
-              <textarea
-                className="input"
-                rows={3}
-                value={cur.highlight?.quote ?? ""}
-                onChange={(e) => set("highlight", "quote", e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="label">Attribution</label>
-              <input
-                className="input"
-                value={cur.highlight?.role ?? ""}
-                onChange={(e) => set("highlight", "role", e.target.value)}
-              />
-            </div>
-          </div>
-          <SaveBar k="highlight" />
         </div>
       )}
 

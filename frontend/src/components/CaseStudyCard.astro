@@ -8,18 +8,17 @@ interface Props {
   mockup?: string;
   logo?: string;
   excerpt?: string;
+  index?: number;
 }
-const { slug = '#', title = 'Case study', client = 'Client', industry = 'Industry', result = 'Result', mockup = '', logo = '', excerpt = '' } = Astro.props as Props;
+const { slug = '#', title = 'Case study', client = 'Client', excerpt = '' } = Astro.props as Props;
 ---
-<a href={slug === '#' ? '/case-studies' : `/case-studies/${slug}`} class="crossfade group block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300" style="border-radius:20px">
-  <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
-    {mockup && <img src={mockup} alt={`${client} brand mockup`} loading="lazy" decoding="async" class="img-base absolute inset-0 h-full w-full object-cover" />}
-    {logo && <img src={logo} alt={`${client} logo`} loading="lazy" decoding="async" class="img-top absolute inset-0 h-full w-full object-cover" />}
+<a href={slug === '#' ? '/case-studies' : `/case-studies/${slug}`} class="crossfade group flex flex-col gap-3.5 rounded-[10px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+  <div class="relative aspect-[322/303] overflow-hidden rounded-[10px] bg-slate-100">
+    {Astro.props.mockup && <img src={Astro.props.mockup} alt={`${client} brand mockup`} loading="lazy" decoding="async" width="644" height="606" class="case-media h-full w-full object-cover" />}
+    {Astro.props.logo && <img src={Astro.props.logo} alt="" loading="lazy" decoding="async" width="644" height="606" class="case-media-hover absolute inset-0 h-full w-full object-cover" />}
   </div>
-  <div class="p-5">
-    <p class="text-[11px] font-extrabold uppercase tracking-[0.14em] text-slate-400">{industry}</p>
-    <p class="tabular mt-1 text-xl font-extrabold tracking-tight text-primary">{result}</p>
-    <h3 class="mt-1 font-extrabold leading-snug group-hover:text-primary transition-colors">{title}</h3>
-    <p class="mt-1 text-sm text-slate-500">{excerpt || client}</p>
+  <div class="flex flex-col gap-1 leading-[25px] tracking-[-0.03em]">
+    <h3 class="truncate text-xl font-medium text-[#151515] transition-colors duration-200 group-hover:text-primary">{client}</h3>
+    <p class="truncate text-base text-[#9c9c9c]">{excerpt || title}</p>
   </div>
 </a>
