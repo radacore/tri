@@ -1,21 +1,8 @@
 ---
 import { FALLBACK_PORTFOLIO } from '../lib/api';
 const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
-// Ukuran bento per index — total span kelipatan 4 (L=4, W=2, T=2, S=1)
-// agar dense packing menutup rapat tanpa rongga.
-const SPANS = ['l', 'w', 's', 's', 't', 's', 's', 'l'] as const;
-const SPAN_CLS: Record<string, string> = {
-  l: 'md:col-span-2 md:row-span-2',
-  w: 'md:col-span-2',
-  t: 'md:row-span-2',
-  s: '',
-};
-const SPAN_ASPECT: Record<string, string> = {
-  l: 'aspect-square',
-  w: 'aspect-[16/9]',
-  t: 'aspect-[3/4]',
-  s: 'aspect-[4/3]',
-};
+// Ukuran bento diacak di browser setiap refresh (lihat <script> shuffle);
+// pola dasar L=4u, W=2u, T=2u, S=1u agar selalu menutup rapat.
 const PILL_BASE = 'pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold border transition';
 const PILL_ON = 'bg-black text-white border-black';
 const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
@@ -38,18 +25,15 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
     </div>
   </div>
   <div id="pf-grid" class="relative mt-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]">
-    {FALLBACK_PORTFOLIO.map((p, i) => {
-      const size = SPANS[i % SPANS.length];
-      return (
-        <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class={`pf-item group relative overflow-hidden rounded-2xl sm:rounded-3xl text-left ${SPAN_CLS[size]}`}>
-          <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class={`h-full w-full object-cover transition-all duration-300 group-hover:scale-105 ${SPAN_ASPECT[size]}`} />
+    {FALLBACK_PORTFOLIO.map((p) => (
+      <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class="pf-item group relative overflow-hidden rounded-2xl sm:rounded-3xl text-left">
+        <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="aspect-[4/3] h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
           <span class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent" aria-hidden="true"></span>
           <span class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true"></span>
           <span class="absolute left-4 top-4 rounded-full bg-black/50 backdrop-blur-md text-white text-xs px-3 py-1 font-semibold">{p.category}</span>
           <span class="absolute bottom-4 left-4 right-4 text-white font-medium text-base md:text-lg leading-snug">{p.title}</span>
         </button>
-      );
-    })}
+      ))}
   </div>
   <dialog id="pf-lightbox" class="rounded-2xl p-0 backdrop:bg-slate-950/70 max-w-3xl w-[calc(100%-2rem)]">
     <div class="relative">
@@ -63,6 +47,41 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
   (function () {
     var btns = Array.from(document.querySelectorAll('.pf-btn'));
     var items = Array.from(document.querySelectorAll('.pf-item'));
+    var grid = document.getElementById('pf-grid');
+    // Acak susunan bento setiap refresh: kocok multiset ukuran (total 16
+    // unit = 4 baris penuh) lalu tempelkan ke kartu.
+    var CLS = {
+      l: ['md:col-span-2', 'md:row-span-2'],
+      w: ['md:col-span-2'],
+      t: ['md:row-span-2'],
+      s: []
+    };
+    var ASP = {
+      l: 'aspect-square',
+      w: 'aspect-[16/9]',
+      t: 'aspect-[3/4]',
+      s: 'aspect-[4/3]'
+    };
+    var ASPECTS = ['aspect-square', 'aspect-[16/9]', 'aspect-[3/4]', 'aspect-[4/3]'];
+    var SPANS = ['md:col-span-2', 'md:row-span-2'];
+    function shuffle() {
+      var deck = ['l', 'w', 's', 's', 't', 's', 's', 'l'];
+      for (var k = deck.length - 1; k > 0; k--) {
+        var r = Math.floor(Math.random() * (k + 1));
+        var tmp = deck[k]; deck[k] = deck[r]; deck[r] = tmp;
+      }
+      items.forEach(function (it, idx) {
+        var s = deck[idx % deck.length];
+        var img = it.querySelector('img');
+        SPANS.forEach(function (c) { it.classList.remove(c); });
+        CLS[s].forEach(function (c) { it.classList.add(c); });
+        if (img) {
+          ASPECTS.forEach(function (c) { img.classList.remove(c); });
+          img.classList.add(ASP[s]);
+        }
+      });
+    }
+    shuffle();
     function paint(active) {
       btns.forEach(function (b) {
         var on = b.getAttribute('data-filter') === active;
@@ -74,6 +93,9 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
       b.addEventListener('click', function () {
         var f = b.getAttribute('data-filter') || 'All';
         paint(f);
+        // Filter non-All: seragam 1 ukuran (4 per baris) via class grid;
+        // 'All' kembali ke susunan acak.
+        if (grid) grid.classList.toggle('pf-uniform', f !== 'All');
         items.forEach(function (it) {
           var show = f === 'All' || it.getAttribute('data-category') === f;
           it.classList.toggle('pf-hidden', !show);

@@ -239,6 +239,14 @@ body {
 /* portfolio filter — display:none agar grid menutup rapat (dense flow
    mengisi ulang otomatis, tidak ada lubang di kombinasi filter apapun) */
 .pf-hidden { display: none; }
+/* mode seragam (filter aktif): paksa 1 ukuran standar, 4 per baris */
+#pf-grid.pf-uniform > .pf-item {
+  grid-column: span 1 !important;
+  grid-row: span 1 !important;
+}
+#pf-grid.pf-uniform > .pf-item img {
+  aspect-ratio: 4 / 3 !important;
+}
 
 /* focus ring */
 a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
