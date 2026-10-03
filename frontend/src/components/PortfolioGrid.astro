@@ -1,18 +1,29 @@
 ---
 import { FALLBACK_PORTFOLIO } from '../lib/api';
 const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
-// Bento 3 ukuran, pola berulang L M S S — total selalu kelipatan 4 unit.
-const SIZES = ['l', 'm', 's', 's', 'l', 'm', 's', 's'] as const;
-const SIZE_CLS: Record<string, string> = {
-  l: 'col-span-2 row-span-2',
-  m: 'col-span-2',
+// Ukuran bento per index — total span kelipatan 4 (L=4, W=2, T=2, S=1)
+// agar dense packing menutup rapat tanpa rongga.
+const SPANS = ['l', 'w', 's', 's', 't', 's', 's', 'l'] as const;
+const SPAN_CLS: Record<string, string> = {
+  l: 'md:col-span-2 md:row-span-2',
+  w: 'md:col-span-2',
+  t: 'md:row-span-2',
   s: '',
 };
+const SPAN_ASPECT: Record<string, string> = {
+  l: 'aspect-square',
+  w: 'aspect-[16/9]',
+  t: 'aspect-[3/4]',
+  s: 'aspect-[4/3]',
+};
+const PILL_BASE = 'pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold border transition';
+const PILL_ON = 'bg-black text-white border-black';
+const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
 ---
 <section class="reveal mx-auto max-w-content px-5 py-16 sm:py-20">
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
-      <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary" data-site="sections.pf_kicker">Portfolio</p>
+      <p class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-slate-500" data-site="sections.pf_kicker">Portfolio</p>
       <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight" data-site="sections.pf_title">Fresh work, shipped weekly</h2>
     </div>
     <div class="flex flex-wrap gap-2" role="tablist" aria-label="Filter portfolio">
@@ -21,21 +32,24 @@ const SIZE_CLS: Record<string, string> = {
           type="button"
           data-filter={f}
           aria-pressed={i === 0 ? 'true' : 'false'}
-          class={`pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold ring-1 transition ${i === 0 ? 'bg-dark text-white ring-dark' : 'bg-white text-slate-600 ring-slate-200 hover:ring-slate-400'}`}
+          class={`${PILL_BASE} ${i === 0 ? PILL_ON : PILL_OFF}`}
         >{f === 'All' ? <span>All</span> : f}</button>
       ))}
     </div>
   </div>
-  <div id="pf-grid" class="relative mt-8 grid auto-rows-[150px] grid-cols-2 gap-4 sm:auto-rows-[180px] lg:grid-cols-4 [grid-auto-flow:dense]">
-    {FALLBACK_PORTFOLIO.map((p, i) => (
-      <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class={`pf-item group relative overflow-hidden text-left ring-1 ring-slate-900/10 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 hover:[transform:translateY(-4px)] ${SIZE_CLS[SIZES[i % SIZES.length]]}`} style="border-radius:16px">
-        <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <span class="absolute left-3 top-3 rounded-full bg-black/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur">{p.category}</span>
-        <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent p-4 pt-10 text-left">
-          <span class="block text-sm font-bold text-white sm:text-base">{p.title}</span>
-        </span>
-      </button>
-    ))}
+  <div id="pf-grid" class="relative mt-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]">
+    {FALLBACK_PORTFOLIO.map((p, i) => {
+      const size = SPANS[i % SPANS.length];
+      return (
+        <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class={`pf-item group relative overflow-hidden rounded-2xl sm:rounded-3xl text-left ${SPAN_CLS[size]}`}>
+          <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class={`h-full w-full object-cover transition-all duration-300 group-hover:scale-105 ${SPAN_ASPECT[size]}`} />
+          <span class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent" aria-hidden="true"></span>
+          <span class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true"></span>
+          <span class="absolute left-4 top-4 rounded-full bg-black/50 backdrop-blur-md text-white text-xs px-3 py-1 font-semibold">{p.category}</span>
+          <span class="absolute bottom-4 left-4 right-4 text-white font-medium text-base md:text-lg leading-snug">{p.title}</span>
+        </button>
+      );
+    })}
   </div>
   <dialog id="pf-lightbox" class="rounded-2xl p-0 backdrop:bg-slate-950/70 max-w-3xl w-[calc(100%-2rem)]">
     <div class="relative">
@@ -45,7 +59,7 @@ const SIZE_CLS: Record<string, string> = {
     </div>
   </dialog>
 </section>
-<script>
+<script define:vars={{ pillBase: PILL_BASE, pillOn: PILL_ON, pillOff: PILL_OFF }}>
   (function () {
     var btns = Array.from(document.querySelectorAll('.pf-btn'));
     var items = Array.from(document.querySelectorAll('.pf-item'));
@@ -53,8 +67,7 @@ const SIZE_CLS: Record<string, string> = {
       btns.forEach(function (b) {
         var on = b.getAttribute('data-filter') === active;
         b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        b.className = 'pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold ring-1 transition ' +
-          (on ? 'bg-dark text-white ring-dark' : 'bg-white text-slate-600 ring-slate-200 hover:ring-slate-400');
+        b.className = pillBase + ' ' + (on ? pillOn : pillOff);
       });
     }
     btns.forEach(function (b) {
