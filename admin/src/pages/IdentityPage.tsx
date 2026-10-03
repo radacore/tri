@@ -70,13 +70,6 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
     ],
   },
   {
-    title: "Guarantee",
-    fields: [
-      ["guar_title", "Title"],
-      ["guar_text", "Text"],
-    ],
-  },
-  {
     title: "FAQ",
     fields: [
       ["faq_kicker", "Kicker"],
