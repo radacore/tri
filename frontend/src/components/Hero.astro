@@ -2,8 +2,8 @@
 ---
 <section class="reveal reveal-stagger relative overflow-hidden pt-32 pb-12 sm:pt-44">
   <div class="relative mx-auto max-w-content px-5">
-    <div class="grid items-center gap-10 lg:grid-cols-5">
-      <div class="lg:col-span-2">
+    <div class="grid items-center gap-10 lg:grid-cols-2">
+      <div>
         <h1 class="font-display max-w-xl font-extrabold leading-[1.0] tracking-tight" style="--i:0">
           <span class="block text-4xl sm:text-6xl" data-site="hero.t1">A logo that sells,</span>
           <span class="block text-4xl sm:text-6xl text-primary" data-site="hero.t2">ready in 48 hours</span>
@@ -17,13 +17,13 @@
           <a href="/#portfolio" data-site="hero.cta2" class="btn-active rounded-full bg-dark px-8 py-4 text-base font-bold text-white hover:bg-slate-800 text-center">See Our Work</a>
         </div>
       </div>
-      <div class="relative lg:col-span-3" style="--i:3" aria-hidden="true">
-        <div class="v-collage v-mask relative mx-auto grid max-h-[560px] grid-cols-2 gap-4 overflow-hidden sm:grid-cols-3">
+      <div class="relative" style="--i:3" aria-hidden="true">
+        <div class="v-collage v-mask relative mx-auto grid max-h-[630px] grid-cols-2 gap-4 overflow-hidden sm:grid-cols-3">
           {[0, 1, 2].map((col) => (
             <div class={`overflow-hidden ${col === 2 ? 'hidden sm:block' : ''}`}>
               <div class={`v-track ${col % 2 === 0 ? 'v-track-up' : 'v-track-down'}`}>
                 {[0, 1, 2, 3].map((k) => [0, 1].map((dup) => (
-                  <img src={`https://picsum.photos/seed/lp-c${col}-${k}/400/${k % 2 === 0 ? 500 : 380}.webp`} alt="" width="400" height={k % 2 === 0 ? 500 : 380} loading="lazy" decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />
+                  <img src={`https://picsum.photos/seed/lp-c${col}-${k}/400/${k % 2 === 0 ? 350 : 266}.webp`} alt="" width="400" height={k % 2 === 0 ? 350 : 266} loading="lazy" decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />
                 )))}
               </div>
             </div>
