@@ -24,12 +24,6 @@ const HERO_FIELDS: [string, string][] = [
   ["sub", "Subtitle"],
   ["cta1", "Primary button"],
   ["cta2", "Secondary button"],
-  ["s1v", "Stat 1 value"],
-  ["s1l", "Stat 1 label"],
-  ["s2v", "Stat 2 value"],
-  ["s2l", "Stat 2 label"],
-  ["s3v", "Stat 3 value"],
-  ["s3l", "Stat 3 label"],
 ];
 
 const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [

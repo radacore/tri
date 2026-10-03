@@ -21,6 +21,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 .font-serif-accent { font-family: 'Newsreader', Georgia, serif; font-style: italic; }
+.font-display { font-family: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif; }
 
 ::selection { background: var(--primary); color: #fff; }
 
@@ -50,6 +51,24 @@ body {
 .marquee:hover .marquee-track { animation-play-state: paused; }
 .marquee:focus-within .marquee-track { animation-play-state: paused; }
 .marquee-track img { -webkit-user-drag: none; user-select: none; }
+
+/* vertical collage (2 arah ala ManyPixels) — transform-only */
+@keyframes v-marquee-up { to { transform: translate3d(0, -50%, 0); } }
+@keyframes v-marquee-down { from { transform: translate3d(0, -50%, 0); } to { transform: translate3d(0, 0, 0); } }
+.v-track {
+  display: flex; flex-direction: column; gap: 1rem; width: max-content;
+  will-change: transform; transform: translateZ(0);
+  backface-visibility: hidden;
+}
+.v-track-up { animation: v-marquee-up 30s linear infinite; }
+.v-track-down { animation: v-marquee-down 36s linear infinite; }
+.v-collage:hover .v-track { animation-play-state: paused; }
+.v-collage:focus-within .v-track { animation-play-state: paused; }
+.v-collage img { -webkit-user-drag: none; user-select: none; }
+.v-mask {
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);
+}
 
 /* CTA — static gradient (tanpa animasi background-position: memicu repaint).
    Kemeriahan diganti shine sweep di bawah (transform+opacity only, area kecil). */
@@ -212,7 +231,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .tabular { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .scale-in, .marquee-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+  .reveal, .scale-in, .marquee-track, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
   #site-nav { animation: none !important; }
   html { scroll-behavior: auto; }
 }
