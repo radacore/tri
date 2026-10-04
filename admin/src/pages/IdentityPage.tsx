@@ -19,9 +19,9 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "footer", label: "Footer & Socials" },
 ];
 
-const PAGE_GROUPS: { title: string; desc: string; fields: [string, string][] }[] = [
+const PAGE_GROUPS: { title: string; desc: string; anchor: string; fields: [string, string][] }[] = [
   {
-    title: "Order page", desc: "Multi-step order form, review summary, and WhatsApp/email message template.",
+    title: "Order page", anchor: "/order", desc: "Multi-step order form, review summary, and WhatsApp/email message template.",
     fields: [
       ["order_kicker", "Kicker"], ["order_title", "Title"], ["order_sub", "Subtitle"],
       ["order_s1", "Step 1"], ["order_s2", "Step 2"], ["order_s3", "Step 3"],
@@ -52,7 +52,7 @@ const PAGE_GROUPS: { title: string; desc: string; fields: [string, string][] }[]
     ],
   },
   {
-    title: "Contact page", desc: "Contact info cards and the message form.",
+    title: "Contact page", anchor: "/contact", desc: "Contact info cards and the message form.",
     fields: [
       ["contact_kicker", "Kicker"], ["contact_title", "Title"], ["contact_sub", "Subtitle"],
       ["contact_else", "Elsewhere label"], ["contact_fname", "Name label"],
@@ -61,11 +61,11 @@ const PAGE_GROUPS: { title: string; desc: string; fields: [string, string][] }[]
     ],
   },
   {
-    title: "About page", desc: "Studio story paragraphs.",
+    title: "About page", anchor: "/about", desc: "Studio story paragraphs.",
     fields: [["about_kicker", "Kicker"], ["about_title", "Title"], ["about_p1", "Paragraph 1"], ["about_p2", "Paragraph 2"]],
   },
   {
-    title: "Index & legal pages", desc: "Blog/case listing titles, legal page titles, and the 404 page.",
+    title: "Index & legal pages", anchor: "/blog", desc: "Blog/case listing titles, legal page titles, and the 404 page.",
     fields: [
       ["blog_title", "Blog title"], ["cases_title", "Case studies title"],
       ["terms_title", "Terms title"], ["privacy_title", "Privacy title"],
@@ -74,7 +74,7 @@ const PAGE_GROUPS: { title: string; desc: string; fields: [string, string][] }[]
     ],
   },
   {
-    title: "Legal clauses", desc: "Terms and privacy clause headings and bodies.",
+    title: "Legal clauses", anchor: "/terms", desc: "Terms and privacy clause headings and bodies.",
     fields: [
       ["terms_h1", "Terms 1 head"], ["terms_b1", "Terms 1 body"],
       ["terms_h2", "Terms 2 head"], ["terms_b2", "Terms 2 body"],
@@ -99,13 +99,15 @@ const HERO_FIELDS: [string, string][] = [
   ["cta2", "Secondary button"],
 ];
 
-const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
+const SECTION_GROUPS: { title: string; anchor: string; fields: [string, string][] }[] = [
   {
     title: "Client logos",
+    anchor: "/#clients",
     fields: [["logos_heading", "Heading"]],
   },
   {
     title: "Case studies",
+    anchor: "/#case-studies",
     fields: [
       ["cases_kicker", "Kicker"],
       ["cases_title", "Title"],
@@ -114,6 +116,7 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
   },
   {
     title: "Portfolio",
+    anchor: "/#portfolio",
     fields: [
       ["pf_kicker", "Kicker"],
       ["pf_title", "Title"],
@@ -121,6 +124,7 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
   },
   {
     title: "How it works",
+    anchor: "/#how-it-works",
     fields: [
       ["how_kicker", "Kicker"],
       ["how_title", "Title"],
@@ -128,6 +132,7 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
   },
   {
     title: "Pricing",
+    anchor: "/#pricing",
     fields: [
       ["price_kicker", "Kicker"],
       ["price_title", "Title"],
@@ -136,6 +141,7 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
   },
   {
     title: "Reviews",
+    anchor: "/#testimonials",
     fields: [
       ["rev_kicker", "Kicker"],
       ["rev_title", "Title"],
@@ -144,6 +150,7 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
   },
   {
     title: "FAQ",
+    anchor: "/#faq",
     fields: [
       ["faq_kicker", "Kicker"],
       ["faq_title", "Title"],
@@ -151,6 +158,7 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
   },
   {
     title: "CTA banner",
+    anchor: "/#cta",
     fields: [
       ["cta_kicker", "Kicker"],
       ["cta_t1", "Title part 1"],
@@ -163,6 +171,7 @@ const SECTION_GROUPS: { title: string; fields: [string, string][] }[] = [
   },
   {
     title: "Small texts",
+    anchor: "/",
     fields: [
       ["badge_by", "Rating badge suffix"],
       ["price_popular", "Popular plan badge"],
@@ -185,10 +194,12 @@ function PagesTab({
   cur,
   set,
   saveMut,
+  onPreview,
 }: {
   cur: Record<string, Record<string, any>>;
   set: (key: string, field: string, v: any) => void;
   saveMut: { isPending: boolean; mutate: (v: { key: string; body: unknown }) => void };
+  onPreview: (anchor: string) => void;
 }) {
   const [group, setGroup] = useState(0);
   const g = PAGE_GROUPS[group];
@@ -203,10 +214,13 @@ function PagesTab({
           <button
             key={gg.title}
             type="button"
-            onClick={() => setGroup(i)}
+            onClick={() => {
+              setGroup(i);
+              onPreview(gg.anchor);
+            }}
             className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
               i === group
-                ? "bg-dark text-white"
+                ? "bg-brand text-white"
                 : "bg-white text-ink-secondary ring-1 ring-[#e2eceb] hover:text-ink-primary"
             }`}
           >
@@ -241,6 +255,74 @@ function PagesTab({
           onClick={() => saveMut.mutate({ key: "pages", body: cur.pages ?? {} })}
         >
           {saveMut.isPending ? "Saving…" : "Save pages"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function SectionsTab({
+  cur,
+  set,
+  saveMut,
+  onPreview,
+}: {
+  cur: Record<string, Record<string, any>>;
+  set: (key: string, field: string, v: any) => void;
+  saveMut: { isPending: boolean; mutate: (v: { key: string; body: unknown }) => void };
+  onPreview: (anchor: string) => void;
+}) {
+  const [gi, setGi] = useState(0);
+  const g = SECTION_GROUPS[gi];
+  const filled = g.fields.filter(([f]) => {
+    const v = cur.sections?.[f];
+    return typeof v === "string" && v.trim() !== "";
+  }).length;
+  return (
+    <div className="max-w-2xl space-y-4">
+      <div className="flex flex-wrap gap-1.5">
+        {SECTION_GROUPS.map((gg, i) => (
+          <button
+            key={gg.title}
+            type="button"
+            onClick={() => {
+              setGi(i);
+              onPreview(gg.anchor);
+            }}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+              i === gi
+                ? "bg-brand text-white"
+                : "bg-white text-ink-secondary ring-1 ring-[#e2eceb] hover:text-ink-primary"
+            }`}
+          >
+            {gg.title}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-base font-semibold text-ink-primary">{g.title}</h2>
+          <span className="tabular text-xs font-semibold text-ink-secondary">
+            {filled}/{g.fields.length} filled
+          </span>
+        </div>
+        {g.fields.map(([f, label]) => (
+          <TextRow
+            key={f}
+            label={label}
+            value={cur.sections?.[f] ?? ""}
+            onChange={(v) => set("sections", f, v)}
+            textarea={/_text$|_sub$/.test(f)}
+          />
+        ))}
+      </div>
+      <div className="mt-5 flex justify-end">
+        <button
+          className="btn-primary shadow-lg"
+          disabled={saveMut.isPending}
+          onClick={() => saveMut.mutate({ key: "sections", body: cur.sections ?? {} })}
+        >
+          {saveMut.isPending ? "Saving…" : "Save sections"}
         </button>
       </div>
     </div>
@@ -282,6 +364,7 @@ function TextRow({
 export default function IdentityPage() {
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>("hero");
+  const [previewPath, setPreviewPath] = useState<string | null>(null);
   const [local, setLocal] = useState<Record<string, Record<string, any>> | null>(null);
 
   const { data } = useQuery({
@@ -349,7 +432,10 @@ export default function IdentityPage() {
         {TABS.map((t) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              setTab(t.id);
+              setPreviewPath(null);
+            }}
             className={`rounded-full px-4 py-2 font-semibold transition ${
               tab === t.id
                 ? "bg-brand text-white shadow-sm"
@@ -380,23 +466,12 @@ export default function IdentityPage() {
       )}
 
       {tab === "sections" && (
-        <div className="max-w-2xl space-y-4">
-          {SECTION_GROUPS.map((g) => (
-            <div key={g.title} className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
-              <h2 className="text-base font-semibold text-ink-primary">{g.title}</h2>
-              {g.fields.map(([f, label]) => (
-                <TextRow
-                  key={f}
-                  label={label}
-                  value={cur.sections?.[f] ?? ""}
-                  onChange={(v) => set("sections", f, v)}
-                  textarea={/_text$|_sub$/.test(f)}
-                />
-              ))}
-            </div>
-          ))}
-          <SaveBar k="sections" />
-        </div>
+        <SectionsTab
+          cur={cur}
+          set={set}
+          saveMut={saveMut}
+          onPreview={(a) => setPreviewPath(a)}
+        />
       )}
 
       {tab === "steps" && (
@@ -543,7 +618,7 @@ export default function IdentityPage() {
       )}
 
       {tab === "pages" && (
-        <PagesTab cur={cur} set={set} saveMut={saveMut} />
+        <PagesTab cur={cur} set={set} saveMut={saveMut} onPreview={(a) => setPreviewPath(a)} />
       )}
 
       {tab === "contact" && (
@@ -655,7 +730,7 @@ export default function IdentityPage() {
       )}
         </div>
         <div className="min-w-0 xl:sticky xl:top-6">
-          <SitePreview tab={tab} reloadKey={previewKey} />
+          <SitePreview tab={tab} reloadKey={previewKey} path={previewPath} />
         </div>
       </div>
     </div>

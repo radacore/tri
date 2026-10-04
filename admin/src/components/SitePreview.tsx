@@ -28,12 +28,14 @@ function siteBase(): string {
 export default function SitePreview({
   tab,
   reloadKey,
+  path,
 }: {
   tab: string;
   reloadKey: number;
+  path?: string | null;
 }) {
   const base = siteBase();
-  const src = `${base}${TAB_ANCHOR[tab] ?? "/"}`;
+  const src = `${base}${path ?? TAB_ANCHOR[tab] ?? "/"}`;
   return (
     <div className="overflow-hidden rounded-[24px] border border-[#e2eceb] bg-white shadow-sm">
       <div className="flex items-center gap-2 border-b border-[#e2eceb] bg-surface-muted px-4 py-2.5">
