@@ -179,9 +179,20 @@ body {
 @keyframes badge-pop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .reveal-visible .badge-pop { animation: badge-pop .45s cubic-bezier(0.2,0,0,1) both; }
 
-/* scale-in */
-.scale-in { opacity: 0; transform: scale(.94); transition: opacity .6s ease, transform .6s cubic-bezier(0.2,0,0,1); }
-.reveal-visible.scale-in, .reveal-visible .scale-in { opacity: 1; transform: scale(1); }
+/* CTA banner — kecil di tengah dengan tinggi penuh, lalu melebar kiri-kanan.
+   Terikat .reveal-visible sehingga main ulang setiap masuk viewport. */
+@keyframes cta-in {
+  from { opacity: 0; transform: scaleX(0.05); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+#cta-banner {
+  opacity: 0;
+  transform-origin: center;
+}
+.reveal-visible #cta-banner,
+#cta-banner.reveal-visible {
+  animation: cta-in 0.7s cubic-bezier(0.2, 0, 0, 1) both;
+}
 
 /* crossfade card — mockup default, ganti ke logo saat hover / fokus keyboard */
 .crossfade .case-media { transition: opacity .4s ease; }
@@ -258,7 +269,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .tabular { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, .scale-in, .marquee-track, .marquee-track-rev, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+  .reveal, #cta-banner, .marquee-track, .marquee-track-rev, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
   #site-nav { animation: none !important; }
   html { scroll-behavior: auto; }
 }
