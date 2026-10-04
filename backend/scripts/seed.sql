@@ -157,3 +157,26 @@ UPDATE site_settings SET value = value || '{"pages.terms_h2": "2. Revisions."}' 
 UPDATE site_settings SET value = value || '{"pages.terms_h3": "3. Refunds."}' WHERE key='pages';
 UPDATE site_settings SET value = value || '{"pages.terms_h4": "4. Ownership."}' WHERE key='pages';
 UPDATE site_settings SET value = value || '{"pages.terms_h5": "5. Acceptable use."}' WHERE key='pages';
+
+-- Website Identity: hero collage images
+INSERT INTO site_settings (key, value) VALUES ('hero_images', '{"images": ["/hero/leo-1.jpg", "https://picsum.photos/seed/lp-c0-1/400/266.webp", "https://picsum.photos/seed/lp-c0-2/400/350.webp", "https://picsum.photos/seed/lp-c0-3/400/266.webp", "https://picsum.photos/seed/lp-c1-0/400/350.webp", "https://picsum.photos/seed/lp-c1-1/400/266.webp", "https://picsum.photos/seed/lp-c1-2/400/350.webp", "https://picsum.photos/seed/lp-c1-3/400/266.webp", "https://picsum.photos/seed/lp-c2-0/400/350.webp", "https://picsum.photos/seed/lp-c2-1/400/266.webp", "https://picsum.photos/seed/lp-c2-2/400/350.webp", "https://picsum.photos/seed/lp-c2-3/400/266.webp"]}') ON CONFLICT DO NOTHING;
+
+-- Website Identity: legal clauses fallback
+UPDATE site_settings SET value = value || '{"priv_b1": "Contact details and brief inputs needed to deliver your project. Orders are confirmed via WhatsApp or email, and payment is arranged manually \u2014 we never store card numbers."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"priv_b2": "We use your data to deliver designs, provide support, and improve our service. No sale of personal data, ever."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"priv_b3": "Project files are kept for 12 months for re-delivery, then archived. Contact us anytime to request deletion."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"priv_b4": "Privacy questions: "}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"priv_h1": "1. Data we collect."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"priv_h2": "2. Use."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"priv_h3": "3. Retention."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"priv_h4": "4. Contact."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_b1": "LogoPulse provides custom logo and brand-identity design with first concepts delivered within 48 hours of a complete brief."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_b2": "Starter includes 2 revision rounds; Professional includes unlimited rounds for 7 days; Premium includes unlimited rounds for 14 days plus priority support."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_b3": "If you are unhappy with the first concepts, request a full refund within 7 days of delivery. Refunded orders grant no license to use the concepts."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_b4": "Full ownership of the final approved artwork transfers to you upon final delivery (and completed payment), including vector source files."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_b5": "You agree not to request designs that infringe third-party trademarks or contain unlawful content."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_h1": "1. Service."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_h2": "2. Revisions."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_h3": "3. Refunds."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_h4": "4. Ownership."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"terms_h5": "5. Acceptable use."}' WHERE key='pages';

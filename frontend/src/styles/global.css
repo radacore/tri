@@ -76,7 +76,7 @@ body {
 @keyframes v-marquee-up { to { transform: translate3d(0, -50%, 0); } }
 @keyframes v-marquee-down { from { transform: translate3d(0, -50%, 0); } to { transform: translate3d(0, 0, 0); } }
 .v-track {
-  display: flex; flex-direction: column; gap: 1rem; width: max-content;
+  display: flex; flex-direction: column; gap: 1rem; width: 100%;
   will-change: transform; transform: translateZ(0);
   backface-visibility: hidden;
 }

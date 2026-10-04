@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { LockKeyhole } from "lucide-react";
 import { useAuth } from "../lib/auth";
 
@@ -14,8 +14,14 @@ type Form = z.infer<typeof schema>;
 export default function LoginPage() {
   const { login } = useAuth();
   const nav = useNavigate();
+  const [params] = useSearchParams();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [notice] = useState(
+    params.get("expired") === "1"
+      ? "Session expired. Please sign in again."
+      : ""
+  );
   const { register, handleSubmit, formState } = useForm<Form>();
 
   const onSubmit = async (v: Form) => {
@@ -84,6 +90,11 @@ export default function LoginPage() {
         {formState.errors.password && (
           <p className="mt-1 text-xs text-[#991b1b]">
             {formState.errors.password.message}
+          </p>
+        )}
+        {notice && !error && (
+          <p className="mt-3 rounded-[14px] bg-[#fef3c7] p-3 text-xs font-medium text-[#92400e]">
+            {notice}
           </p>
         )}
         {error && (

@@ -21,9 +21,13 @@
         <div class="v-collage v-mask relative mx-auto grid max-h-[630px] grid-cols-2 gap-4 overflow-hidden sm:grid-cols-3">
           {[0, 1, 2].map((col) => (
             <div class={`overflow-hidden ${col === 2 ? 'hidden sm:block' : ''}`}>
-              <div class={`v-track ${col % 2 === 0 ? 'v-track-up' : 'v-track-down'}`}>
+              <div class={`v-track ${col % 2 === 0 ? 'v-track-up' : 'v-track-down'}`} data-site-collage={col}>
                 {[0, 1, 2, 3].map((k) => [0, 1].map((dup) => (
-                  <img src={`https://picsum.photos/seed/lp-c${col}-${k}/400/${k % 2 === 0 ? 350 : 266}.webp`} alt="" width="400" height={k % 2 === 0 ? 350 : 266} loading="lazy" decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />
+                  col === 0 && k === 0 ? (
+                    <img src="/hero/leo-1.jpg" alt="Leo airline brand identity" width="400" height="350" loading="eager" decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />
+                  ) : (
+                    <img src={`https://picsum.photos/seed/lp-c${col}-${k}/400/${k % 2 === 0 ? 350 : 266}.webp`} alt="" width="400" height={k % 2 === 0 ? 350 : 266} loading="lazy" decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />
+                  )
                 )))}
               </div>
             </div>

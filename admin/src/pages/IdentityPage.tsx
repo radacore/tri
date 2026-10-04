@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { get, put } from "../api/client";
 import ImageUploader from "../components/ImageUploader";
 import SitePreview from "../components/SitePreview";
+import HeroImages from "../components/HeroImages";
 import { toast } from "../components/Layout";
 
 type Tab = "hero" | "sections" | "steps" | "pricing" | "pages" | "contact" | "media" | "footer";
@@ -18,9 +19,9 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "footer", label: "Footer & Socials" },
 ];
 
-const PAGE_GROUPS: { title: string; prefix: string; fields: [string, string][] }[] = [
+const PAGE_GROUPS: { title: string; desc: string; fields: [string, string][] }[] = [
   {
-    title: "Order page", prefix: "",
+    title: "Order page", desc: "Multi-step order form, review summary, and WhatsApp/email message template.",
     fields: [
       ["order_kicker", "Kicker"], ["order_title", "Title"], ["order_sub", "Subtitle"],
       ["order_s1", "Step 1"], ["order_s2", "Step 2"], ["order_s3", "Step 3"],
@@ -51,7 +52,7 @@ const PAGE_GROUPS: { title: string; prefix: string; fields: [string, string][] }
     ],
   },
   {
-    title: "Contact page", prefix: "",
+    title: "Contact page", desc: "Contact info cards and the message form.",
     fields: [
       ["contact_kicker", "Kicker"], ["contact_title", "Title"], ["contact_sub", "Subtitle"],
       ["contact_else", "Elsewhere label"], ["contact_fname", "Name label"],
@@ -60,11 +61,11 @@ const PAGE_GROUPS: { title: string; prefix: string; fields: [string, string][] }
     ],
   },
   {
-    title: "About page", prefix: "",
+    title: "About page", desc: "Studio story paragraphs.",
     fields: [["about_kicker", "Kicker"], ["about_title", "Title"], ["about_p1", "Paragraph 1"], ["about_p2", "Paragraph 2"]],
   },
   {
-    title: "Index & legal pages", prefix: "",
+    title: "Index & legal pages", desc: "Blog/case listing titles, legal page titles, and the 404 page.",
     fields: [
       ["blog_title", "Blog title"], ["cases_title", "Case studies title"],
       ["terms_title", "Terms title"], ["privacy_title", "Privacy title"],
@@ -73,7 +74,7 @@ const PAGE_GROUPS: { title: string; prefix: string; fields: [string, string][] }
     ],
   },
   {
-    title: "Legal clauses", prefix: "",
+    title: "Legal clauses", desc: "Terms and privacy clause headings and bodies.",
     fields: [
       ["terms_h1", "Terms 1 head"], ["terms_b1", "Terms 1 body"],
       ["terms_h2", "Terms 2 head"], ["terms_b2", "Terms 2 body"],
@@ -180,6 +181,72 @@ const FOOTER_FIELDS: [string, string, string][] = [
   ["copyright", "Copyright", "text"],
 ];
 
+function PagesTab({
+  cur,
+  set,
+  saveMut,
+}: {
+  cur: Record<string, Record<string, any>>;
+  set: (key: string, field: string, v: any) => void;
+  saveMut: { isPending: boolean; mutate: (v: { key: string; body: unknown }) => void };
+}) {
+  const [group, setGroup] = useState(0);
+  const g = PAGE_GROUPS[group];
+  const filled = g.fields.filter(([f]) => {
+    const v = cur.pages?.[f];
+    return typeof v === "string" && v.trim() !== "";
+  }).length;
+  return (
+    <div className="max-w-2xl space-y-4">
+      <div className="flex flex-wrap gap-1.5">
+        {PAGE_GROUPS.map((gg, i) => (
+          <button
+            key={gg.title}
+            type="button"
+            onClick={() => setGroup(i)}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+              i === group
+                ? "bg-dark text-white"
+                : "bg-white text-ink-secondary ring-1 ring-[#e2eceb] hover:text-ink-primary"
+            }`}
+          >
+            {gg.title}
+            <span className={`tabular ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] ${i === group ? "bg-white/20" : "bg-surface-muted"}`}>
+              {gg.fields.length}
+            </span>
+          </button>
+        ))}
+      </div>
+      <div className="rounded-[16px] bg-brand-subtle px-4 py-3 text-xs leading-relaxed text-ink-secondary">
+        <span className="font-bold text-ink-primary">{g.title}</span> — {g.desc}{" "}
+        <span className="tabular font-semibold text-ink-primary">
+          {filled}/{g.fields.length} filled
+        </span>
+      </div>
+      <div className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
+        {g.fields.map(([f, label]) => (
+          <TextRow
+            key={f}
+            label={label}
+            value={cur.pages?.[f] ?? ""}
+            onChange={(v) => set("pages", f, v)}
+            textarea={/_(sub|text|msg|notes|p1|p2)$/.test(f)}
+          />
+        ))}
+      </div>
+      <div className="mt-5 flex justify-end">
+        <button
+          className="btn-primary shadow-lg"
+          disabled={saveMut.isPending}
+          onClick={() => saveMut.mutate({ key: "pages", body: cur.pages ?? {} })}
+        >
+          {saveMut.isPending ? "Saving…" : "Save pages"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TextRow({
   label,
   value,
@@ -215,7 +282,7 @@ function TextRow({
 export default function IdentityPage() {
   const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>("hero");
-  const [local, setLocal] = useState<Record<string, Record<string, string>> | null>(null);
+  const [local, setLocal] = useState<Record<string, Record<string, any>> | null>(null);
 
   const { data } = useQuery({
     queryKey: ["settings"],
@@ -229,7 +296,7 @@ export default function IdentityPage() {
   });
   const server = data ?? {};
   const cur = local ?? server;
-  const set = (key: string, field: string, v: string) =>
+  const set = (key: string, field: string, v: any) =>
     setLocal({ ...cur, [key]: { ...(cur[key] ?? {}), [field]: v } });
 
   const saveMut = useMutation({
@@ -476,23 +543,7 @@ export default function IdentityPage() {
       )}
 
       {tab === "pages" && (
-        <div className="max-w-2xl space-y-4">
-          {PAGE_GROUPS.map((g) => (
-            <div key={g.title} className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
-              <h2 className="text-base font-semibold text-ink-primary">{g.title}</h2>
-              {g.fields.map(([f, label]) => (
-                <TextRow
-                  key={f}
-                  label={label}
-                  value={cur.pages?.[f] ?? ""}
-                  onChange={(v) => set("pages", f, v)}
-                  textarea={/_(sub|text|msg|notes|p1|p2)$/.test(f) || f.length > 200}
-                />
-              ))}
-            </div>
-          ))}
-          <SaveBar k="pages" />
-        </div>
+        <PagesTab cur={cur} set={set} saveMut={saveMut} />
       )}
 
       {tab === "contact" && (
@@ -564,6 +615,14 @@ export default function IdentityPage() {
             <ImageUploader
               value={cur.media?.og_image ?? ""}
               onChange={(url) => set("media", "og_image", url)}
+            />
+          </div>
+          <div>
+            <label className="label">Hero collage images (uploads via tombol di bawah, urutan = kiri ke kanan, dibagi rata ke 3 kolom)</label>
+            <HeroImages
+              value={cur.hero_images?.images ?? []}
+              saving={saveMut.isPending}
+              onSave={(imgs) => saveMut.mutate({ key: "hero_images", body: { images: imgs } })}
             />
           </div>
           <div>

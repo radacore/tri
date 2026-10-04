@@ -103,7 +103,23 @@ export function applySite(s: Settings) {
       )
       .join("");
   });
-  // logo: ganti badge "L" dengan <img> bila logo_url diisi
+  // kolase hero: bagi rata ke 3 kolom, tiap kolom digandakan untuk loop mulus
+  document.querySelectorAll("[data-site-collage]").forEach((track) => {
+    const all = get(s, "hero_images.images");
+    const list = Array.isArray(all) && all.length > 0 ? all : get(s, "hero_images");
+    if (!Array.isArray(list) || list.length === 0) return;
+    const col = Number(track.getAttribute("data-site-collage") || "0");
+    const per = Math.ceil(list.length / 3);
+    const slice = list.slice(col * per, col * per + per);
+    if (slice.length === 0) return;
+    const imgs = slice.concat(slice);
+    track.innerHTML = imgs
+      .map(
+        (src) =>
+          `<img src="${escHtml(String(src))}" alt="" width="400" height="350" loading="lazy" decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />`
+      )
+      .join("");
+  });
   const logo = get(s, "media.logo_url");
   if (typeof logo === "string" && logo !== "") {
     document.querySelectorAll("[data-site-logo]").forEach((el) => {

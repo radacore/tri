@@ -14,6 +14,22 @@ function authHeaders(extra?: HeadersInit): HeadersInit {
 }
 
 async function handle<T>(res: Response): Promise<T> {
+  if (res.status === 401) {
+    // Sesi kedaluwarsa / token tak valid: bersihkan + tendang ke login.
+    // Jangan redirect bila sudah di halaman login (hindari loop).
+    try {
+      localStorage.removeItem("logopulse_token");
+    } catch {
+      /* ignore */
+    }
+    if (
+      typeof window !== "undefined" &&
+      !window.location.pathname.endsWith("/login")
+    ) {
+      window.location.assign("/admin/login?expired=1");
+    }
+    throw new Error("Session expired. Please sign in again.");
+  }
   if (!res.ok) {
     let msg = `API ${res.status}`;
     try {
