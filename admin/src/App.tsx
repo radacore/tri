@@ -10,6 +10,7 @@ import CaseStudiesPage from "./pages/CaseStudiesPage";
 import BlogPage from "./pages/BlogPage";
 import TestimonialsPage from "./pages/TestimonialsPage";
 import ClientsPage from "./pages/ClientsPage";
+import CategoriesPage from "./pages/CategoriesPage";
 import IdentityPage from "./pages/IdentityPage";
 import SettingsPage from "./pages/SettingsPage";
 
@@ -42,6 +43,7 @@ export default function App() {
               <Route path="blog" element={<BlogPage />} />
               <Route path="testimonials" element={<TestimonialsPage />} />
               <Route path="clients" element={<ClientsPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
           <Route path="identity" element={<IdentityPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />

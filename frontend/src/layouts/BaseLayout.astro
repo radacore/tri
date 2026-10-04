@@ -29,13 +29,13 @@ const jsonLd = {
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={site + Astro.url.pathname} />
-  <meta property="og:image" content={site + '/og-cover.jpg'} />
+  <meta property="og:image" data-site-content="media.og_image" content={site + '/og-cover.jpg'} />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={site + '/og-cover.jpg'} />
   <meta name="theme-color" content="#0158FE" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/svg+xml" data-site-href="media.favicon" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link

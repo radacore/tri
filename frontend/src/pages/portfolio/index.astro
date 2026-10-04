@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { FALLBACK_PORTFOLIO } from '../../lib/api';
+const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
+---
+<BaseLayout title="Portfolio — LogoPulse">
+  <Navbar />
+  <main class="mx-auto max-w-content px-5 pt-32 pb-20">
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Portfolio</p>
+    <h1 class="mt-2 text-4xl font-extrabold tracking-tight">Selected work</h1>
+    <div id="pf-filters" class="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="Filter portfolio">
+      {filters.map((f, i) => (
+        <button
+          type="button"
+          data-filter={f}
+          aria-pressed={i === 0 ? 'true' : 'false'}
+          class={`pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold border transition ${i === 0 ? 'bg-black text-white border-black' : 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white'}`}
+        >{f}</button>
+      ))}
+    </div>
+    <div id="pf-grid" class="relative mt-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]">
+      {FALLBACK_PORTFOLIO.map((p) => (
+        <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class="pf-item group relative overflow-hidden rounded-2xl sm:rounded-3xl text-left">
+          <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="aspect-[4/3] h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
+          <span class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent" aria-hidden="true"></span>
+          <span class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true"></span>
+          <span class="absolute left-4 top-4 rounded-full bg-black/50 backdrop-blur-md text-white text-xs px-3 py-1 font-semibold">{p.category}</span>
+          <span class="absolute bottom-4 left-4 right-4 text-white font-medium text-base md:text-lg leading-snug">{p.title}</span>
+        </button>
+      ))}
+    </div>
+  </main>
+  <Footer />
+  <script>
+    (function () {
+      var btns = Array.from(document.querySelectorAll('.pf-btn'));
+      var items = Array.from(document.querySelectorAll('.pf-item'));
+      var grid = document.getElementById('pf-grid');
+      var PILL = 'pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold border transition ';
+      function paint(active) {
+        btns.forEach(function (b) {
+          var on = b.getAttribute('data-filter') === active;
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+          b.className = PILL + (on ? 'bg-black text-white border-black' : 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white');
+        });
+      }
+      function select(f) {
+        paint(f);
+        if (grid) grid.classList.toggle('pf-uniform', f !== 'All');
+        items.forEach(function (it) {
+          var show = f === 'All' || it.getAttribute('data-category') === f;
+          it.classList.toggle('pf-hidden', !show);
+        });
+      }
+      function bind() {
+        btns.forEach(function (b) {
+          b.addEventListener('click', function () { select(b.getAttribute('data-filter') || 'All'); });
+        });
+      }
+      bind();
+      try {
+        fetch('http://localhost:8080/api/v1/categories', { cache: 'no-store' }).then(function (r) {
+          return r.ok ? r.json() : null;
+        }).then(function (j) {
+          var list = (j && (j.data || j)) || [];
+          if (!Array.isArray(list) || list.length === 0) return;
+          var wrap = document.getElementById('pf-filters');
+          if (!wrap) return;
+          wrap.innerHTML = '';
+          ['All'].concat(list.map(function (c) { return c.name; })).forEach(function (name, i) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.setAttribute('data-filter', name);
+            b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+            b.className = PILL + (i === 0 ? 'bg-black text-white border-black' : 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white');
+            b.textContent = name;
+            wrap.appendChild(b);
+          });
+          btns = Array.from(wrap.querySelectorAll('.pf-btn'));
+          bind();
+        }).catch(function () {});
+      } catch (e) {}
+    })();
+  </script>
+</BaseLayout>

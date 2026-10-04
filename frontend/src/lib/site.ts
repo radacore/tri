@@ -54,6 +54,23 @@ export function applySite(s: Settings) {
     if (typeof v === "string" && v !== "")
       el.setAttribute("href", v);
   });
+  // placeholder input/textarea
+  document.querySelectorAll("[data-site-ph]").forEach((el) => {
+    const v = get(s, el.getAttribute("data-site-ph") || "");
+    if (typeof v === "string" && v !== "")
+      (el as HTMLInputElement | HTMLTextAreaElement).placeholder = v;
+  });
+  // <form action> (mailto tujuan)
+  document.querySelectorAll("[data-site-form]").forEach((el) => {
+    const v = get(s, el.getAttribute("data-site-form") || "");
+    if (typeof v === "string" && v !== "")
+      el.setAttribute("action", v);
+  });
+  document.querySelectorAll("meta[data-site-content]").forEach((el) => {
+    const v = get(s, el.getAttribute("data-site-content") || "");
+    if (typeof v === "string" && v !== "")
+      el.setAttribute("content", v);
+  });
   document.querySelectorAll<HTMLImageElement>("[data-site-src]").forEach(
     (el) => {
       const v = get(s, el.getAttribute("data-site-src") || "");

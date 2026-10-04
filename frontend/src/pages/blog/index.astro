@@ -8,7 +8,7 @@ import { FALLBACK_POSTS } from '../../lib/api';
   <Navbar />
   <main class="mx-auto max-w-content px-5 pt-32 pb-20">
     <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Blog</p>
-    <h1 class="mt-2 text-4xl font-extrabold tracking-tight">Branding advice for founders</h1>
+    <h1 class="mt-2 text-4xl font-extrabold tracking-tight" data-site="pages.blog_title">Branding advice for founders</h1>
     <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {FALLBACK_POSTS.map((p) => (
         <a href={`/blog/${p.slug}`} class="block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:shadow-xl transition hover:-translate-y-1" style="border-radius:20px">

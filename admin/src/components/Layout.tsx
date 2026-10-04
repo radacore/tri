@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import {
   BarChart2,
+  Tags,
   CheckCheck,
   FileText,
   Images,
@@ -34,6 +35,7 @@ const GROUPS: {
     items: [
       { to: "/testimonials", label: "Testimonials", icon: Quote },
       { to: "/clients", label: "Clients", icon: CheckCheck },
+      { to: "/categories", label: "Categories", icon: Tags },
       { to: "/identity", label: "Website Identity", icon: Palette },
     ],
   },

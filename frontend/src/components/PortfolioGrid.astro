@@ -13,7 +13,7 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
       <p class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-slate-500" data-site="sections.pf_kicker">Portfolio</p>
       <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight" data-site="sections.pf_title">Fresh work, shipped weekly</h2>
     </div>
-    <div class="flex flex-wrap gap-2" role="tablist" aria-label="Filter portfolio">
+    <div id="pf-filters" class="flex flex-wrap gap-2" role="tablist" aria-label="Filter portfolio">
       {filters.map((f, i) => (
         <button
           type="button"
@@ -25,7 +25,7 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
     </div>
   </div>
   <div id="pf-grid" class="relative mt-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]">
-    {FALLBACK_PORTFOLIO.map((p) => (
+    {FALLBACK_PORTFOLIO.slice(0, 6).map((p) => (
       <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class="pf-item group relative overflow-hidden rounded-2xl sm:rounded-3xl text-left">
         <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="aspect-[4/3] h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
           <span class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent" aria-hidden="true"></span>
@@ -34,6 +34,9 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
           <span class="absolute bottom-4 left-4 right-4 text-white font-medium text-base md:text-lg leading-snug">{p.title}</span>
         </button>
       ))}
+  </div>
+  <div class="mt-8 text-center">
+    <a href="/portfolio" class="btn-active inline-block rounded-full bg-dark px-8 py-3.5 text-sm font-bold text-white hover:bg-slate-800">View all work →</a>
   </div>
   <dialog id="pf-lightbox" class="rounded-2xl p-0 backdrop:bg-slate-950/70 max-w-3xl w-[calc(100%-2rem)]">
     <div class="relative">
@@ -65,7 +68,9 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
     var ASPECTS = ['aspect-square', 'aspect-[16/9]', 'aspect-[3/4]', 'aspect-[4/3]'];
     var SPANS = ['md:col-span-2', 'md:row-span-2'];
     function shuffle() {
-      var deck = ['l', 'w', 's', 's', 't', 's', 's', 'l'];
+      // Homepage (6 item): multiset W,W,S,S,S,S = 8 sel = 2 baris penuh.
+      // Selalu pas tanpa lubang di susunan apapun (dense flow).
+      var deck = ['w', 'w', 's', 's', 's', 's'];
       for (var k = deck.length - 1; k > 0; k--) {
         var r = Math.floor(Math.random() * (k + 1));
         var tmp = deck[k]; deck[k] = deck[r]; deck[r] = tmp;
@@ -82,6 +87,39 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
       });
     }
     shuffle();
+    // Filter pills dari admin (/categories); gagal = pakai bawaan HTML.
+    try {
+      var base = (window.__lpApiBase || 'http://localhost:8080/api/v1');
+      fetch(base + '/categories', { cache: 'no-store' }).then(function (r) {
+        return r.ok ? r.json() : null;
+      }).then(function (j) {
+        var list = (j && (j.data || j)) || [];
+        if (!Array.isArray(list) || list.length === 0) return;
+        var wrap = document.getElementById('pf-filters');
+        if (!wrap) return;
+        var names = ['All'].concat(list.map(function (c) { return c.name; }));
+        wrap.innerHTML = '';
+        names.forEach(function (name, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.setAttribute('data-filter', name);
+          b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+          b.className = pillBase + ' ' + (i === 0 ? pillOn : pillOff);
+          b.textContent = name;
+          b.addEventListener('click', function () { selectFilter(name); });
+          wrap.appendChild(b);
+        });
+        btns = Array.from(wrap.querySelectorAll('.pf-btn'));
+      }).catch(function () {});
+    } catch (e) {}
+    function selectFilter(f) {
+      paint(f);
+      if (grid) grid.classList.toggle('pf-uniform', f !== 'All');
+      items.forEach(function (it) {
+        var show = f === 'All' || it.getAttribute('data-category') === f;
+        it.classList.toggle('pf-hidden', !show);
+      });
+    }
     function paint(active) {
       btns.forEach(function (b) {
         var on = b.getAttribute('data-filter') === active;
@@ -91,15 +129,7 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
     }
     btns.forEach(function (b) {
       b.addEventListener('click', function () {
-        var f = b.getAttribute('data-filter') || 'All';
-        paint(f);
-        // Filter non-All: seragam 1 ukuran (4 per baris) via class grid;
-        // 'All' kembali ke susunan acak.
-        if (grid) grid.classList.toggle('pf-uniform', f !== 'All');
-        items.forEach(function (it) {
-          var show = f === 'All' || it.getAttribute('data-category') === f;
-          it.classList.toggle('pf-hidden', !show);
-        });
+        selectFilter(b.getAttribute('data-filter') || 'All');
       });
     });
     var dlg = document.getElementById('pf-lightbox');

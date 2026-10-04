@@ -76,7 +76,7 @@ INSERT INTO site_settings (key, value) VALUES
  ('hero', '{"badge":"ACCEPTING NEW PROJECTS — 3 SLOTS LEFT THIS WEEK","t1":"A logo that sells,","t2":"ready in 48 hours","t3":" — or your ","t4":"money back","sub":"Custom logo & brand identity for startups. From $49. No templates, no contests, no waiting weeks.","cta1":"View Pricing — from $49","cta2":"See Our Work","s1v":"48h","s1l":"avg. delivery","s2v":"2,400+","s2l":"logos delivered","s3v":"100%","s3l":"money-back promise"}'),
  ('sections', '{"logos_heading":"Trusted by 2,400+ startups","cases_kicker":"Case studies","cases_title":"Logos that moved the numbers","cases_all":"All case studies →","pf_kicker":"Portfolio","pf_title":"Fresh work, shipped weekly","how_kicker":"How it works","how_title":"From brief to brand in 4 steps","price_kicker":"Pricing","price_title":"One payment. Yours forever.","price_sub":"No subscriptions. 100% money-back guarantee on every plan.","rev_kicker":"Reviews","rev_title":"Loved by founders worldwide","rev_sub":"★ 4.9 average across 500+ verified orders","guar_title":"100% money-back guarantee","guar_text":"If the first concepts don''t excite you, we refund every cent within 7 days. No forms, no hard feelings.","faq_kicker":"FAQ","faq_title":"Questions, answered","cta_kicker":"100% money-back guarantee","cta_t1":"Your new logo is ","cta_t2":"48 hours","cta_t3":" away","cta_sub":"Join 2,400+ founders who stopped worrying about branding and got back to building.","cta_b1":"Start My Logo — $149","cta_b2":"Browse Case Studies"}'),
  ('faqs', '[{"q":"How fast is delivery, really?","a":"First concepts land within 48 hours of your brief. Most projects finalize within 3–5 days including revisions."},{"q":"What if I hate the designs?","a":"Then you pay nothing. Every plan carries a 100% money-back guarantee — just tell us within 7 days and we refund you in full."},{"q":"Do I own the logo?","a":"Yes. Full ownership transfers to you on delivery, including vector source files and a signed transfer note on Premium."},{"q":"What files do I get?","a":"Starter: PNG + JPG. Professional and Premium add AI, SVG, EPS, PDF vectors plus color/font guides and social packs."},{"q":"How do revisions work?","a":"Reply with notes and we turn a new round around fast — usually same-day. Professional includes unlimited rounds for 7 days."},{"q":"Can you match my existing brand?","a":"Absolutely. Share your colors, fonts, or references in the brief and we design within (or evolve) your system."}]'),
- ('media', '{"logo_url":"","og_image":""}'),
+ ('media', '{"logo_url":"","og_image":"","favicon":""}'),
  ('footer', '{"tagline":"Custom logo & brand identity for startups. Ready in 48 hours, guaranteed.","x_url":"https://x.com","instagram_url":"https://instagram.com","dribbble_url":"https://dribbble.com","linkedin_url":"https://linkedin.com","rating":"★ 4.9/5 from 500+ verified reviews","copyright":"© 2026 LogoPulse. All rights reserved. Made for founders who ship."}')
 ON CONFLICT (key) DO NOTHING;
 
@@ -87,7 +87,73 @@ INSERT INTO site_settings (key, value) VALUES
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
 
 -- Website Identity: highlight + teks kecil (upsert)
+
+-- Website Identity: nav, contact, pages (upsert)
 INSERT INTO site_settings (key, value) VALUES
- ('highlight', '{"quote":"“We looked like a weekend project. Two days later we looked fundable — our demo-day deck finally matched our ambition.”","role":"Founder, Nexora — raised $1.2M after rebrand"}'),
- ('sections', '{"logos_heading":"Trusted by 2,400+ startups","badge_by":"by 500+ founders","price_popular":"Most Popular","price_onetime":" one-time"}')
-ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value || (SELECT value FROM site_settings WHERE key = EXCLUDED.key), updated_at = NOW();
+ ('nav', '{"cta": "View Pricing"}'),
+ ('contact', '{"email": "hello@logopulse.co", "wa_number": "6281241525485", "order_email": "hello@logopulse.co", "hours": "Mon\u2013Fri, 9:00\u201318:00 UTC"}'),
+ ('pages', '{"order_kicker": "Order", "order_title": "Start your logo", "order_sub": "Fill a short brief, then send it straight via WhatsApp or email \u2014 no upfront payment.", "order_s1": "1 \u00b7 Brief", "order_s2": "2 \u00b7 Review", "order_s3": "3 \u00b7 Send", "order_f_name": "Your name", "order_ph_name": "Full name", "order_f_biz": "Company / brand name", "order_ph_biz": "Acme Inc.", "order_f_ind": "Industry", "order_ph_ind": "SaaS, caf\u00e9, fashion\u2026", "order_f_target": "Target market", "order_ph_target": "E.g. young moms 25\u201335, Jakarta", "order_f_contact": "Email or WhatsApp number", "order_ph_contact": "you@company.com / 0812\u2026", "order_f_vibe": "Style / vibe", "order_vibe_hint": "Pick up to 3 \u2014 this replaces the discovery call.", "order_f_color": "Color references", "order_f_custom": "Custom", "order_f_notes": "References / things to avoid", "order_ph_notes": "Links you love, styles to avoid\u2026", "order_review": "Review my brief \u2192", "order_review_title": "Review your order", "order_back": "\u2190 Back", "order_continue": "Continue to send \u2192", "order_send_title": "Send your order", "order_send_sub": "Pick how to send \u2014 your brief arrives neatly formatted. 100% money-back guarantee.", "order_wa": "Send via WhatsApp \u2192", "order_mail": "Send via Email \u2192", "contact_kicker": "Contact", "contact_title": "Say hello", "contact_sub": "Average reply time: under 4 business hours.", "about_kicker": "About", "about_title": "Designers who ship as fast as you do", "about_p1": "LogoPulse is a senior-only design team obsessed with one thing: giving startups a brand they are proud of \u2014 in 48 hours, not 6 weeks. Since 2022 we have delivered 2,400+ identities across SaaS, F&B, fashion, and health.", "about_p2": "No templates, no contests, no junior outsourcing. Every concept is drawn from scratch, and every order is backed by a 100% money-back guarantee.", "blog_title": "Branding advice for founders", "cases_title": "Results, not just pretty marks", "terms_title": "Terms of Service", "privacy_title": "Privacy Policy", "n404_title": "This page went off-brand", "n404_text": "The link you followed doesn''t exist. Let''s get you back to good design.", "n404_home": "Back home", "n404_pricing": "View pricing"}')
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
+UPDATE site_settings SET value = value || '{"order_r_plan": "Plan"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_r_name": "Name"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_r_biz": "Company"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_r_ind": "Industry"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_r_target": "Target"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_r_vibe": "Vibe"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_r_color": "Colors"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_r_contact": "Contact"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_r_notes": "References"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_alert": "Please fill in your name and company/brand first."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_alert_vibe": "Pick at least 1 vibe."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_greet": "Hello LogoPulse! I want to order a logo:"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_name": "Name"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_biz": "Company"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_plan": "Plan"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_ind": "Industry"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_target": "Target"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_vibe": "Vibe"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_color": "Colors"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_contact": "Contact"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"wa_notes": "References"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"mail_subj": "Logo order"}' WHERE key='pages';
+INSERT INTO site_settings (key, value) VALUES ('pages', '{}') ON CONFLICT DO NOTHING;
+
+-- Website Identity: color picker labels
+UPDATE site_settings SET value = value || '{"order_cp_title": "Pick a custom color"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_cp_use": "Use this color"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_cp_cancel": "Cancel"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"order_cp_remove": "Remove"}' WHERE key='pages';
+
+-- Website Identity: contact display + form labels
+UPDATE site_settings SET value = value || '{"email": "hello@logopulse.co"}' WHERE key='contact';
+UPDATE site_settings SET value = value || '{"email_href": "mailto:hello@logopulse.co"}' WHERE key='contact';
+UPDATE site_settings SET value = value || '{"hours": "Mon\u2013Fri, 9:00\u201318:00 UTC"}' WHERE key='contact';
+UPDATE site_settings SET value = value || '{"contact_else": "Elsewhere"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"contact_fname": "Name"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"contact_femail": "Email"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"contact_fmsg": "Message"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"contact_ph_msg": "Tell us about your project\u2026"}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"contact_send": "Send message"}' WHERE key='pages';
+
+-- Website Identity: legal clauses
+UPDATE site_settings SET value = value || '{"priv_b1": "Privacy questions: "}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"priv_h1": "4. Contact."}' WHERE key='pages';
+-- Website Identity: legal clauses (underscore keys)
+UPDATE site_settings SET value = value || '{"pages.priv_b1": "Contact details and brief inputs needed to deliver your project. Orders are confirmed via WhatsApp or email, and payment is arranged manually \u2014 we never store card numbers."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.priv_b2": "We use your data to deliver designs, provide support, and improve our service. No sale of personal data, ever."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.priv_b3": "Project files are kept for 12 months for re-delivery, then archived. Contact us anytime to request deletion."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.priv_b4": "Privacy questions: "}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.priv_h1": "1. Data we collect."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.priv_h2": "2. Use."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.priv_h3": "3. Retention."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.priv_h4": "4. Contact."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_b1": "LogoPulse provides custom logo and brand-identity design with first concepts delivered within 48 hours of a complete brief."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_b2": "Starter includes 2 revision rounds; Professional includes unlimited rounds for 7 days; Premium includes unlimited rounds for 14 days plus priority support."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_b3": "If you are unhappy with the first concepts, request a full refund within 7 days of delivery. Refunded orders grant no license to use the concepts."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_b4": "Full ownership of the final approved artwork transfers to you upon final delivery (and completed payment), including vector source files."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_b5": "You agree not to request designs that infringe third-party trademarks or contain unlawful content."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_h1": "1. Service."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_h2": "2. Revisions."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_h3": "3. Refunds."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_h4": "4. Ownership."}' WHERE key='pages';
+UPDATE site_settings SET value = value || '{"pages.terms_h5": "5. Acceptable use."}' WHERE key='pages';

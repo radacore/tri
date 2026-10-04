@@ -291,6 +291,12 @@ Admin panel adalah SPA (Single Page Application) terpisah yang berkomunikasi den
 - Upload SVG/PNG logo
 - Reorder (drag to sort)
 
+**Kelola Kategori (`/admin/categories`):**
+- CRUD kategori portfolio (nama, slug, urutan) + jumlah item per kategori
+- Rename kategori memindahkan semua item otomatis (tanpa yatim)
+- Hapus kategori berisi item wajib pindahkan dulu (`?reassign=`)
+- Filter portfolio di landing + halaman `/portfolio` membaca daftar ini (dinamis)
+
 **Identitas Website (`/admin/identity`):**
 - Tab Hero / Sections / Pricing & FAQ / Media / Footer & Socials — semua teks & gambar landing
 - disimpan per-key (`hero`, `sections`, `pricing`, `faqs`, `how_steps`, `media`, `footer`), landing override saat load, API mati = fallback bawaan

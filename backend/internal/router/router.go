@@ -45,6 +45,7 @@ func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {
 		r.Get("/blog/{slug}", handlers.GetBlogPost(pool))
 		r.Get("/testimonials", handlers.ListTestimonials(pool))
 		r.Get("/client-logos", handlers.ListClientLogos(pool))
+		r.Get("/categories", handlers.ListCategories(pool))
 		r.Get("/settings", handlers.GetPublicSettings(pool))
 
 		// Auth (rate limited)
@@ -82,6 +83,11 @@ func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {
 			r.Post("/admin/clients", handlers.AdminCreateClient(pool))
 			r.Put("/admin/clients/{id}", handlers.AdminUpdateClient(pool))
 			r.Delete("/admin/clients/{id}", handlers.AdminDeleteClient(pool))
+			// Categories
+			r.Get("/admin/categories", handlers.ListCategories(pool))
+			r.Post("/admin/categories", handlers.AdminCreateCategory(pool))
+			r.Put("/admin/categories/{id}", handlers.AdminUpdateCategory(pool))
+			r.Delete("/admin/categories/{id}", handlers.AdminDeleteCategory(pool))
 			// Upload + settings
 			r.Post("/admin/upload", handlers.UploadFile(cfg))
 			r.Get("/admin/settings", handlers.GetSettings(pool))

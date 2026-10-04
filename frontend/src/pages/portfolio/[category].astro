@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { FALLBACK_PORTFOLIO } from '../../lib/api';
+
+export async function getStaticPaths() {
+  let slugs: string[] = ['tech', 'fnb', 'fashion', 'health'];
+  try {
+    const r = await fetch('http://localhost:8080/api/v1/categories');
+    if (r.ok) {
+      const j = await r.json();
+      const list = j?.data ?? j;
+      if (Array.isArray(list) && list.length > 0) slugs = list.map((c: any) => String(c.slug));
+    }
+  } catch { /* build offline — fallback slugs */ }
+  return slugs.map((slug) => ({ params: { category: slug } }));
+}
+
+const { category } = Astro.params;
+---
+<BaseLayout title="Portfolio — LogoPulse">
+  <Navbar />
+  <main class="mx-auto max-w-content px-5 pt-32 pb-20">
+    <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-slate-500">
+      <a href="/" class="hover:text-primary">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="/portfolio" class="hover:text-primary">Portfolio</a>
+      <span aria-hidden="true">/</span>
+      <span id="crumb-name" class="font-semibold capitalize text-slate-900">{category}</span>
+    </nav>
+    <h1 id="cat-title" class="mt-4 text-4xl font-extrabold capitalize tracking-tight">{category}</h1>
+    <p id="cat-count" class="mt-2 text-sm text-slate-500"></p>
+    <div id="pf-grid" class="relative mt-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]">
+      {FALLBACK_PORTFOLIO.map((p) => (
+        <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class="pf-item group relative overflow-hidden rounded-2xl sm:rounded-3xl text-left">
+          <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="aspect-[4/3] h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
+          <span class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent" aria-hidden="true"></span>
+          <span class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true"></span>
+          <span class="absolute left-4 top-4 rounded-full bg-black/50 backdrop-blur-md text-white text-xs px-3 py-1 font-semibold">{p.category}</span>
+          <span class="absolute bottom-4 left-4 right-4 text-white font-medium text-base md:text-lg leading-snug">{p.title}</span>
+        </button>
+      ))}
+    </div>
+    <div id="cat-nav" class="mt-10 flex flex-wrap gap-2"></div>
+  </main>
+  <Footer />
+  <script define:vars={{ slug: category }}>
+    (function () {
+      var base = 'http://localhost:8080/api/v1';
+      var items = Array.from(document.querySelectorAll('.pf-item'));
+      function applyFilter(name) {
+        var shown = 0;
+        items.forEach(function (it) {
+          var show = it.getAttribute('data-category') === name;
+          it.classList.toggle('pf-hidden', !show);
+          if (show) shown++;
+        });
+        var c = document.getElementById('cat-count');
+        if (c) c.textContent = shown + (shown === 1 ? ' work' : ' works');
+      }
+      function renderNav(list) {
+        var nav = document.getElementById('cat-nav');
+        if (!nav) return;
+        nav.innerHTML = '';
+        list.forEach(function (c) {
+          var a = document.createElement('a');
+          a.href = '/portfolio/' + c.slug;
+          a.className = 'rounded-full px-4 py-2 text-sm font-bold border transition ' +
+            (c.slug === slug ? 'bg-black text-white border-black' : 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white');
+          a.textContent = c.name;
+          nav.appendChild(a);
+        });
+      }
+      fetch(base + '/categories', { cache: 'no-store' }).then(function (r) {
+        return r.ok ? r.json() : null;
+      }).then(function (j) {
+        var list = (j && (j.data || j)) || [];
+        if (!Array.isArray(list) || list.length === 0) return;
+        var found = null;
+        list.forEach(function (c) { if (c.slug === slug) found = c; });
+        if (!found) return;
+        var t = document.getElementById('cat-title');
+        if (t) t.textContent = found.name;
+        var cr = document.getElementById('crumb-name');
+        if (cr) cr.textContent = found.name;
+        document.title = found.name + ' — LogoPulse Portfolio';
+        renderNav(list);
+        applyFilter(found.name);
+      }).catch(function () {});
+      renderNav([]);
+      // fallback pra-API: tebak nama dari slug
+      applyFilter(slug.charAt(0).toUpperCase() + slug.slice(1));
+    })();
+  </script>
+</BaseLayout>

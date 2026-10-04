@@ -7,20 +7,20 @@ import Footer from '../components/Footer.astro';
   <Navbar />
   <main class="mx-auto max-w-content px-5 pt-32 pb-20 grid gap-8 md:grid-cols-2">
     <div>
-      <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Contact</p>
-      <h1 class="mt-2 text-4xl font-extrabold tracking-tight">Say hello</h1>
-      <p class="mt-3 text-slate-500">Average reply time: under 4 business hours.</p>
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary" data-site="pages.contact_kicker">Contact</p>
+      <h1 class="mt-2 text-4xl font-extrabold tracking-tight" data-site="pages.contact_title">Say hello</h1>
+      <p class="mt-3 text-slate-500" data-site="pages.contact_sub">Average reply time: under 4 business hours.</p>
       <ul class="mt-6 space-y-3 text-sm">
-        <li class="rounded-2xl bg-white p-4 ring-1 ring-slate-200" style="border-radius:20px"><strong>Email</strong><br /><a class="text-primary font-bold" href="mailto:hello@logopulse.example.com">hello@logopulse.example.com</a></li>
-        <li class="rounded-2xl bg-white p-4 ring-1 ring-slate-200" style="border-radius:20px"><strong>Hours</strong><br /><span>Mon–Fri, 9:00–18:00 UTC</span></li>
-        <li class="rounded-2xl bg-white p-4 ring-1 ring-slate-200" style="border-radius:20px"><strong>Elsewhere</strong><br />X · Instagram · Dribbble · LinkedIn</li>
+        <li class="rounded-2xl bg-white p-4 ring-1 ring-slate-200" style="border-radius:20px"><strong>Email</strong><br /><a class="text-primary font-bold" data-site-href="contact.email_href" href="mailto:hello@logopulse.co"><span data-site="contact.email">hello@logopulse.co</span></a></li>
+        <li class="rounded-2xl bg-white p-4 ring-1 ring-slate-200" style="border-radius:20px"><strong>Hours</strong><br /><span data-site="contact.hours">Mon–Fri, 9:00–18:00 UTC</span></li>
+        <li class="rounded-2xl bg-white p-4 ring-1 ring-slate-200" style="border-radius:20px"><strong data-site="pages.contact_else">Elsewhere</strong><br />X · Instagram · Dribbble · LinkedIn</li>
       </ul>
     </div>
-    <form action="mailto:hello@logopulse.example.com" method="post" enctype="text/plain" class="h-fit rounded-2xl bg-white p-6 ring-1 ring-slate-900/10 shadow-sm" style="border-radius:20px">
-      <label class="block text-sm font-bold"><span>Name</span><input required name="name" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Ada Lovelace" /></label>
-      <label class="mt-4 block text-sm font-bold"><span>Email</span><input required type="email" name="email" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="ada@company.com" /></label>
-      <label class="mt-4 block text-sm font-bold"><span>Message</span><textarea required name="body" rows="5" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Tell us about your project…"></textarea></label>
-      <button type="submit" class="btn-active mt-5 w-full rounded-full bg-primary px-6 py-3.5 text-sm font-bold text-white hover:bg-primary-hover">Send message</button>
+    <form action="mailto:hello@logopulse.co" data-site-form="contact.email_href" method="post" enctype="text/plain" class="h-fit rounded-2xl bg-white p-6 ring-1 ring-slate-900/10 shadow-sm" style="border-radius:20px">
+      <label class="block text-sm font-bold"><span data-site="pages.contact_fname">Name</span><input required name="name" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Ada Lovelace" /></label>
+      <label class="mt-4 block text-sm font-bold"><span data-site="pages.contact_femail">Email</span><input required type="email" name="email" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="ada@company.com" /></label>
+      <label class="mt-4 block text-sm font-bold"><span data-site="pages.contact_fmsg">Message</span><textarea required name="body" rows="5" data-site-ph="pages.contact_ph_msg" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Tell us about your project…"></textarea></label>
+      <button type="submit" data-site="pages.contact_send" class="btn-active mt-5 w-full rounded-full bg-primary px-6 py-3.5 text-sm font-bold text-white hover:bg-primary-hover">Send message</button>
     </form>
   </main>
   <Footer />

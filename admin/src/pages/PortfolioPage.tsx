@@ -9,6 +9,7 @@ import {
   type PortfolioItem,
 } from "../api/client";
 import ImageUploader from "../components/ImageUploader";
+import CategorySelect from "../components/CategorySelect";
 import { useConfirm } from "../components/ConfirmDialog";
 import { toast } from "../components/Layout";
 import Badge from "../components/Badge";
@@ -159,7 +160,10 @@ export default function PortfolioPage() {
               </div>
               <div>
                 <label className="label">Category</label>
-                <input className="input" value={modal.category} onChange={(e) => setModal({ ...modal, category: e.target.value })} />
+                <CategorySelect
+                  value={modal.category}
+                  onChange={(v) => setModal({ ...modal, category: v })}
+                />
               </div>
               <div>
                 <label className="label">Sort order</label>

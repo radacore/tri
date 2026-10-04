@@ -5,15 +5,87 @@ import ImageUploader from "../components/ImageUploader";
 import SitePreview from "../components/SitePreview";
 import { toast } from "../components/Layout";
 
-type Tab = "hero" | "sections" | "steps" | "pricing" | "media" | "footer";
+type Tab = "hero" | "sections" | "steps" | "pricing" | "pages" | "contact" | "media" | "footer";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "hero", label: "Hero" },
   { id: "sections", label: "Sections" },
   { id: "steps", label: "Steps" },
   { id: "pricing", label: "Pricing & FAQ" },
+  { id: "pages", label: "Pages" },
+  { id: "contact", label: "Nav & Contact" },
   { id: "media", label: "Media" },
   { id: "footer", label: "Footer & Socials" },
+];
+
+const PAGE_GROUPS: { title: string; prefix: string; fields: [string, string][] }[] = [
+  {
+    title: "Order page", prefix: "",
+    fields: [
+      ["order_kicker", "Kicker"], ["order_title", "Title"], ["order_sub", "Subtitle"],
+      ["order_s1", "Step 1"], ["order_s2", "Step 2"], ["order_s3", "Step 3"],
+      ["order_f_name", "Name label"], ["order_ph_name", "Name placeholder"],
+      ["order_f_biz", "Company label"], ["order_ph_biz", "Company placeholder"],
+      ["order_f_ind", "Industry label"], ["order_ph_ind", "Industry placeholder"],
+      ["order_f_target", "Target label"], ["order_ph_target", "Target placeholder"],
+      ["order_f_contact", "Contact label"], ["order_ph_contact", "Contact placeholder"],
+      ["order_f_vibe", "Vibe label"], ["order_vibe_hint", "Vibe hint"],
+      ["order_f_color", "Colors label"], ["order_f_custom", "Custom label"],
+      ["order_f_notes", "Notes label"], ["order_ph_notes", "Notes placeholder"],
+      ["order_review", "Review button"], ["order_review_title", "Review title"],
+      ["order_back", "Back button"], ["order_continue", "Continue button"],
+      ["order_send_title", "Send title"], ["order_send_sub", "Send subtitle"],
+      ["order_wa", "WhatsApp button"], ["order_mail", "Email button"],
+      ["order_alert", "Missing fields alert"], ["order_alert_vibe", "Missing vibe alert"],
+      ["order_r_plan", "Summary: plan"], ["order_r_name", "Summary: name"],
+      ["order_r_biz", "Summary: company"], ["order_r_ind", "Summary: industry"],
+      ["order_r_target", "Summary: target"], ["order_r_vibe", "Summary: vibe"],
+      ["order_r_color", "Summary: colors"], ["order_r_contact", "Summary: contact"],
+      ["order_r_notes", "Summary: references"],
+      ["wa_greet", "WA greeting"], ["wa_name", "WA: name"], ["wa_biz", "WA: company"],
+      ["wa_plan", "WA: plan"], ["wa_ind", "WA: industry"], ["wa_target", "WA: target"],
+      ["wa_vibe", "WA: vibe"], ["wa_color", "WA: colors"], ["wa_contact", "WA: contact"],
+      ["wa_notes", "WA: references"], ["mail_subj", "Email subject"],
+      ["order_cp_title", "Picker title"], ["order_cp_use", "Picker use"],
+      ["order_cp_cancel", "Picker cancel"], ["order_cp_remove", "Picker remove"],
+    ],
+  },
+  {
+    title: "Contact page", prefix: "",
+    fields: [
+      ["contact_kicker", "Kicker"], ["contact_title", "Title"], ["contact_sub", "Subtitle"],
+      ["contact_else", "Elsewhere label"], ["contact_fname", "Name label"],
+      ["contact_femail", "Email label"], ["contact_fmsg", "Message label"],
+      ["contact_ph_msg", "Message placeholder"], ["contact_send", "Send button"],
+    ],
+  },
+  {
+    title: "About page", prefix: "",
+    fields: [["about_kicker", "Kicker"], ["about_title", "Title"], ["about_p1", "Paragraph 1"], ["about_p2", "Paragraph 2"]],
+  },
+  {
+    title: "Index & legal pages", prefix: "",
+    fields: [
+      ["blog_title", "Blog title"], ["cases_title", "Case studies title"],
+      ["terms_title", "Terms title"], ["privacy_title", "Privacy title"],
+      ["n404_title", "404 title"], ["n404_text", "404 text"],
+      ["n404_home", "404 home button"], ["n404_pricing", "404 pricing button"],
+    ],
+  },
+  {
+    title: "Legal clauses", prefix: "",
+    fields: [
+      ["terms_h1", "Terms 1 head"], ["terms_b1", "Terms 1 body"],
+      ["terms_h2", "Terms 2 head"], ["terms_b2", "Terms 2 body"],
+      ["terms_h3", "Terms 3 head"], ["terms_b3", "Terms 3 body"],
+      ["terms_h4", "Terms 4 head"], ["terms_b4", "Terms 4 body"],
+      ["terms_h5", "Terms 5 head"], ["terms_b5", "Terms 5 body"],
+      ["priv_h1", "Privacy 1 head"], ["priv_b1", "Privacy 1 body"],
+      ["priv_h2", "Privacy 2 head"], ["priv_b2", "Privacy 2 body"],
+      ["priv_h3", "Privacy 3 head"], ["priv_b3", "Privacy 3 body"],
+      ["priv_h4", "Privacy 4 head"], ["priv_b4", "Privacy 4 body"],
+    ],
+  },
 ];
 
 const HERO_FIELDS: [string, string][] = [
@@ -403,6 +475,76 @@ export default function IdentityPage() {
         </div>
       )}
 
+      {tab === "pages" && (
+        <div className="max-w-2xl space-y-4">
+          {PAGE_GROUPS.map((g) => (
+            <div key={g.title} className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
+              <h2 className="text-base font-semibold text-ink-primary">{g.title}</h2>
+              {g.fields.map(([f, label]) => (
+                <TextRow
+                  key={f}
+                  label={label}
+                  value={cur.pages?.[f] ?? ""}
+                  onChange={(v) => set("pages", f, v)}
+                  textarea={/_(sub|text|msg|notes|p1|p2)$/.test(f) || f.length > 200}
+                />
+              ))}
+            </div>
+          ))}
+          <SaveBar k="pages" />
+        </div>
+      )}
+
+      {tab === "contact" && (
+        <div className="max-w-2xl space-y-4">
+          <div className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
+            <h2 className="text-base font-semibold text-ink-primary">Navbar</h2>
+            <TextRow
+              label="CTA button"
+              value={cur.nav?.cta ?? ""}
+              onChange={(v) => set("nav", "cta", v)}
+            />
+          </div>
+          <div className="space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
+            <h2 className="text-base font-semibold text-ink-primary">Contact channels</h2>
+            {[
+              ["email", "Public email"],
+              ["email_href", "Email link (mailto:…)"],
+              ["hours", "Office hours"],
+              ["wa_number", "WhatsApp number (order target)"],
+              ["order_email", "Order email target"],
+            ].map(([f, label]) => (
+              <TextRow
+                key={f}
+                label={label}
+                value={cur.contact?.[f] ?? ""}
+                onChange={(v) => set("contact", f, v)}
+              />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="sticky bottom-4 mt-5 flex justify-end">
+              <button
+                className="btn-primary shadow-lg"
+                disabled={saveMut.isPending}
+                onClick={() => saveMut.mutate({ key: "nav", body: cur.nav ?? {} })}
+              >
+                {saveMut.isPending ? "Saving…" : "Save nav"}
+              </button>
+            </div>
+            <div className="sticky bottom-4 mt-5 flex justify-end">
+              <button
+                className="btn-primary shadow-lg"
+                disabled={saveMut.isPending}
+                onClick={() => saveMut.mutate({ key: "contact", body: cur.contact ?? {} })}
+              >
+                {saveMut.isPending ? "Saving…" : "Save contact"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {tab === "media" && (
         <div className="max-w-2xl space-y-4 rounded-[24px] bg-white p-5 shadow-sm">
           <h2 className="text-base font-semibold text-ink-primary">Site media</h2>
@@ -422,6 +564,13 @@ export default function IdentityPage() {
             <ImageUploader
               value={cur.media?.og_image ?? ""}
               onChange={(url) => set("media", "og_image", url)}
+            />
+          </div>
+          <div>
+            <label className="label">Favicon (browser tab icon)</label>
+            <ImageUploader
+              value={cur.media?.favicon ?? ""}
+              onChange={(url) => set("media", "favicon", url)}
             />
           </div>
           <SaveBar k="media" />

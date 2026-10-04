@@ -7,6 +7,8 @@ const TAB_ANCHOR: Record<string, string> = {
   sections: "/#how-it-works",
   steps: "/#how-it-works",
   pricing: "/#pricing",
+  pages: "/order",
+  contact: "/contact",
   media: "/",
   footer: "/#site-footer",
 };

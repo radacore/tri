@@ -2,18 +2,17 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
-const plans: Record<string, { name: string; price: number }> = {
+// Fallback bila API mati; diganti key pricing dari admin saat load.
+const FALLBACK_PLANS: Record<string, { name: string; price: number }> = {
   starter: { name: 'Starter', price: 49 },
   professional: { name: 'Professional', price: 149 },
   premium: { name: 'Premium', price: 399 },
 };
 const q = (Astro.url.searchParams.get('plan') ?? 'professional').toLowerCase();
-const initial = plans[q] ?? plans['professional'];
+const initial = FALLBACK_PLANS[q] ?? FALLBACK_PLANS['professional'];
 const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
-// Nomor WA bisnis tujuan order
-const waNumber = import.meta.env.PUBLIC_WA_NUMBER ?? '6281241525485';
-// TODO: ganti dengan email order bisnis
-const orderEmail = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
+const waNumberFallback = import.meta.env.PUBLIC_WA_NUMBER ?? '6281241525485';
+const orderEmailFallback = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
 const VIBES = ['minimalis', 'berani', 'elegan', 'playful', 'klasik', 'futuristis', 'mewah', 'organik'];
 const COLORS = [
   { k: 'biru', hex: '#2563EB' },
@@ -28,35 +27,35 @@ const COLORS = [
 <BaseLayout title="Order — LogoPulse">
   <Navbar />
   <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
-    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center">Order</p>
-    <h1 class="mt-2 text-center text-4xl font-extrabold tracking-tight">Start your logo</h1>
-    <p class="mt-3 text-center text-sm text-slate-500">Fill a short brief, then send it straight via WhatsApp or email — no upfront payment.</p>
+    <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center" data-site="pages.order_kicker">Order</p>
+    <h1 class="mt-2 text-center text-4xl font-extrabold tracking-tight" data-site="pages.order_title">Start your logo</h1>
+    <p class="mt-3 text-center text-sm text-slate-500" data-site="pages.order_sub">Fill a short brief, then send it straight via WhatsApp or email — no upfront payment.</p>
     <ol class="mt-8 flex items-center justify-center gap-2 text-xs font-bold" id="order-steps">
-      <li data-step="1" class="rounded-full bg-dark px-4 py-2 text-white">1 · Brief</li>
-      <li data-step="2" class="rounded-full bg-slate-100 px-4 py-2 text-slate-500">2 · Review</li>
-      <li data-step="3" class="rounded-full bg-slate-100 px-4 py-2 text-slate-500">3 · Send</li>
+      <li data-step="1" data-site="pages.order_s1" class="rounded-full bg-dark px-4 py-2 text-white">1 · Brief</li>
+      <li data-step="2" data-site="pages.order_s2" class="rounded-full bg-slate-100 px-4 py-2 text-slate-500">2 · Review</li>
+      <li data-step="3" data-site="pages.order_s3" class="rounded-full bg-slate-100 px-4 py-2 text-slate-500">3 · Send</li>
     </ol>
     <div class="mt-6 rounded-2xl bg-white p-6 sm:p-8 ring-1 ring-slate-900/10 shadow-sm" style="border-radius:20px">
       <!-- STEP 1 -->
       <div id="os-1">
-        <div class="grid gap-4 sm:grid-cols-3" role="radiogroup" aria-label="Choose a plan">
-          {Object.entries(plans).map(([key, p]) => (
-            <button type="button" data-plan={key} data-price={p.price} class={`plan-btn btn-active rounded-2xl px-4 py-4 text-left ring-2 transition ${key === (plans[q] ? q : 'professional') ? 'ring-primary bg-subtle/50' : 'ring-slate-200'}`}>
+        <div id="plan-grid" class="grid gap-4 sm:grid-cols-3" role="radiogroup" aria-label="Choose a plan">
+          {Object.entries(FALLBACK_PLANS).map(([key, p]) => (
+            <button type="button" data-plan={key} data-price={p.price} class={`plan-btn btn-active rounded-2xl px-4 py-4 text-left ring-2 transition ${key === (FALLBACK_PLANS[q] ? q : 'professional') ? 'ring-primary bg-subtle/50' : 'ring-slate-200'}`}>
               <span class="block font-extrabold">{p.name}</span>
               <span class="tabular text-2xl font-extrabold">${p.price}</span>
             </button>
           ))}
         </div>
         <div class="mt-5 grid gap-5">
-          <label class="text-sm font-bold"><span>Your name</span><input id="f-name" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Full name" /></label>
-          <label class="text-sm font-bold"><span>Company / brand name</span><input id="f-business" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Acme Inc." /></label>
+          <label class="text-sm font-bold"><span data-site="pages.order_f_name">Your name</span><input id="f-name" data-site-ph="pages.order_ph_name" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Full name" /></label>
+          <label class="text-sm font-bold"><span data-site="pages.order_f_biz">Company / brand name</span><input id="f-business" data-site-ph="pages.order_ph_biz" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Acme Inc." /></label>
           <div class="grid gap-5 sm:grid-cols-2">
-            <label class="text-sm font-bold"><span>Industry</span><input id="f-industry" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="SaaS, café, fashion…" /></label>
-            <label class="text-sm font-bold"><span>Target market</span><input id="f-target" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="E.g. young moms 25–35, Jakarta" /></label>
+            <label class="text-sm font-bold"><span data-site="pages.order_f_ind">Industry</span><input id="f-industry" data-site-ph="pages.order_ph_ind" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="SaaS, café, fashion…" /></label>
+            <label class="text-sm font-bold"><span data-site="pages.order_f_target">Target market</span><input id="f-target" data-site-ph="pages.order_ph_target" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="E.g. young moms 25–35, Jakarta" /></label>
           </div>
-          <label class="text-sm font-bold"><span>Email or WhatsApp number</span><input id="f-contact" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="you@company.com / 0812…" /></label>
+          <label class="text-sm font-bold"><span data-site="pages.order_f_contact">Email or WhatsApp number</span><input id="f-contact" data-site-ph="pages.order_ph_contact" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="you@company.com / 0812…" /></label>
           <fieldset>
-            <legend class="text-sm font-bold"><span>Style / vibe</span> <span class="font-semibold text-slate-400">Pick up to 3 — this replaces the discovery call.</span></legend>
+            <legend class="text-sm font-bold"><span data-site="pages.order_f_vibe">Style / vibe</span> <span class="font-semibold text-slate-400" data-site="pages.order_vibe_hint">Pick up to 3 — this replaces the discovery call.</span></legend>
             <div class="mt-2 flex flex-wrap gap-2" role="group" aria-label="Vibe">
               {VIBES.map((v) => (
                 <button type="button" data-vibe={v} aria-pressed="false" class="vibe-chip btn-active rounded-full px-4 py-2 text-sm font-bold ring-1 ring-slate-200 bg-white text-slate-600 hover:ring-slate-400 transition">{v}</button>
@@ -64,37 +63,37 @@ const COLORS = [
             </div>
           </fieldset>
           <fieldset>
-            <legend class="text-sm font-bold">Color references</legend>
+            <legend class="text-sm font-bold" data-site="pages.order_f_color">Color references</legend>
             <div class="mt-2 flex flex-wrap items-center gap-2" role="group" aria-label="Colors">
               {COLORS.map((c) => (
                 <button type="button" data-color={c.k} aria-pressed="false" class="color-chip btn-active inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ring-1 ring-slate-200 bg-white text-slate-600 hover:ring-slate-400 transition"><span class="h-3.5 w-3.5 rounded-full ring-1 ring-black/10" style={`background:${c.hex}`}></span>{c.k}</button>
               ))}
-              <button type="button" id="custom-chip" aria-pressed="false" class="btn-active inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold ring-1 ring-dashed ring-slate-300 bg-white text-slate-600 hover:ring-slate-400 transition"><span id="custom-dot" class="h-3.5 w-3.5 rounded-full ring-1 ring-black/10" style="background:#0158FE"></span><span>Custom</span></button>
+              <button type="button" id="custom-chip" aria-pressed="false" class="btn-active inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold ring-1 ring-dashed ring-slate-300 bg-white text-slate-600 hover:ring-slate-400 transition"><span id="custom-dot" class="h-3.5 w-3.5 rounded-full ring-1 ring-black/10" style="background:#0158FE"></span><span data-site="pages.order_f_custom">Custom</span></button>
             </div>
           </fieldset>
-          <label class="text-sm font-bold"><span>References / things to avoid</span><textarea id="f-notes" rows="3" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Links you love, styles to avoid…"></textarea></label>
+          <label class="text-sm font-bold"><span data-site="pages.order_f_notes">References / things to avoid</span><textarea id="f-notes" rows="3" data-site-ph="pages.order_ph_notes" class="mt-1 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-normal" placeholder="Links you love, styles to avoid…"></textarea></label>
         </div>
-        <button id="to-2" type="button" class="btn-active mt-6 w-full rounded-full bg-primary px-6 py-3.5 text-sm font-bold text-white hover:bg-primary-hover">Review my brief →</button>
+        <button id="to-2" type="button" data-site="pages.order_review" class="btn-active mt-6 w-full rounded-full bg-primary px-6 py-3.5 text-sm font-bold text-white hover:bg-primary-hover">Review my brief →</button>
       </div>
       <!-- STEP 2 -->
       <div id="os-2" class="hidden">
-        <h2 class="text-xl font-extrabold">Review your order</h2>
+        <h2 class="text-xl font-extrabold" data-site="pages.order_review_title">Review your order</h2>
         <dl id="os-summary" class="mt-4 space-y-2 text-sm"></dl>
         <div class="mt-6 flex gap-3">
-          <button id="back-1" type="button" class="btn-active rounded-full bg-white px-6 py-3 text-sm font-bold ring-1 ring-slate-300">← Back</button>
-          <button id="to-3" type="button" class="btn-active flex-1 rounded-full bg-dark px-6 py-3 text-sm font-bold text-white hover:bg-slate-800">Continue to send →</button>
+          <button id="back-1" type="button" data-site="pages.order_back" class="btn-active rounded-full bg-white px-6 py-3 text-sm font-bold ring-1 ring-slate-300">← Back</button>
+          <button id="to-3" type="button" data-site="pages.order_continue" class="btn-active flex-1 rounded-full bg-dark px-6 py-3 text-sm font-bold text-white hover:bg-slate-800">Continue to send →</button>
         </div>
       </div>
       <!-- STEP 3 -->
       <div id="os-3" class="hidden text-center">
-        <h2 class="text-xl font-extrabold">Send your order</h2>
+        <h2 class="text-xl font-extrabold" data-site="pages.order_send_title">Send your order</h2>
         <p id="os-total" class="tabular mt-2 text-4xl font-extrabold"></p>
-        <p class="mt-1 text-sm text-slate-500">Pick how to send — your brief arrives neatly formatted. 100% money-back guarantee.</p>
+        <p class="mt-1 text-sm text-slate-500" data-site="pages.order_send_sub">Pick how to send — your brief arrives neatly formatted. 100% money-back guarantee.</p>
         <p id="os-error" class="mt-3 hidden text-sm font-bold text-amber-600"></p>
         <div class="mt-6 grid gap-3">
-          <a id="send-wa" href="#" target="_blank" rel="noopener" class="btn-active btn-shine rounded-full bg-[#25D366] px-6 py-3.5 text-sm font-bold text-white hover:brightness-95">Send via WhatsApp →</a>
-          <a id="send-mail" href="#" class="btn-active rounded-full bg-dark px-6 py-3.5 text-sm font-bold text-white hover:bg-slate-800">Send via Email →</a>
-          <button id="back-2" type="button" class="btn-active rounded-full bg-white px-6 py-3 text-sm font-bold ring-1 ring-slate-300">← Back</button>
+          <a id="send-wa" href="#" target="_blank" rel="noopener" data-site="pages.order_wa" class="btn-active btn-shine rounded-full bg-[#25D366] px-6 py-3.5 text-sm font-bold text-white hover:brightness-95">Send via WhatsApp →</a>
+          <a id="send-mail" href="#" data-site="pages.order_mail" class="btn-active rounded-full bg-dark px-6 py-3.5 text-sm font-bold text-white hover:bg-slate-800">Send via Email →</a>
+          <button id="back-2" type="button" data-site="pages.order_back" class="btn-active rounded-full bg-white px-6 py-3 text-sm font-bold ring-1 ring-slate-300">← Back</button>
         </div>
       </div>
     </div>
@@ -102,7 +101,7 @@ const COLORS = [
     <div id="cp-modal" class="hidden fixed inset-0 z-[80] items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Custom color">
       <div id="cp-backdrop" class="absolute inset-0 bg-slate-950/50"></div>
       <div class="cp-panel relative w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl" style="border-radius:20px">
-        <h3 class="font-extrabold">Pick a custom color</h3>
+        <h3 class="font-extrabold" data-site="pages.order_cp_title">Pick a custom color</h3>
         <div id="cp-sv" class="relative mt-3 h-44 w-full rounded-xl cursor-crosshair touch-none ring-1 ring-black/10" style="background:hsl(222,100%,50%)">
           <span id="cp-cursor" class="absolute h-5 w-5 -ml-2.5 -mt-2.5 rounded-full border-[3px] border-white shadow pointer-events-none" style="left:100%;top:0%"></span>
         </div>
@@ -112,18 +111,82 @@ const COLORS = [
           <label class="flex-1 text-sm font-bold">HEX<input id="cp-hex" maxlength="7" spellcheck="false" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm font-normal uppercase" value="#0158FE" /></label>
         </div>
         <div class="mt-4 flex gap-2">
-          <button id="cp-remove" type="button" class="btn-active hidden rounded-full px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50">Remove</button>
+          <button id="cp-remove" type="button" class="btn-active hidden rounded-full px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50" data-site="pages.order_cp_remove">Remove</button>
           <span class="flex-1"></span>
-          <button id="cp-cancel" type="button" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-300">Cancel</button>
-          <button id="cp-use" type="button" class="btn-active rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover">Use this color</button>
+          <button id="cp-cancel" type="button" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-300" data-site="pages.order_cp_cancel">Cancel</button>
+          <button id="cp-use" type="button" class="btn-active rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover" data-site="pages.order_cp_use">Use this color</button>
         </div>
       </div>
     </div>
   </main>
   <Footer />
-  <script define:vars={{ initialKey: (plans[q] ? q : 'professional'), initialPrice: initial.price, initialName: initial.name, apiBase: apiBase, waNumber: waNumber, orderEmail: orderEmail }}>
+  <script define:vars={{ initialKey: (FALLBACK_PLANS[q] ? q : 'professional'), initialPrice: initial.price, initialName: initial.name, apiBase: apiBase, waNumberFallback: waNumberFallback, orderEmailFallback: orderEmailFallback }}>
     (function () {
+      // Kamus halaman dari admin (pages.*); fallback Inggris bila API mati.
+      var SITE = {};
+      function S(key, fb) {
+        var v = (SITE.pages || {})[key];
+        return typeof v === 'string' && v !== '' ? v : fb;
+      }
+      var waNumber = typeof waNumberFallback !== 'undefined' ? waNumberFallback : '6281241525485';
+      var orderEmail = typeof orderEmailFallback !== 'undefined' ? orderEmailFallback : 'hello@logopulse.co';
       var plan = initialKey, price = initialPrice, pname = initialName;
+      var base = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : 'http://localhost:8080/api/v1';
+      try {
+        fetch(base + '/settings', { cache: 'no-store' }).then(function (r) {
+          return r.ok ? r.json() : null;
+        }).then(function (j) {
+          var d = (j && (j.data || j)) || {};
+          SITE = d;
+          if (d.contact && typeof d.contact.wa_number === 'string' && d.contact.wa_number !== '') waNumber = d.contact.wa_number;
+          if (d.contact && typeof d.contact.order_email === 'string' && d.contact.order_email !== '') orderEmail = d.contact.order_email;
+          var tiers = d.pricing && Array.isArray(d.pricing.tiers) ? d.pricing.tiers : null;
+          if (tiers && tiers.length > 0) renderPlans(tiers);
+        }).catch(function () {});
+      } catch (e) {}
+      function fmtUSD(cents) {
+        var usd = Number(cents) / 100;
+        return '$' + (Number.isInteger(usd) ? String(usd) : usd.toFixed(2));
+      }
+      function renderPlans(tiers) {
+        var grid = document.getElementById('plan-grid');
+        if (!grid) return;
+        var q = '';
+        try { q = (new URLSearchParams(window.location.search).get('plan') || 'professional').toLowerCase(); } catch (e) {}
+        grid.innerHTML = '';
+        tiers.forEach(function (t) {
+          var key = t.id, dollars = fmtUSD(t.price_cents);
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.setAttribute('data-plan', key);
+          b.setAttribute('data-price', String(Number(t.price_cents) / 100));
+          var on = key === q;
+          b.className = 'plan-btn btn-active rounded-2xl px-4 py-4 text-left ring-2 transition ' + (on ? 'ring-primary bg-subtle/50' : 'ring-slate-200');
+          var s1 = document.createElement('span');
+          s1.className = 'block font-extrabold';
+          s1.textContent = t.name;
+          var s2 = document.createElement('span');
+          s2.className = 'tabular text-2xl font-extrabold';
+          s2.textContent = dollars;
+          b.appendChild(s1); b.appendChild(s2);
+          b.addEventListener('click', function () { selectPlan(key, Number(t.price_cents) / 100, t.name); });
+          grid.appendChild(b);
+          if (on) { plan = key; price = Number(t.price_cents) / 100; pname = t.name; }
+        });
+        paintPlans();
+      }
+      function paintPlans() {
+        document.querySelectorAll('.plan-btn').forEach(function (x) {
+          var on = x.getAttribute('data-plan') === plan;
+          x.classList.toggle('ring-primary', on);
+          x.classList.toggle('bg-subtle/50', on);
+          x.classList.toggle('ring-slate-200', !on);
+        });
+      }
+      function selectPlan(key, pr, name) {
+        plan = key; price = pr; pname = name;
+        paintPlans();
+      }
       var vibes = [], colors = [], customOn = false;
       var s1 = document.getElementById('os-1'), s2 = document.getElementById('os-2'), s3 = document.getElementById('os-3');
       var dots = Array.from(document.querySelectorAll('#order-steps li'));
@@ -144,11 +207,7 @@ const COLORS = [
       }
       document.querySelectorAll('.plan-btn').forEach(function (b) {
         b.addEventListener('click', function () {
-          plan = b.getAttribute('data-plan') || plan;
-          price = Number(b.getAttribute('data-price')) || price;
-          pname = (b.querySelector('span') || {}).textContent || pname;
-          document.querySelectorAll('.plan-btn').forEach(function (x) { x.classList.remove('ring-primary', 'bg-subtle/50'); x.classList.add('ring-slate-200'); });
-          b.classList.add('ring-primary', 'bg-subtle/50'); b.classList.remove('ring-slate-200');
+          selectPlan(b.getAttribute('data-plan') || plan, Number(b.getAttribute('data-price')) || price, (b.querySelector('span') || {}).textContent || pname);
         });
       });
       function paintChip(btn, on) {
@@ -177,10 +236,8 @@ const COLORS = [
         });
       });
       var customChip = document.getElementById('custom-chip');
-      var customChip = document.getElementById('custom-chip');
       var customDot = document.getElementById('custom-dot');
       var customHex = '#0158FE';
-      // ---- color picker modal (kotak SV + hue + hex, tanpa library) ----
       var cpModal = document.getElementById('cp-modal');
       var cpSV = document.getElementById('cp-sv');
       var cpCursor = document.getElementById('cp-cursor');
@@ -265,9 +322,9 @@ const COLORS = [
         if (customOn) { customOn = false; paintChip(customChip, false); }
         else openPicker();
       });
-      function vibeLabels() { return vibes.map(function (k) { return T('vibe.' + k, k); }); }
+      function vibeLabels() { return vibes.slice(); }
       function colorLabels() {
-        var out = colors.map(function (k) { return T('color.' + k, k); });
+        var out = colors.slice();
         if (customOn) out.push(customHex.toUpperCase());
         return out;
       }
@@ -278,24 +335,24 @@ const COLORS = [
         var sum = document.getElementById('os-summary');
         if (!sum || currentStep() !== 2) return;
         sum.innerHTML =
-          row(esc('Plan'), esc(pname) + ' — $' + price) +
-          row(esc('Name'), esc(val('f-name')) || '—') +
-          row(esc('Company'), esc(val('f-business')) || '—') +
-          row(esc('Industry'), esc(val('f-industry')) || '—') +
-          row(esc('Target'), esc(val('f-target')) || '—') +
-          row(esc('Vibe'), esc(vibeLabels().join(', ')) || '—') +
-          row(esc('Colors'), esc(colorLabels().join(', ')) || '—') +
-          row(esc('Contact'), esc(val('f-contact')) || '—') +
-          row(esc('References'), esc(val('f-notes')) || '—');
+          row(esc(S('pages.order_r_plan', 'Plan')), esc(pname) + ' — $' + price) +
+          row(esc(S('pages.order_r_name', 'Name')), esc(val('f-name')) || '—') +
+          row(esc(S('pages.order_r_biz', 'Company')), esc(val('f-business')) || '—') +
+          row(esc(S('pages.order_r_ind', 'Industry')), esc(val('f-industry')) || '—') +
+          row(esc(S('pages.order_r_target', 'Target')), esc(val('f-target')) || '—') +
+          row(esc(S('pages.order_r_vibe', 'Vibe')), esc(vibeLabels().join(', ')) || '—') +
+          row(esc(S('pages.order_r_color', 'Colors')), esc(colorLabels().join(', ')) || '—') +
+          row(esc(S('pages.order_r_contact', 'Contact')), esc(val('f-contact')) || '—') +
+          row(esc(S('pages.order_r_notes', 'References')), esc(val('f-notes')) || '—');
       }
       var to2 = document.getElementById('to-2');
       if (to2) to2.addEventListener('click', function () {
         if (!val('f-name') || !val('f-business')) {
-          alert('Please fill in your name and company/brand first.');
+          alert(S('pages.order_alert', 'Please fill in your name and company/brand first.'));
           return;
         }
         if (vibes.length < 1) {
-          alert('Pick at least 1 vibe.');
+          alert(S('pages.order_alert_vibe', 'Pick at least 1 vibe.'));
           return;
         }
         show(2);
@@ -307,32 +364,30 @@ const COLORS = [
       if (t3) t3.addEventListener('click', function () {
         var t = document.getElementById('os-total'); if (t) t.textContent = '$' + price + ' · ' + pname;
         var lines = [
-          'Hello LogoPulse! I want to order a logo:' + '%0A%0A',
-          '• ' + 'Name' + ': ' + encodeURIComponent(val('f-name')) + '%0A',
-          '• ' + 'Company' + ': ' + encodeURIComponent(val('f-business')) + '%0A',
-          '• ' + 'Plan' + ': ' + encodeURIComponent(pname + ' ($' + price + ')') + '%0A',
-          '• ' + 'Industry' + ': ' + encodeURIComponent(val('f-industry') || '-') + '%0A',
-          '• ' + 'Target' + ': ' + encodeURIComponent(val('f-target') || '-') + '%0A',
-          '• ' + 'Vibe' + ': ' + encodeURIComponent(vibeLabels().join(', ') || '-') + '%0A',
-          '• ' + 'Colors' + ': ' + encodeURIComponent(colorLabels().join(', ') || '-') + '%0A',
-          '• ' + 'Contact' + ': ' + encodeURIComponent(val('f-contact') || '-') + '%0A',
-          '• ' + 'References' + ': ' + encodeURIComponent(val('f-notes') || '-'),
+          S('pages.wa_greet', 'Hello LogoPulse! I want to order a logo:') + '%0A%0A',
+          '• ' + S('pages.wa_name', 'Name') + ': ' + encodeURIComponent(val('f-name')) + '%0A',
+          '• ' + S('pages.wa_biz', 'Company') + ': ' + encodeURIComponent(val('f-business')) + '%0A',
+          '• ' + S('pages.wa_plan', 'Plan') + ': ' + encodeURIComponent(pname + ' ($' + price + ')') + '%0A',
+          '• ' + S('pages.wa_ind', 'Industry') + ': ' + encodeURIComponent(val('f-industry') || '-') + '%0A',
+          '• ' + S('pages.wa_target', 'Target') + ': ' + encodeURIComponent(val('f-target') || '-') + '%0A',
+          '• ' + S('pages.wa_vibe', 'Vibe') + ': ' + encodeURIComponent(vibeLabels().join(', ') || '-') + '%0A',
+          '• ' + S('pages.wa_color', 'Colors') + ': ' + encodeURIComponent(colorLabels().join(', ') || '-') + '%0A',
+          '• ' + S('pages.wa_contact', 'Contact') + ': ' + encodeURIComponent(val('f-contact') || '-') + '%0A',
+          '• ' + S('pages.wa_notes', 'References') + ': ' + encodeURIComponent(val('f-notes') || '-'),
         ];
         var msg = lines.join('');
         var wa = document.getElementById('send-wa');
         if (wa) wa.setAttribute('href', 'https://wa.me/' + waNumber + '?text=' + msg);
         var mail = document.getElementById('send-mail');
         if (mail) mail.setAttribute('href',
-          'mailto:' + orderEmail + '?subject=' + encodeURIComponent('Logo order' + ' ' + pname + ' — ' + val('f-business')) +
+          'mailto:' + orderEmail + '?subject=' + encodeURIComponent(S('pages.mail_subj', 'Logo order') + ' ' + pname + ' — ' + val('f-business')) +
           '&body=' + msg.replace(/%0A/g, '\n'));
-        // simpan ke backend bila tersedia (best-effort, tanpa payment)
         try {
-          var base = typeof apiBase !== 'undefined' ? apiBase : 'http://localhost:8080/api/v1';
           fetch(base + '/orders', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ plan: plan, name: val('f-name'), business: val('f-business'), industry: val('f-industry'), target: val('f-target'), vibes: vibes, colors: colorLabels(), notes: val('f-notes'), email: val('f-contact') }),
           }).catch(function () {});
-        } catch (e) { /* WA/email tetap jalan tanpa backend */ }
+        } catch (e) {}
         show(3);
       });
     })();
