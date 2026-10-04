@@ -167,51 +167,15 @@ body {
 #site-nav-inner [data-lang-btn][aria-pressed="true"] { background-color: #fff; color: #0a0a0a; }
 #site-nav-inner [data-lang-btn][aria-pressed="false"] { color: rgba(255, 255, 255, 0.6); }
 
-/* storytelling SVG (how-it-works) — jalan saat section masuk viewport,
-   main ulang tiap masuk berkat replay observer. Transform/opacity/stroke. */
-.st-pop,
-.st-slide-l,
-.st-slide-r,
-.st-drop {
-  opacity: 0;
-}
-.reveal-visible .st-draw path,
-.reveal-visible .st-draw circle,
-.reveal-visible .st-draw rect {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: st-draw 0.7s cubic-bezier(0.2, 0, 0, 1) forwards;
-}
-.reveal-visible .st-draw {
-  animation: none;
-}
-@keyframes st-draw {
-  to { stroke-dashoffset: 0; }
-}
-.reveal-visible .st-pop {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: st-pop 0.45s cubic-bezier(0.2, 0, 0, 1) both;
-}
-@keyframes st-pop {
-  0% { opacity: 0; transform: scale(0); }
-  70% { opacity: 1; transform: scale(1.15); }
-  100% { opacity: 1; transform: scale(1); }
-}
-.reveal-visible .st-slide-l { animation: st-slide-l 0.55s cubic-bezier(0.2, 0, 0, 1) both; }
-.reveal-visible .st-slide-r { animation: st-slide-r 0.55s cubic-bezier(0.2, 0, 0, 1) both; }
-@keyframes st-slide-l {
-  from { opacity: 0; transform: translateX(-36px); }
-  to { opacity: 1; transform: none; }
-}
-@keyframes st-slide-r {
-  from { opacity: 0; transform: translateX(36px); }
-  to { opacity: 1; transform: none; }
-}
-.reveal-visible .st-drop { animation: st-drop 0.5s cubic-bezier(0.2, 0, 0, 1) both; }
-@keyframes st-drop {
-  from { opacity: 0; transform: translateY(-34px); }
-  to { opacity: 1; transform: none; }
+/* tombol CTA panel Delivery — fade mengikuti siklus SMIL 10 detik.
+   Sinkronisasi ulang via repeatEvent (lihat HowItWorks.astro). */
+.st-btn-live { opacity: 0; }
+.st-btn-live.go { animation: btn-in 10s linear infinite; }
+.st-paused-all .st-btn-live { animation-play-state: paused; }
+@keyframes btn-in {
+  0%, 30% { opacity: 0; transform: translateY(8px); }
+  38%, 62% { opacity: 1; transform: none; }
+  70%, 100% { opacity: 0; transform: translateY(8px); }
 }
 .btn-active:active { transform: scale(.97); }
 .btn-active { transition: transform .15s ease, background-color .2s ease, box-shadow .2s ease; }
@@ -314,8 +278,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .tabular { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, #cta-banner, .marquee-track, .marquee-track-rev, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse, .st-pop, .st-slide-l, .st-slide-r, .st-drop { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
-  .reveal-visible .st-draw path, .reveal-visible .st-draw circle, .reveal-visible .st-draw rect { stroke-dashoffset: 0 !important; }
+  .reveal, #cta-banner, .marquee-track, .marquee-track-rev, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse, .st-btn-live { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
   #site-nav { animation: none !important; }
   html { scroll-behavior: auto; }
 }
