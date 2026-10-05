@@ -9,7 +9,7 @@ DEV_SUFFIX="-dev"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y nginx postgresql postgresql-contrib certbot python3-certbot-nginx curl git ufw
+apt-get install -y nginx postgresql postgresql-contrib certbot python3-certbot-nginx curl git ufw build-essential
 
 # Firewall: hanya SSH + HTTP(S)
 ufw allow OpenSSH >/dev/null 2>&1 || true
