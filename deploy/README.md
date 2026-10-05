@@ -37,7 +37,13 @@ certbot --nginx -d brandingpulse.co -d www.brandingpulse.co -d dev.brandingpulse
 # Cloudflare SSL → Full (strict)
 ```
 
-## 5. Rilis harian
+## 5. Rilis harian (hemat: lewati yang tak berubah)
+```bash
+SERVER=root@IP_VPS ./deploy/deploy.sh dev                 # penuh
+SERVER=root@IP_VPS ./deploy/deploy.sh dev --only=api       # backend saja
+SERVER=root@IP_VPS ./deploy/deploy.sh dev --only=web       # landing+admin saja
+SERVER=root@IP_VPS ./deploy/deploy.sh dev --skip-db        # tanpa migrasi+seed
+```
 ```bash
 SERVER=root@IP_VPS ./deploy/deploy.sh dev              # ujung main -> dev
 git tag v1.0.0 && git push origin v1.0.0

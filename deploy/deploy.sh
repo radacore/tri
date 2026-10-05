@@ -11,7 +11,7 @@
 # (provision.sh, vhost, unit systemd, .env di /opt/brandingpulse[-dev]/).
 set -euo pipefail
 
-TARGET="${1:-}"; REF="${2:-}"; EXTRA="${3:-}"; FLAG="${4:-}"
+TARGET="${1:-}"; REF="${2:-}"; EXTRA="${3:-}"
 if [[ "$TARGET" != "dev" && "$TARGET" != "prod" ]]; then
   echo "pakai: $0 dev [--only=api|web] [--skip-db] | $0 prod <tag> | $0 <dev|prod> --rollback <stamp>"; exit 1
 fi
