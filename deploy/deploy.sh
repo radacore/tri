@@ -157,7 +157,7 @@ if command -v psql >/dev/null 2>&1 && psql "postgres://brandingpulse:logopulse@l
   MIG_OK=1
   for m in "$WORK"/backend/scripts/migrate_*.sql; do
     if ! psql "postgres://brandingpulse:logopulse@localhost:5432/mig_check?sslmode=disable" -q -v ON_ERROR_STOP=1 -f "$m" >/tmp/lp-migcheck.log 2>&1; then
-      echo "  GAGAL pra-penerbangan: $(basename $m)"; tail -5 /tmp/lp-migcheck.log; MIG_OK=0; break
+      echo "  GAGAL pra-penerbangan: $(basename "$m")"; tail -5 /tmp/lp-migcheck.log; MIG_OK=0; break
     fi
   done
   psql "postgres://brandingpulse:logopulse@localhost:5432/postgres?sslmode=disable" -qc "DROP DATABASE IF EXISTS mig_check;" >/dev/null 2>&1
@@ -169,9 +169,9 @@ fi
 run_mig() { # $1 = file, $2 = db
   local out
   if out=$(ssh "$SERVER" "set -a; . $BASE/.env; set +a; PGPASSWORD=\"\$DB_PASSWORD\" psql -q -h localhost -U brandingpulse -d $2 -v ON_ERROR_STOP=1 -f -" < "$1" 2>&1); then
-    echo "  - $(basename $1): OK"
+    echo "  - $(basename "$1"): OK"
   else
-    echo "  - $(basename $1): GAGAL"; echo "$out" | grep -viE "warning|locale|LC_|LANG" | head -8; return 1
+    echo "  - $(basename "$1"): GAGAL"; echo "$out" | grep -viE "warning|locale|LC_|LANG" | head -8; return 1
   fi
 }
 for m in "$WORK"/backend/scripts/migrate_*.sql; do
