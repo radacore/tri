@@ -15,8 +15,8 @@ import (
 	"github.com/chai2010/webp"
 	"github.com/google/uuid"
 	"golang.org/x/image/draw"
-	"logopulse/backend/internal/config"
-	"logopulse/backend/internal/sanitize"
+	"brandingpulse/backend/internal/config"
+	"brandingpulse/backend/internal/sanitize"
 )
 
 const maxUploadBytes = 10 << 20 // 10MB

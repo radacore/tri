@@ -7,7 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"logopulse/backend/internal/models"
+	"brandingpulse/backend/internal/models"
 )
 
 func Pagination(r interface {

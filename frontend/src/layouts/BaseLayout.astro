@@ -4,17 +4,17 @@ interface Props {
   description?: string;
 }
 const {
-  title = 'LogoPulse — Logo & Brand Identity in 48 Hours',
+  title = 'BrandingPulse — Logo & Brand Identity in 48 Hours',
   description = 'Custom logo & brand identity. From $49, ready in 48 hours, 100% money-back guarantee.',
 } = Astro.props as Props;
 import '../styles/global.css';
 import { API as LP_API_BASE } from '../lib/api';
-const site = import.meta.env.PUBLIC_SITE_URL ?? 'https://logopulse.example.com';
+const site = import.meta.env.PUBLIC_SITE_URL ?? 'https://brandingpulse.example.com';
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
-    { '@type': 'Organization', name: 'LogoPulse', url: site, logo: `${site}/logo.svg` },
-    { '@type': 'WebSite', name: 'LogoPulse', url: site },
+    { '@type': 'Organization', name: 'BrandingPulse', url: site, logo: `${site}/logo.svg` },
+    { '@type': 'WebSite', name: 'BrandingPulse', url: site },
   ],
 };
 ---
@@ -26,7 +26,7 @@ const jsonLd = {
   <meta name="description" content={description} />
   <link rel="canonical" href={site + Astro.url.pathname} />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="LogoPulse" />
+  <meta property="og:site_name" content="BrandingPulse" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={site + Astro.url.pathname} />

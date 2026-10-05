@@ -39,12 +39,12 @@ function shortId(id: string) {
 }
 
 function paidMsg(o: Order) {
-  return `Halo ${o.customer_name}, pembayaran paket ${o.tier} (${centsToUSD(o.total_cents)}) kami terima. Desain mulai dikerjakan, konsep pertama maks. 48 jam. — LogoPulse #${shortId(o.id)}`;
+  return `Halo ${o.customer_name}, pembayaran paket ${o.tier} (${centsToUSD(o.total_cents)}) kami terima. Desain mulai dikerjakan, konsep pertama maks. 48 jam. — BrandingPulse #${shortId(o.id)}`;
 }
 
 function deliverMsg(o: Order) {
   const links = (o.deliverables ?? []).join("\n");
-  return `Halo ${o.customer_name}, brand kit ${o.tier} sudah jadi! Unduh di sini:\n${links}\n— LogoPulse #${shortId(o.id)}`;
+  return `Halo ${o.customer_name}, brand kit ${o.tier} sudah jadi! Unduh di sini:\n${links}\n— BrandingPulse #${shortId(o.id)}`;
 }
 
 function isFollowUp(o: Order) {
@@ -349,7 +349,7 @@ export default function OrdersPage() {
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge status={selected.status} />
               <a className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline" target="_blank" rel="noreferrer"
-                href={waLink(selected.customer_phone || selected.customer_email, `Halo ${selected.customer_name}, ini LogoPulse terkait order #${shortId(selected.id)} (${selected.tier}, ${centsToUSD(selected.total_cents)}).`)}>
+                href={waLink(selected.customer_phone || selected.customer_email, `Halo ${selected.customer_name}, ini BrandingPulse terkait order #${shortId(selected.id)} (${selected.tier}, ${centsToUSD(selected.total_cents)}).`)}>
                 <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
               </a>
             </div>

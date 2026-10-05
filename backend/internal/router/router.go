@@ -8,9 +8,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"logopulse/backend/internal/config"
-	handlers "logopulse/backend/internal/handlers"
-	mw "logopulse/backend/internal/middleware"
+	"brandingpulse/backend/internal/config"
+	handlers "brandingpulse/backend/internal/handlers"
+	mw "brandingpulse/backend/internal/middleware"
 )
 
 func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {

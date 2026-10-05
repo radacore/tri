@@ -12,7 +12,7 @@ const q = (Astro.url.searchParams.get('plan') ?? 'professional').toLowerCase();
 const initial = FALLBACK_PLANS[q] ?? FALLBACK_PLANS['professional'];
 const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
 const waNumberFallback = import.meta.env.PUBLIC_WA_NUMBER ?? '6281241525485';
-const orderEmailFallback = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@logopulse.co';
+const orderEmailFallback = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@brandingpulse.co';
 const VIBES = ['minimalis', 'berani', 'elegan', 'playful', 'klasik', 'futuristis', 'mewah', 'organik'];
 const COLORS = [
   { k: 'biru', hex: '#2563EB' },
@@ -24,7 +24,7 @@ const COLORS = [
   { k: 'monokrom', hex: '#6B7280' },
 ];
 ---
-<BaseLayout title="Order — LogoPulse">
+<BaseLayout title="Order — BrandingPulse">
   <Navbar />
   <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
     <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary text-center" data-site="pages.order_kicker">Order</p>
@@ -129,7 +129,7 @@ const COLORS = [
         return typeof v === 'string' && v !== '' ? v : fb;
       }
       var waNumber = typeof waNumberFallback !== 'undefined' ? waNumberFallback : '6281241525485';
-      var orderEmail = typeof orderEmailFallback !== 'undefined' ? orderEmailFallback : 'hello@logopulse.co';
+      var orderEmail = typeof orderEmailFallback !== 'undefined' ? orderEmailFallback : 'hello@brandingpulse.co';
       var plan = initialKey, price = initialPrice, pname = initialName;
       var base = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : 'http://localhost:8080/api/v1';
       try {
@@ -364,7 +364,7 @@ const COLORS = [
       if (t3) t3.addEventListener('click', function () {
         var t = document.getElementById('os-total'); if (t) t.textContent = '$' + price + ' · ' + pname;
         var lines = [
-          S('pages.wa_greet', 'Hello LogoPulse! I want to order a logo:') + '%0A%0A',
+          S('pages.wa_greet', 'Hello BrandingPulse! I want to order a logo:') + '%0A%0A',
           '• ' + S('pages.wa_name', 'Name') + ': ' + encodeURIComponent(val('f-name')) + '%0A',
           '• ' + S('pages.wa_biz', 'Company') + ': ' + encodeURIComponent(val('f-business')) + '%0A',
           '• ' + S('pages.wa_plan', 'Plan') + ': ' + encodeURIComponent(pname + ' ($' + price + ')') + '%0A',

@@ -193,7 +193,7 @@ export default function BoardPage() {
                       <a aria-label="WhatsApp" title="WhatsApp"
                         className="flex h-7 w-7 items-center justify-center rounded-full text-ink-secondary transition hover:bg-surface-hover"
                         target="_blank" rel="noreferrer"
-                        href={`https://wa.me/${waNumber(o.customer_phone || o.customer_email) || "6281241525485"}?text=${encodeURIComponent(`Halo ${o.customer_name}, ini LogoPulse terkait order #${o.id.slice(0, 8).toUpperCase()}.`)}`}>
+                        href={`https://wa.me/${waNumber(o.customer_phone || o.customer_email) || "6281241525485"}?text=${encodeURIComponent(`Halo ${o.customer_name}, ini BrandingPulse terkait order #${o.id.slice(0, 8).toUpperCase()}.`)}`}>
                         <MessageCircle className="h-3.5 w-3.5" />
                       </a>
                       <span className="flex-1" />

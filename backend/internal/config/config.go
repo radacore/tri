@@ -51,12 +51,12 @@ func requireStrongSecret() string {
 
 func Load() *Config {
 	return &Config{
-		DatabaseURL:       getenv("DATABASE_URL", "postgres://logopulse:changeme@localhost:5432/logopulse?sslmode=disable"),
+		DatabaseURL:       getenv("DATABASE_URL", "postgres://brandingpulse:changeme@localhost:5432/brandingpulse?sslmode=disable"),
 		JWTSecret:         requireStrongSecret(),
 		Port:              getenv("PORT", "8080"),
 		FrontendURL:       getenv("FRONTEND_URL", "http://localhost:3000"),
 		AllowedOrigins:    splitCSV(getenv("ALLOWED_ORIGINS", "http://localhost:4321,http://127.0.0.1:4321,http://localhost:5174,http://127.0.0.1:5174")),
-		AdminEmail:        getenv("ADMIN_EMAIL", "admin@logopulse.co"),
+		AdminEmail:        getenv("ADMIN_EMAIL", "admin@brandingpulse.co"),
 		AdminPasswordHash: getenv("ADMIN_PASSWORD_HASH", ""),
 		UploadDir:         getenv("UPLOAD_DIR", "uploads"),
 	}

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"logopulse/backend/internal/repository"
+	"brandingpulse/backend/internal/repository"
 )
 
 // GetDashboardStats returns totals + recent 5 orders.

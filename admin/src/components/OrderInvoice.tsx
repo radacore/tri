@@ -6,11 +6,11 @@ import { centsToUSD, type Order } from "../api/client";
 import { toast } from "./Layout";
 
 const COMPANY = {
-  name: "LogoPulse",
+  name: "BrandingPulse",
   tagline: "Logo & Brand Identity",
-  email: "admin@logopulse.co",
+  email: "admin@brandingpulse.co",
   wa: "wa.me/6281241525485",
-  web: "logopulse.co",
+  web: "brandingpulse.co",
 };
 
 function d(iso?: string | null) {
@@ -144,7 +144,7 @@ function buildPdf(o: Order) {
   doc.setFontSize(8.5);
   doc.setTextColor(120);
   const thanks = doc.splitTextToSize(
-    "Thank you for trusting LogoPulse. First concepts within 48 hours of payment. 100% money-back guarantee.",
+    "Thank you for trusting BrandingPulse. First concepts within 48 hours of payment. 100% money-back guarantee.",
     W - 28
   );
   doc.text(thanks, 14, 288);
@@ -252,7 +252,7 @@ export default function OrderInvoice({ order: o }: { order: Order }) {
           Payment: manual bank transfer arranged over WhatsApp{o.payment_proof ? " — proof on file" : ""}.
         </p>
         <p className="mt-3 border-t border-slate-200 pt-2 text-center text-[11px] text-slate-400">
-          Thank you for trusting LogoPulse. First concepts within 48 hours of payment. 100% money-back guarantee.<br />
+          Thank you for trusting BrandingPulse. First concepts within 48 hours of payment. 100% money-back guarantee.<br />
           {COMPANY.email} · {COMPANY.wa} · {COMPANY.web}
         </p>
       </div>

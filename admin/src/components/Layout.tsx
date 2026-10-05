@@ -84,7 +84,7 @@ export default function Layout() {
               L
             </span>
             <span className="text-xl font-bold tracking-tight text-ink-primary">
-              LogoPulse
+              BrandingPulse
             </span>
           </Link>
           {GROUPS.map((g) => (

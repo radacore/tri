@@ -10,7 +10,7 @@ import {
 import { Navigate, useLocation } from "react-router-dom";
 import { post } from "../api/client";
 
-const TOKEN_KEY = "logopulse_token";
+const TOKEN_KEY = "brandingpulse_token";
 
 // L2: anggap token kedaluwarsa bila klaim exp-nya lewat (selain cek server).
 function isExpired(token: string | null): boolean {

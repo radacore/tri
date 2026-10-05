@@ -1,32 +1,34 @@
-# LogoPulse — Jasa Desain Logo & Brand Identity
+# BrandingPulse — Jasa Desain Logo & Brand Identity
 
-Monorepo: Astro (public) + React shadcn/ui (admin) + Go chi (API) + Postgres + Nginx. Single VPS Docker Compose.
+Monorepo: Astro (public) + React admin (/admin/) + Go chi API + Postgres + Nginx. Deploy native ke single VPS (dev + prod).
 
-> Pricing dalam **USD** via **Stripe Checkout** (`currency: usd`). Tier: $49 / $149 / $399.
+> Pricing dalam **USD**. Tier: $49 / $149 / $399.
 
 ## Struktur
 
 ```
-./backend   → Go + chi API (:8080)
+./backend   → Go + chi API (:8080 prod, :8081 dev)
 ./frontend  → Astro public site
 ./admin     → React SPA admin (/admin/)
-./nginx     → reverse proxy + static
+./nginx     → reverse proxy + static (native)
+./deploy    → provision, vhost, systemd, skrip rilis
+./referensi → arsip lokal, TIDAK di-commit (lihat .gitignore)
 ```
 
-## Quickstart (dev)
+## Quickstart (dev lokal)
 
 ```bash
-cp .env.example .env
-docker compose up --build
-# api: http://localhost:8080/api/v1/health
-# frontend: build via ./frontend (npm run dev)
-# admin: via ./admin (npm run dev)
+# API:     cd backend && go run ./cmd/server   (butuh backend/.env)
+# Landing: cd frontend && npm run preview -- --port 4321
+# Admin:   cd admin && npm run dev             # :5174/admin/
 ```
 
-## Prod (VPS)
+## Rilis (lihat deploy/README.md)
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d --build
+SERVER=user@ip ./deploy/deploy.sh dev            # ujung main -> dev.brandingpulse.co
+git tag v1.0.0 && git push origin v1.0.0
+SERVER=user@ip ./deploy/deploy.sh prod v1.0.0    # tag -> brandingpulse.co
 ```
 
-Lihat `prd.md` (spesifikasi) dan `design.md` (tokens + animasi wajib 12 section).
+Spesifikasi dan tokens desain diarsipkan di `referensi/` (tidak ikut repo).

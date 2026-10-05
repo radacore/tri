@@ -5,7 +5,7 @@ export const API_BASE: string =
 function authHeaders(extra?: HeadersInit): HeadersInit {
   const token =
     typeof localStorage !== "undefined"
-      ? localStorage.getItem("logopulse_token")
+      ? localStorage.getItem("brandingpulse_token")
       : null;
   return {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -18,7 +18,7 @@ async function handle<T>(res: Response): Promise<T> {
     // Sesi kedaluwarsa / token tak valid: bersihkan + tendang ke login.
     // Jangan redirect bila sudah di halaman login (hindari loop).
     try {
-      localStorage.removeItem("logopulse_token");
+      localStorage.removeItem("brandingpulse_token");
     } catch {
       /* ignore */
     }
@@ -116,7 +116,7 @@ export async function uploadFile(file: File): Promise<UploadResult> {
   fd.append("file", file);
   const token =
     typeof localStorage !== "undefined"
-      ? localStorage.getItem("logopulse_token")
+      ? localStorage.getItem("brandingpulse_token")
       : null;
   const res = await fetch(`${API_BASE}/admin/upload`, {
     method: "POST",

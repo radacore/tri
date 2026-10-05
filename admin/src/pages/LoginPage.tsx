@@ -57,7 +57,7 @@ export default function LoginPage() {
           <LockKeyhole className="h-5 w-5" />
         </span>
         <h1 className="mt-4 text-2xl font-bold tracking-tight text-ink-primary">
-          LogoPulse Admin
+          BrandingPulse Admin
         </h1>
         <p className="mb-5 mt-1 text-sm text-ink-secondary">
           Sign in to manage content

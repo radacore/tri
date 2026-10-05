@@ -1,0 +1,12 @@
+# .env PRODUKSI di server: /opt/brandingpulse/.env  (chmod 600, milik brandingpulse)
+# JANGAN commit file ini. Generate secret: openssl rand -base64 48
+PORT=8080
+DATABASE_URL=postgres://brandingpulse:ISI_PASSWORD_DB@localhost:5432/brandingpulse?sslmode=disable
+DB_PASSWORD=ISI_PASSWORD_DB_SAMA
+JWT_SECRET=ISI_MINIMAL_32_KARAKTER_ACAK
+ADMIN_PASSWORD_HASH=
+ADMIN_EMAIL=admin@brandingpulse.co
+FRONTEND_URL=https://brandingpulse.co
+ALLOWED_ORIGINS=https://brandingpulse.co,https://www.brandingpulse.co
+TRUST_PROXY_HEADERS=1
+UPLOAD_DIR=/var/lib/brandingpulse/uploads

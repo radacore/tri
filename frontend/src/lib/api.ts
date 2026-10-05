@@ -73,7 +73,7 @@ export const FALLBACK_CASES: CaseStudy[] = [
 ];
 
 export const FALLBACK_POSTS: BlogPost[] = [
-  { slug: 'logo-design-cost-2026', title: 'How much does a logo cost in 2026?', excerpt: 'Freelancer vs agency vs LogoPulse — honest numbers.', date: '2026-09-10', cover: pic('blog-cost', 800, 450) },
+  { slug: 'logo-design-cost-2026', title: 'How much does a logo cost in 2026?', excerpt: 'Freelancer vs agency vs BrandingPulse — honest numbers.', date: '2026-09-10', cover: pic('blog-cost', 800, 450) },
   { slug: 'rebrand-checklist', title: 'The 10-point rebrand checklist', excerpt: 'Know exactly when your startup has outgrown its logo.', date: '2026-08-22', cover: pic('blog-checklist', 800, 450) },
   { slug: 'logo-mistakes', title: '7 logo mistakes that scare customers away', excerpt: 'Fix these before your next launch.', date: '2026-07-30', cover: pic('blog-mistakes', 800, 450) },
 ];

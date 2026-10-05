@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
-	"logopulse/backend/internal/config"
+	"brandingpulse/backend/internal/config"
 )
 
 func findUser(ctx context.Context, pool *pgxpool.Pool, email string) (id, hash, name, role string, found bool) {

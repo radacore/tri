@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"logopulse/backend/internal/sanitize"
+	"brandingpulse/backend/internal/sanitize"
 )
 
 func itoa(n int) string { return strconv.Itoa(n) }

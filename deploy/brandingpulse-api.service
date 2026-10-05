@@ -1,0 +1,18 @@
+[Unit]
+Description=BrandingPulse API (production)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=brandingpulse
+Group=brandingpulse
+WorkingDirectory=/opt/brandingpulse/current
+EnvironmentFile=/opt/brandingpulse/.env
+ExecStart=/opt/brandingpulse/current/api
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

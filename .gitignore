@@ -7,3 +7,4 @@ backend/*.test
 .DS_Store
 .backup/
 .playwright-mcp/
+referensi/

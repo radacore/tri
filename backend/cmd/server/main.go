@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"logopulse/backend/internal/config"
-	"logopulse/backend/internal/database"
-	"logopulse/backend/internal/handlers"
-	"logopulse/backend/internal/router"
+	"brandingpulse/backend/internal/config"
+	"brandingpulse/backend/internal/database"
+	"brandingpulse/backend/internal/handlers"
+	"brandingpulse/backend/internal/router"
 )
 
 func main() {

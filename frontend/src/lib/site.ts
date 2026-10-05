@@ -126,7 +126,7 @@ export function applySite(s: Settings) {
       if (el.querySelector("img")) return;
       const img = document.createElement("img");
       img.src = logo;
-      img.alt = "LogoPulse";
+      img.alt = "BrandingPulse";
       img.className = "h-8 w-8 rounded-full object-contain";
       el.replaceChildren(img);
     });

@@ -46,7 +46,7 @@ const SHARE_BTNS = [
   { k: 'copy', label: 'Copy link', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>' },
 ];
 ---
-<BaseLayout title={`${title} — LogoPulse Blog`} description={desc}>
+<BaseLayout title={`${title} — BrandingPulse Blog`} description={desc}>
   <Navbar />
   <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
     {cover && <img id="post-cover" src={cover} alt={title} class="w-full object-cover" style="border-radius:16px" />}
@@ -123,7 +123,7 @@ const SHARE_BTNS = [
         if (!p) return;
         if (p.title) {
           document.getElementById('post-title').textContent = p.title;
-          document.title = p.title + ' — LogoPulse Blog';
+          document.title = p.title + ' — BrandingPulse Blog';
         }
         if (p.published_at || p.created_at) {
           document.getElementById('post-date').textContent = fmt(p.published_at || p.created_at);

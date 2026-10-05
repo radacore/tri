@@ -1,4 +1,4 @@
-module logopulse/backend
+module brandingpulse/backend
 
 go 1.26.0
 
