@@ -187,120 +187,135 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- Name: blog_posts blog_posts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE blog_posts DROP CONSTRAINT IF EXISTS blog_posts_pkey;
-ALTER TABLE blog_posts ADD CONSTRAINT blog_posts_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'blog_posts_pkey') THEN
+  ALTER TABLE blog_posts ADD CONSTRAINT blog_posts_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
 -- Name: blog_posts blog_posts_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE blog_posts DROP CONSTRAINT IF EXISTS blog_posts_slug_key;
-ALTER TABLE blog_posts ADD CONSTRAINT blog_posts_slug_key UNIQUE (slug);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'blog_posts_slug_key') THEN
+  ALTER TABLE blog_posts ADD CONSTRAINT blog_posts_slug_key UNIQUE (slug);
+END IF; END $$;
 
 
 --
 -- Name: case_studies case_studies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE case_studies DROP CONSTRAINT IF EXISTS case_studies_pkey;
-ALTER TABLE case_studies ADD CONSTRAINT case_studies_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'case_studies_pkey') THEN
+  ALTER TABLE case_studies ADD CONSTRAINT case_studies_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
 -- Name: case_studies case_studies_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE case_studies DROP CONSTRAINT IF EXISTS case_studies_slug_key;
-ALTER TABLE case_studies ADD CONSTRAINT case_studies_slug_key UNIQUE (slug);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'case_studies_slug_key') THEN
+  ALTER TABLE case_studies ADD CONSTRAINT case_studies_slug_key UNIQUE (slug);
+END IF; END $$;
 
 
 --
 -- Name: categories categories_name_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE categories DROP CONSTRAINT IF EXISTS categories_name_key;
-ALTER TABLE categories ADD CONSTRAINT categories_name_key UNIQUE (name);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'categories_name_key') THEN
+  ALTER TABLE categories ADD CONSTRAINT categories_name_key UNIQUE (name);
+END IF; END $$;
 
 
 --
 -- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE categories DROP CONSTRAINT IF EXISTS categories_pkey;
-ALTER TABLE categories ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'categories_pkey') THEN
+  ALTER TABLE categories ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
 -- Name: categories categories_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE categories DROP CONSTRAINT IF EXISTS categories_slug_key;
-ALTER TABLE categories ADD CONSTRAINT categories_slug_key UNIQUE (slug);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'categories_slug_key') THEN
+  ALTER TABLE categories ADD CONSTRAINT categories_slug_key UNIQUE (slug);
+END IF; END $$;
 
 
 --
 -- Name: client_logos client_logos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE client_logos DROP CONSTRAINT IF EXISTS client_logos_pkey;
-ALTER TABLE client_logos ADD CONSTRAINT client_logos_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'client_logos_pkey') THEN
+  ALTER TABLE client_logos ADD CONSTRAINT client_logos_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
 -- Name: order_status_history order_status_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE order_status_history DROP CONSTRAINT IF EXISTS order_status_history_pkey;
-ALTER TABLE order_status_history ADD CONSTRAINT order_status_history_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'order_status_history_pkey') THEN
+  ALTER TABLE order_status_history ADD CONSTRAINT order_status_history_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
 -- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_pkey;
-ALTER TABLE orders ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'orders_pkey') THEN
+  ALTER TABLE orders ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
 -- Name: portfolio_items portfolio_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE portfolio_items DROP CONSTRAINT IF EXISTS portfolio_items_pkey;
-ALTER TABLE portfolio_items ADD CONSTRAINT portfolio_items_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'portfolio_items_pkey') THEN
+  ALTER TABLE portfolio_items ADD CONSTRAINT portfolio_items_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
 -- Name: site_settings site_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE site_settings DROP CONSTRAINT IF EXISTS site_settings_pkey;
-ALTER TABLE site_settings ADD CONSTRAINT site_settings_pkey PRIMARY KEY (key);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'site_settings_pkey') THEN
+  ALTER TABLE site_settings ADD CONSTRAINT site_settings_pkey PRIMARY KEY (key);
+END IF; END $$;
 
 
 --
 -- Name: testimonials testimonials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE testimonials DROP CONSTRAINT IF EXISTS testimonials_pkey;
-ALTER TABLE testimonials ADD CONSTRAINT testimonials_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'testimonials_pkey') THEN
+  ALTER TABLE testimonials ADD CONSTRAINT testimonials_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE users DROP CONSTRAINT IF EXISTS users_email_key;
-ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_email_key') THEN
+  ALTER TABLE users ADD CONSTRAINT users_email_key UNIQUE (email);
+END IF; END $$;
 
 
 --
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE users DROP CONSTRAINT IF EXISTS users_pkey;
-ALTER TABLE users ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'users_pkey') THEN
+  ALTER TABLE users ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+END IF; END $$;
 
 
 --
@@ -335,8 +350,9 @@ CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders USING btree (statu
 -- Name: order_status_history order_status_history_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE order_status_history DROP CONSTRAINT IF EXISTS order_status_history_order_id_fkey;
-ALTER TABLE order_status_history ADD CONSTRAINT order_status_history_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE CASCADE;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'order_status_history_order_id_fkey') THEN
+  ALTER TABLE order_status_history ADD CONSTRAINT order_status_history_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE CASCADE;
+END IF; END $$;
 
 
 --
