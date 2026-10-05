@@ -1,17 +1,28 @@
 #!/usr/bin/env bash
 # Deploy native: build di sini, kirim ke VPS, migrasi, restart service.
-#   SERVER=user@ip ./deploy/deploy.sh dev            # ujung main -> dev
-#   SERVER=user@ip ./deploy/deploy.sh prod v1.2.0    # tag -> prod
+#   SERVER=user@ip ./deploy/deploy.sh dev            # ujung main -> dev (penuh)
+#   SERVER=user@ip ./deploy/deploy.sh prod v1.2.0    # tag -> prod (penuh)
 #   SERVER=user@ip ./deploy/deploy.sh prod --rollback <stamp>
-#   SERVER=user@ip ./deploy/deploy.sh dev --rollback <stamp>
+# Hemat (untuk perubahan kecil):
+#   SERVER=user@ip ./deploy/deploy.sh dev --only=api   # backend saja
+#   SERVER=user@ip ./deploy/deploy.sh dev --only=web   # landing+admin saja
+#   SERVER=user@ip ./deploy/deploy.sh dev --skip-db    # tanpa migrasi+seed
 # Butuh: Go + Node lokal, akses SSH ke VPS, folder deploy/ sudah disiapkan
 # (provision.sh, vhost, unit systemd, .env di /opt/brandingpulse[-dev]/).
 set -euo pipefail
 
-TARGET="${1:-}"; REF="${2:-}"; EXTRA="${3:-}"
+TARGET="${1:-}"; REF="${2:-}"; EXTRA="${3:-}"; FLAG="${4:-}"
 if [[ "$TARGET" != "dev" && "$TARGET" != "prod" ]]; then
-  echo "pakai: $0 dev | $0 prod <tag> | $0 <dev|prod> --rollback <stamp>"; exit 1
+  echo "pakai: $0 dev [--only=api|web] [--skip-db] | $0 prod <tag> | $0 <dev|prod> --rollback <stamp>"; exit 1
 fi
+ONLY="all"; SKIP_DB=0
+for f in "$REF" "$EXTRA" "$@"; do
+  case "$f" in
+    --only=*) ONLY="${f#--only=}";;
+    --skip-db) SKIP_DB=1;;
+  esac
+done
+if [[ "$ONLY" != all && "$ONLY" != api && "$ONLY" != web ]]; then echo "only harus api|web"; exit 1; fi
 : "${SERVER:?set SERVER=user@ip}"
 
 if [[ "$TARGET" == "dev" ]]; then
@@ -48,37 +59,81 @@ else
 fi
 
 echo "== build backend (di server — butuh CGO untuk WebP) =="
-tar -czf /tmp/lp-backend.tgz -C "$WORK/backend" .
-scp -q /tmp/lp-backend.tgz "$SERVER:/tmp/"
-ssh "$SERVER" "rm -rf /tmp/lp-src $REL && mkdir -p /tmp/lp-src $REL && tar -xzf /tmp/lp-backend.tgz -C /tmp/lp-src && cd /tmp/lp-src && export PATH=\$PATH:/usr/local/go/bin && go build -o $REL/api ./cmd/server && rm -rf /tmp/lp-src /tmp/lp-backend.tgz && chown -R brandingpulse:brandingpulse $REL" && rm -f /tmp/lp-backend.tgz
+if [[ "$ONLY" == web ]]; then
+  echo "  (dilewati --only=web)"
+else
+  tar -czf /tmp/lp-backend.tgz -C "$WORK/backend" .
+  scp -q /tmp/lp-backend.tgz "$SERVER:/tmp/"
+  ssh "$SERVER" "rm -rf /tmp/lp-src $REL && mkdir -p /tmp/lp-src $REL && tar -xzf /tmp/lp-backend.tgz -C /tmp/lp-src && cd /tmp/lp-src && export PATH=\$PATH:/usr/local/go/bin && go build -o $REL/api ./cmd/server && rm -rf /tmp/lp-src /tmp/lp-backend.tgz && chown -R brandingpulse:brandingpulse $REL" && rm -f /tmp/lp-backend.tgz
+fi
+# npm ci hanya bila node_modules belum ada atau lockfile berubah
+npm_smart() {
+  local dir="$1"
+  local hash
+  hash=$(sha1sum "$dir/package-lock.json" 2>/dev/null | cut -d' ' -f1)
+  if [[ -d "$dir/node_modules" && -f "$dir/node_modules/.lp-lock" ]] && [[ "$(cat "$dir/node_modules/.lp-lock")" == "$hash" ]]; then
+    echo "  (node_modules segar — npm ci dilewati)"
+  else
+    (cd "$dir" && npm ci --no-audit --no-fund >/dev/null 2>&1) && echo "$hash" > "$dir/node_modules/.lp-lock"
+  fi
+}
 echo "== build landing =="
 if [ "$TARGET" = dev ]; then
   API_URL="https://dev.brandingpulse.co/api/v1"; SITE_URL="https://dev.brandingpulse.co"
 else
   API_URL="https://brandingpulse.co/api/v1"; SITE_URL="https://brandingpulse.co"
 fi
-(cd "$WORK/frontend" && npm ci --no-audit --no-fund >/dev/null 2>&1; PUBLIC_API_URL="$API_URL" PUBLIC_SITE_URL="$SITE_URL" npm run build >/dev/null 2>&1)
+if [[ "$ONLY" == api ]]; then
+  echo "  (dilewati --only=api)"
+else
+  npm_smart "$WORK/frontend"
+  (cd "$WORK/frontend" && PUBLIC_API_URL="$API_URL" PUBLIC_SITE_URL="$SITE_URL" npm run build >/dev/null 2>&1)
+fi
 echo "== build admin =="
-(cd "$WORK/admin" && npm ci --no-audit --no-fund >/dev/null 2>&1; VITE_API_URL="$API_URL" VITE_LANDING_URL="$SITE_URL" VITE_SITE_URL="$SITE_URL" npm run build >/dev/null 2>&1)
+if [[ "$ONLY" == api ]]; then
+  echo "  (dilewati --only=api)"
+else
+  npm_smart "$WORK/admin"
+  (cd "$WORK/admin" && VITE_API_URL="$API_URL" VITE_LANDING_URL="$SITE_URL" VITE_SITE_URL="$SITE_URL" npm run build >/dev/null 2>&1)
+fi
 
 echo "== kirim $STAMP ke $TARGET =="
 ssh "$SERVER" "mkdir -p $REL/landing $REL/admin"
-# (binary sudah dibangun di server pada langkah build)
-scp -qr "$WORK/frontend/dist/." "$SERVER:$REL/landing/"
-scp -qr "$WORK/admin/dist/." "$SERVER:$REL/admin/"
+if [[ "$ONLY" == api ]]; then
+  echo "  (landing+admin disalin dari rilis aktif)"
+  ssh "$SERVER" "cp -r $BASE/current/landing/. $REL/landing/ && cp -r $BASE/current/admin/. $REL/admin/"
+else
+  scp -qr "$WORK/frontend/dist/." "$SERVER:$REL/landing/"
+  scp -qr "$WORK/admin/dist/." "$SERVER:$REL/admin/"
+fi
+if [[ "$ONLY" == web ]]; then
+  echo "  (binary disalin dari rilis aktif)"
+  ssh "$SERVER" "cp $BASE/current/api $REL/api || { echo 'tidak ada rilis aktif — deploy penuh dulu'; exit 1; }"
+fi
 
+if [[ "$SKIP_DB" == 1 ]]; then
+  echo "== migrasi DB dilewati (--skip-db) =="
+else
 echo "== migrasi DB $TARGET =="
 DBNAME="brandingpulse"; [ "$TARGET" = dev ] && DBNAME="brandingpulse_dev"
 for m in "$WORK"/backend/scripts/migrate_*.sql; do
   echo "  - $(basename $m)"
   ssh "$SERVER" "set -a; . $BASE/.env; set +a; PGPASSWORD=\"\$DB_PASSWORD\" psql -h localhost -U brandingpulse -d $DBNAME -v ON_ERROR_STOP=1 -f -" < "$m"
 done
+fi
 
 echo "== aktifkan rilis =="
-# seed konten contoh hanya untuk dev (prod mulai kosong, diisi via admin)
-if [ "$TARGET" = dev ]; then
-  echo "== seed konten dev =="
-  ssh "$SERVER" 'set -a; . '"$BASE"'/.env; set +a; PGPASSWORD="$DB_PASSWORD" psql -h localhost -U brandingpulse -d '"$DBNAME"' -v ON_ERROR_STOP=1 -f -' < "$WORK/backend/scripts/seed.sql"
+# seed konten contoh: dev saja, dan hanya bila DB masih kosong
+if [[ "$SKIP_DB" == 1 ]]; then
+  echo "  (seed dilewati --skip-db)"
+elif [[ "$TARGET" == dev ]]; then
+  N=$(ssh "$SERVER" 'set -a; . '"$BASE"'/.env; set +a; PGPASSWORD="$DB_PASSWORD" psql -h localhost -U brandingpulse -d '"$DBNAME"' -tAc "SELECT COUNT(*) FROM portfolio_items"')
+  if [[ "${N//[[:space:]]/}" == "0" ]]; then
+    echo "  (DB kosong — seed dijalankan)"
+    ssh "$SERVER" 'set -a; . '"$BASE"'/.env; set +a; PGPASSWORD="$DB_PASSWORD" psql -h localhost -U brandingpulse -d '"$DBNAME"' -v ON_ERROR_STOP=1 -f -' < "$WORK/backend/scripts/seed.sql"
+  else
+    echo "  (DB sudah berisi — seed dilewati)"
+  fi
 fi
 ssh "$SERVER" "chmod +x $REL/api && chown -R brandingpulse:brandingpulse $REL && ln -sfn $REL $BASE/current && sudo systemctl restart $SVC && sudo systemctl reload nginx"
 sleep 3
