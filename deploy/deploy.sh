@@ -46,7 +46,7 @@ ssh_init() {
   SCP="scp -o ControlPath=$SOCK"
   ssh -o ControlPath=$SOCK -o ControlMaster=auto -o ControlPersist=60 -f -N "$SERVER"
 }
-cleanup_ssh() { [[ -n "$SOCK" ]] && ssh -O exit -o ControlPath=$SOCK "$SERVER" 2>/dev/null || true; [[ -n "$SOCK" ]] && rm -f "$SOCK"; }
+cleanup_ssh() { if [[ -n "$SOCK" ]]; then ssh -O exit -o ControlPath=$SOCK "$SERVER" 2>/dev/null || true; rm -f "$SOCK"; fi; return 0; }
 trap cleanup_ssh EXIT
 
 rollback() {
@@ -100,6 +100,7 @@ else
       if [[ -z "$CHANGED" ]]; then
         echo "tidak ada perubahan sejak deploy terakhir ($LAST) — selesai."
         echo "(paksa penuh: hapus $STATE lalu ulangi)"
+        cleanup_ssh
         exit 0
       fi
       NEED_API=0; NEED_WEB=0; NEED_DB=0
