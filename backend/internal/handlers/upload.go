@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/image/draw"
 	"logopulse/backend/internal/config"
+	"logopulse/backend/internal/sanitize"
 )
 
 const maxUploadBytes = 10 << 20 // 10MB
@@ -67,6 +68,13 @@ func UploadFile(cfg *config.Config) http.HandlerFunc {
 				fail(w, http.StatusBadRequest, "invalid SVG file")
 				return
 			}
+			// H1: allowlist-sanitize agar <script>/event handler tak tersimpan
+			clean := sanitize.SanitizeSVG(string(raw))
+			if strings.TrimSpace(clean) == "" {
+				fail(w, http.StatusBadRequest, "SVG rejected by sanitizer")
+				return
+			}
+			raw = []byte(clean)
 			fname := id + ".svg"
 			if err := os.WriteFile(filepath.Join(cfg.UploadDir, fname), raw, 0o644); err != nil {
 				fail(w, http.StatusInternalServerError, "failed to save file")

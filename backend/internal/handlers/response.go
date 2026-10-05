@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -33,6 +34,13 @@ func created(w http.ResponseWriter, data any) {
 }
 
 func fail(w http.ResponseWriter, status int, msg string) {
+	writeJSON(w, status, map[string]any{"error": msg})
+}
+
+// failErr mencatat penyebab asli di log server (M3) dan mengirim pesan
+// generik ke klien agar detail internal tidak bocor.
+func failErr(w http.ResponseWriter, r *http.Request, status int, msg string, err error) {
+	log.Printf("ERROR %s %s -> %d %s: %v", r.Method, r.URL.Path, status, msg, err)
 	writeJSON(w, status, map[string]any{"error": msg})
 }
 

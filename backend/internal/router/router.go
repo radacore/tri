@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -36,8 +37,24 @@ func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {
 		w.Write([]byte(`{"data":{"ok":true}}`))
 	})
 
-	// Serve uploaded files.
-	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir(cfg.UploadDir))))
+	// Serve uploaded files (M1, H1): hanya ekstensi gambar + header anti-XSS.
+	// nginx juga menyajikan /uploads langsung — header yang sama dipasang di nginx.
+	uploads := http.StripPrefix("/uploads/", http.FileServer(http.Dir(cfg.UploadDir)))
+	r.Handle("/uploads/*", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		lower := strings.ToLower(r.URL.Path)
+		okExt := strings.HasSuffix(lower, ".webp") || strings.HasSuffix(lower, ".svg") ||
+			strings.HasSuffix(lower, ".png") || strings.HasSuffix(lower, ".jpg") ||
+			strings.HasSuffix(lower, ".jpeg") || strings.HasSuffix(lower, ".gif") ||
+			strings.HasSuffix(lower, ".avif")
+		if !okExt {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox")
+		w.Header().Set("Referrer-Policy", "no-referrer")
+		uploads.ServeHTTP(w, r)
+	}))
 
 	r.Route("/api/v1", func(r chi.Router) {
 		// Public orders

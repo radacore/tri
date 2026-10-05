@@ -12,6 +12,18 @@ import { post } from "../api/client";
 
 const TOKEN_KEY = "logopulse_token";
 
+// L2: anggap token kedaluwarsa bila klaim exp-nya lewat (selain cek server).
+function isExpired(token: string | null): boolean {
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    if (typeof payload.exp !== "number") return true;
+    return payload.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+}
+
 interface AuthContextValue {
   token: string | null;
   isAuthed: boolean;
@@ -53,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ token, isAuthed: !!token, login, logout }),
+    () => ({ token, isAuthed: !!token && !isExpired(token), login, logout }),
     [token, login, logout]
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

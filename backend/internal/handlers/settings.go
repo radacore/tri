@@ -42,9 +42,47 @@ func GetSettings(pool *pgxpool.Pool) http.HandlerFunc {
 	}
 }
 
-// GetPublicSettings returns site_settings for public consumption.
+// publicSettingsAllowlist: hanya key ini yang boleh dibaca publik (C2).
+// Key baru TIDAK otomatis publik — daftarkan eksplisit bila memang konten marketing.
+var publicSettingsAllowlist = map[string]bool{
+	"sections": true, "hero_images": true, "media": true, "pages": true,
+	"pricing": true, "hero": true, "footer": true, "testimonials": true,
+	"clients": true, "order": true, "contact": true, "about": true,
+	"legal": true, "identity": true,
+}
+
+// GetPublicSettings returns allowlisted site_settings for public consumption.
 func GetPublicSettings(pool *pgxpool.Pool) http.HandlerFunc {
-	return GetSettings(pool)
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		rows, err := pool.Query(r.Context(), `SELECT key, value FROM site_settings`)
+		if err != nil {
+			failErr(w, r, http.StatusInternalServerError, "query failed", err)
+			return
+		}
+		defer rows.Close()
+		out := map[string]any{}
+		for rows.Next() {
+			var k string
+			var v []byte
+			if err := rows.Scan(&k, &v); err != nil {
+				continue
+			}
+			if !publicSettingsAllowlist[k] {
+				continue
+			}
+			var decoded any
+			if json.Unmarshal(v, &decoded) == nil {
+				out[k] = decoded
+			} else {
+				out[k] = string(v)
+			}
+		}
+		if out == nil {
+			out = map[string]any{}
+		}
+		ok(w, out)
+	}
 }
 
 // UpdateSetting upserts a single site_settings key.
@@ -72,8 +110,26 @@ func UpdateSetting(pool *pgxpool.Pool) http.HandlerFunc {
 			fail(w, http.StatusBadRequest, "invalid value")
 			return
 		}
-		if _, err := pool.Exec(r.Context(), `INSERT INTO site_settings (key, value, updated_at) VALUES ($1, $2::jsonb, NOW()) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()`, key, string(raw)); err != nil {
-			fail(w, http.StatusInternalServerError, "update failed")
+		// H3: gabung objek (jsonb ||) agar update satu field tak menghapus lainnya.
+		// Kirim {"replace": true, "value": ...} untuk menimpa penuh secara eksplisit.
+		replace := false
+		if m, isMap := v.(map[string]any); isMap {
+			if r, _ := m["replace"].(bool); r {
+				replace = true
+				if inner, present := m["value"]; present {
+					v = inner
+				}
+				raw, _ = json.Marshal(v)
+			}
+		}
+		var execErr error
+		if replace {
+			_, execErr = pool.Exec(r.Context(), `INSERT INTO site_settings (key, value, updated_at) VALUES ($1, $2::jsonb, NOW()) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()`, key, string(raw))
+		} else {
+			_, execErr = pool.Exec(r.Context(), `INSERT INTO site_settings (key, value, updated_at) VALUES ($1, $2::jsonb, NOW()) ON CONFLICT (key) DO UPDATE SET value = COALESCE(site_settings.value, '{}'::jsonb) || EXCLUDED.value, updated_at=NOW()`, key, string(raw))
+		}
+		if execErr != nil {
+			failErr(w, r, http.StatusInternalServerError, "update failed", execErr)
 			return
 		}
 		ok(w, map[string]any{"key": key, "value": v})

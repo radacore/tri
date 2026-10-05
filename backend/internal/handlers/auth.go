@@ -13,20 +13,6 @@ import (
 	"logopulse/backend/internal/config"
 )
 
-var seededFallbackHash []byte
-
-func fallbackHash() []byte {
-	if seededFallbackHash != nil {
-		return seededFallbackHash
-	}
-	h, err := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
-	if err != nil {
-		return nil
-	}
-	seededFallbackHash = h
-	return h
-}
-
 func findUser(ctx context.Context, pool *pgxpool.Pool, email string) (id, hash, name, role string, found bool) {
 	err := pool.QueryRow(ctx, `SELECT id, password, COALESCE(name,''), COALESCE(role,'admin') FROM users WHERE email=$1`, email).Scan(&id, &hash, &name, &role)
 	if err != nil {
@@ -56,12 +42,11 @@ func Login(pool *pgxpool.Pool, cfg *config.Config) http.HandlerFunc {
 			if envHash == "" {
 				envHash = cfg.AdminPasswordHash
 			}
-			if envHash != "" {
-				hash = envHash
-			} else {
-				hash = string(fallbackHash())
-				log.Printf("WARN: using fallback admin credentials for %s (set ADMIN_PASSWORD_HASH)", body.Email)
+			if envHash == "" {
+				fail(w, http.StatusUnauthorized, "invalid credentials")
+				return
 			}
+			hash = envHash
 			id, name, role, found = "seed-admin", "Admin", "admin", true
 		}
 		if !found {
@@ -116,19 +101,4 @@ func EnsureSeedAdmin(pool *pgxpool.Pool, cfg *config.Config) {
 	}
 }
 
-func hashPasswordIfNeeded(s string) string {
-	if s == "" {
-		return s
-	}
-	if len(s) >= 4 && s[:4] == "$2a$" || len(s) >= 4 && s[:4] == "$2b$" {
-		return s
-	}
-	h, err := bcrypt.GenerateFromPassword([]byte(s), bcrypt.DefaultCost)
-	if err != nil {
-		return s
-	}
-	return string(h)
-}
-
-var _ = hashPasswordIfNeeded
 var _ = pgxpool.Pool{}

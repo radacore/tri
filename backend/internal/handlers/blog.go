@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"logopulse/backend/internal/sanitize"
 )
 
 // ListBlogPosts returns published posts with pagination + category filter.
@@ -43,7 +44,7 @@ func ListBlogPosts(pool *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 			items = append(items, map[string]any{
-				"id": id, "title": title, "slug": slug, "content": strp(content),
+				"id": id, "title": title, "slug": slug, "content": sanitize.Clean(strp(content)),
 				"category": strp(cat), "thumbnail_url": strp(thumb),
 				"meta_title": strp(mt), "meta_description": strp(md),
 				"published": pub, "published_at": pat.String(),
@@ -71,7 +72,7 @@ func GetBlogPost(pool *pgxpool.Pool) http.HandlerFunc {
 			return
 		}
 		ok(w, map[string]any{
-			"id": id, "title": title, "slug": slug, "content": strp(content),
+			"id": id, "title": title, "slug": slug, "content": sanitize.Clean(strp(content)),
 			"category": strp(cat), "thumbnail_url": strp(thumb),
 			"meta_title": strp(mt), "meta_description": strp(md),
 			"published": pub, "published_at": pat.String(),
@@ -106,7 +107,7 @@ func AdminListBlogPosts(pool *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 			items = append(items, map[string]any{
-				"id": id, "title": title, "slug": slug, "content": strp(content),
+				"id": id, "title": title, "slug": slug, "content": sanitize.Clean(strp(content)),
 				"category": strp(cat), "thumbnail_url": strp(thumb),
 				"meta_title": strp(mt), "meta_description": strp(md),
 				"published": pub, "published_at": pat.String(),
@@ -144,6 +145,10 @@ func AdminCreateBlogPost(pool *pgxpool.Pool) http.HandlerFunc {
 		if b.Published != nil {
 			pub = *b.Published
 		}
+		if b.Content != nil {
+			clean := sanitize.SanitizeHTML(*b.Content)
+			b.Content = &clean
+		}
 		var id string
 		var q string
 		if pub {
@@ -171,6 +176,11 @@ func AdminUpdateBlogPost(pool *pgxpool.Pool) http.HandlerFunc {
 		if pub, present := b["published"]; present {
 			if on, _ := pub.(bool); on {
 				b["published_at"] = "NOW()"
+			}
+		}
+		if raw, present := b["content"]; present {
+			if s, _ := raw.(string); s != "" {
+				b["content"] = sanitize.SanitizeHTML(s)
 			}
 		}
 		allowed := map[string]string{

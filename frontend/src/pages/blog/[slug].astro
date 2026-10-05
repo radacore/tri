@@ -71,11 +71,12 @@ const SHARE_BTNS = [
   </main>
   <Footer />
   <script define:vars={{ slug, md: body }}>
+    import { sanitizeHtml } from '../../lib/sanitize-html';
     (function () {
       function render(htmlText) {
         try {
           var el = document.getElementById('post-body');
-          if (el && htmlText) el.innerHTML = htmlText;
+          if (el && htmlText) el.innerHTML = sanitizeHtml(htmlText);
         } catch (e) {}
       }
       function fmt(iso) {

@@ -6,16 +6,17 @@ services:
     environment:
       POSTGRES_DB: logopulse
       POSTGRES_USER: logopulse
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD di .env}
     restart: unless-stopped
   api:
     build: ./backend
     depends_on: [db]
     environment:
-      DATABASE_URL: postgres://logopulse:${DB_PASSWORD}@db:5432/logopulse?sslmode=disable
-      JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://logopulse:${DB_PASSWORD:?set DB_PASSWORD di .env}@db:5432/logopulse?sslmode=disable
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET 48+ karakter di .env}
       UPLOAD_DIR: /app/uploads
       PORT: 8080
+      TRUST_PROXY_HEADERS: "1"
     volumes:
       - uploads:/app/uploads
     restart: unless-stopped

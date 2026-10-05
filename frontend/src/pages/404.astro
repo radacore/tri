@@ -16,6 +16,7 @@ import Footer from '../components/Footer.astro';
   </main>
   <Footer />
   <script>
+    import { sanitizeHtml } from '../lib/sanitize-html';
     // Fallback cerdas: slug blog/case baru yang belum ikut build statis
     // tetap bisa dibuka — diambil dari API lalu dirender di sini.
     // Setelah build ulang, halaman SSG asli yang melayani.
@@ -32,7 +33,7 @@ import Footer from '../components/Footer.astro';
       function looksHtml(s) { return /<[a-z][\s>]/i.test(s || ''); }
       function bodyHtml(s) {
         if (!s) return '';
-        return looksHtml(s) ? s : '<p>' + esc(s) + '</p>';
+        return looksHtml(s) ? sanitizeHtml(s) : '<p>' + esc(s) + '</p>';
       }
       function fmt(iso) {
         var d = String(iso || '').slice(0, 10).split('-');

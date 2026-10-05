@@ -3,6 +3,8 @@ package middleware
 import (
 	"net"
 	"net/http"
+	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -49,8 +51,17 @@ func init() {
 }
 
 func clientIP(r *http.Request) string {
-	if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {
-		return fwd
+	// X-Forwarded-For hanya dipercaya di belakang proxy tepercaya
+	// (compose menyetel TRUST_PROXY_HEADERS=1; nginx menimpa header).
+	// Kalau langsung terekspos, tanpa ini siapa pun bisa memalsukan IP
+	// dan melewati rate limit login.
+	if os.Getenv("TRUST_PROXY_HEADERS") == "1" {
+		if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {
+			first := strings.TrimSpace(strings.Split(fwd, ",")[0])
+			if ip := net.ParseIP(first); ip != nil {
+				return ip.String()
+			}
+		}
 	}
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {

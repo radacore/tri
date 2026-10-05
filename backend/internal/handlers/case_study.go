@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"logopulse/backend/internal/sanitize"
 )
 
 func itoa(n int) string { return strconv.Itoa(n) }
@@ -38,7 +39,7 @@ func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			}
 			items = append(items, map[string]any{
 				"id": id, "title": title, "slug": slug, "industry": strp(ind),
-				"hero_image": strp(hero), "content": strp(content), "published": pub,
+				"hero_image": strp(hero), "content": sanitize.Clean(strp(content)), "published": pub,
 				"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
 				"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
 				"created_at": ca.String(), "updated_at": ua.String(),
@@ -67,7 +68,7 @@ func GetCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 		}
 		ok(w, map[string]any{
 			"id": id, "title": title, "slug": slug, "industry": strp(ind),
-			"hero_image": strp(hero), "content": strp(content), "published": pub,
+			"hero_image": strp(hero), "content": sanitize.Clean(strp(content)), "published": pub,
 			"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
 			"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
 			"created_at": ca.String(), "updated_at": ua.String(),
@@ -103,7 +104,7 @@ func AdminListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			}
 			items = append(items, map[string]any{
 				"id": id, "title": title, "slug": slug, "industry": strp(ind),
-				"hero_image": strp(hero), "content": strp(content), "published": pub,
+				"hero_image": strp(hero), "content": sanitize.Clean(strp(content)), "published": pub,
 				"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
 				"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
 				"created_at": ca.String(), "updated_at": ua.String(),
@@ -145,6 +146,10 @@ func AdminCreateCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 		if b.Published != nil {
 			pub = *b.Published
 		}
+		if b.Content != nil {
+			clean := sanitize.SanitizeHTML(*b.Content)
+			b.Content = &clean
+		}
 		var id string
 		err := pool.QueryRow(r.Context(), `INSERT INTO case_studies (title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`, b.Title, b.Slug, b.Industry, b.HeroImage, b.Content, pub, b.Client, b.Result, b.Excerpt, b.Logo, b.Mockup, b.Year, b.Website).Scan(&id)
 		if err != nil {
@@ -162,6 +167,11 @@ func AdminUpdateCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 		var b map[string]any
 		if !decodeJSON(w, r, &b) {
 			return
+		}
+		if raw, present := b["content"]; present {
+			if s, _ := raw.(string); s != "" {
+				b["content"] = sanitize.SanitizeHTML(s)
+			}
 		}
 		allowed := map[string]string{
 			"title": "title", "slug": "slug", "industry": "industry",
