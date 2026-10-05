@@ -187,105 +187,105 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- Name: blog_posts blog_posts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT blog_posts_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT blog_posts_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: blog_posts blog_posts_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT blog_posts_slug_key UNIQUE (slug);
+-- TODO:     ADD CONSTRAINT blog_posts_slug_key UNIQUE (slug);
 
 
 --
 -- Name: case_studies case_studies_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT case_studies_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT case_studies_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: case_studies case_studies_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT case_studies_slug_key UNIQUE (slug);
+-- TODO:     ADD CONSTRAINT case_studies_slug_key UNIQUE (slug);
 
 
 --
 -- Name: categories categories_name_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT categories_name_key UNIQUE (name);
+-- TODO:     ADD CONSTRAINT categories_name_key UNIQUE (name);
 
 
 --
 -- Name: categories categories_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT categories_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: categories categories_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT categories_slug_key UNIQUE (slug);
+-- TODO:     ADD CONSTRAINT categories_slug_key UNIQUE (slug);
 
 
 --
 -- Name: client_logos client_logos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT client_logos_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT client_logos_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: order_status_history order_status_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT order_status_history_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT order_status_history_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: orders orders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT orders_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: portfolio_items portfolio_items_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT portfolio_items_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT portfolio_items_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: site_settings site_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT site_settings_pkey PRIMARY KEY (key);
+-- TODO:     ADD CONSTRAINT site_settings_pkey PRIMARY KEY (key);
 
 
 --
 -- Name: testimonials testimonials_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT testimonials_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT testimonials_pkey PRIMARY KEY (id);
 
 
 --
 -- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT users_email_key UNIQUE (email);
+-- TODO:     ADD CONSTRAINT users_email_key UNIQUE (email);
 
 
 --
 -- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+-- TODO:     ADD CONSTRAINT users_pkey PRIMARY KEY (id);
 
 
 --
@@ -320,7 +320,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders USING btree (statu
 -- Name: order_status_history order_status_history_order_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-    ADD CONSTRAINT order_status_history_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE CASCADE;
+-- TODO:     ADD CONSTRAINT order_status_history_order_id_fkey FOREIGN KEY (order_id) REFERENCES public.orders(id) ON DELETE CASCADE;
 
 
 --
