@@ -150,9 +150,32 @@ if [[ "$SKIP_DB" == 1 ]]; then
 else
 echo "== migrasi DB $TARGET =="
 DBNAME="brandingpulse"; [ "$TARGET" = dev ] && DBNAME="brandingpulse_dev"
+# Pra-penerbangan: uji semua migrasi ke database scratch lokal.
+# Gagal di sini = berhenti SEBELUM menyentuh server.
+if command -v psql >/dev/null 2>&1 && psql "postgres://brandingpulse:logopulse@localhost:5432/postgres?sslmode=disable" -tAc "SELECT 1" >/dev/null 2>&1; then
+  psql "postgres://brandingpulse:logopulse@localhost:5432/postgres?sslmode=disable" -qc "DROP DATABASE IF EXISTS mig_check;" -qc "CREATE DATABASE mig_check;" >/dev/null 2>&1
+  MIG_OK=1
+  for m in "$WORK"/backend/scripts/migrate_*.sql; do
+    if ! psql "postgres://brandingpulse:logopulse@localhost:5432/mig_check?sslmode=disable" -q -v ON_ERROR_STOP=1 -f "$m" >/tmp/lp-migcheck.log 2>&1; then
+      echo "  GAGAL pra-penerbangan: $(basename $m)"; tail -5 /tmp/lp-migcheck.log; MIG_OK=0; break
+    fi
+  done
+  psql "postgres://brandingpulse:logopulse@localhost:5432/postgres?sslmode=disable" -qc "DROP DATABASE IF EXISTS mig_check;" >/dev/null 2>&1
+  if [[ "$MIG_OK" == 0 ]]; then echo "perbaiki migrasi dulu — deploy dibatalkan."; exit 1; fi
+  echo "  pra-penerbangan lolos"
+else
+  echo "  (postgres lokal tak tersedia — pra-penerbangan dilewati)"
+fi
+run_mig() { # $1 = file, $2 = db
+  local out
+  if out=$(ssh "$SERVER" "set -a; . $BASE/.env; set +a; PGPASSWORD=\"\$DB_PASSWORD\" psql -q -h localhost -U brandingpulse -d $2 -v ON_ERROR_STOP=1 -f -" < "$1" 2>&1); then
+    echo "  - $(basename $1): OK"
+  else
+    echo "  - $(basename $1): GAGAL"; echo "$out" | grep -viE "warning|locale|LC_|LANG" | head -8; return 1
+  fi
+}
 for m in "$WORK"/backend/scripts/migrate_*.sql; do
-  echo "  - $(basename $m)"
-  ssh "$SERVER" "set -a; . $BASE/.env; set +a; PGPASSWORD=\"\$DB_PASSWORD\" psql -h localhost -U brandingpulse -d $DBNAME -v ON_ERROR_STOP=1 -f -" < "$m"
+  run_mig "$m" "$DBNAME"
 done
 fi
 
@@ -164,7 +187,11 @@ elif [[ "$TARGET" == dev ]]; then
   N=$(ssh "$SERVER" 'set -a; . '"$BASE"'/.env; set +a; PGPASSWORD="$DB_PASSWORD" psql -h localhost -U brandingpulse -d '"$DBNAME"' -tAc "SELECT COUNT(*) FROM portfolio_items"')
   if [[ "${N//[[:space:]]/}" == "0" ]]; then
     echo "  (DB kosong — seed dijalankan)"
-    ssh "$SERVER" 'set -a; . '"$BASE"'/.env; set +a; PGPASSWORD="$DB_PASSWORD" psql -h localhost -U brandingpulse -d '"$DBNAME"' -v ON_ERROR_STOP=1 -f -' < "$WORK/backend/scripts/seed.sql"
+    if ssh "$SERVER" 'set -a; . '"$BASE"'/.env; set +a; PGPASSWORD="$DB_PASSWORD" psql -q -h localhost -U brandingpulse -d '"$DBNAME"' -v ON_ERROR_STOP=1 -f -' < "$WORK/backend/scripts/seed.sql" >/tmp/lp-seed.log 2>&1; then
+      echo "  - seed.sql: OK"
+    else
+      echo "  - seed.sql: GAGAL"; grep -viE "warning|locale|LC_|LANG" /tmp/lp-seed.log | head -8; exit 1
+    fi
   else
     echo "  (DB sudah berisi — seed dilewati)"
   fi
