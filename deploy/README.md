@@ -45,6 +45,12 @@ SERVER=root@IP_VPS ./deploy/deploy.sh dev --only=api       # backend saja
 SERVER=root@IP_VPS ./deploy/deploy.sh dev --only=web       # landing+admin saja
 SERVER=root@IP_VPS ./deploy/deploy.sh dev --skip-db        # tanpa migrasi+seed
 ```
+Build backend/landing/admin jalan paralel + satu koneksi SSH dipakai ulang.
+Opsional: purge cache Cloudflare otomatis — isi `~/.brandingpulse-deploy`:
+```bash
+CF_API_TOKEN=token_dengan_izin_Cache_Purge
+CF_ZONE_ID=id_zone_brandingpulse_co
+```
 ```bash
 SERVER=root@IP_VPS ./deploy/deploy.sh dev              # ujung main -> dev
 git tag v1.0.0 && git push origin v1.0.0
