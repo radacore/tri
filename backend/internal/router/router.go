@@ -15,8 +15,16 @@ import (
 func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger, middleware.Recoverer, middleware.RealIP)
+	origins := append([]string{}, cfg.AllowedOrigins...)
+	seen := map[string]bool{}
+	for _, o := range origins {
+		seen[o] = true
+	}
+	if cfg.FrontendURL != "" && !seen[cfg.FrontendURL] {
+		origins = append(origins, cfg.FrontendURL)
+	}
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   origins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-Requested-With"},
 		AllowCredentials: false,

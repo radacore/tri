@@ -8,7 +8,8 @@ const {
   description = 'Custom logo & brand identity. From $49, ready in 48 hours, 100% money-back guarantee.',
 } = Astro.props as Props;
 import '../styles/global.css';
-const site = 'https://logopulse.example.com';
+import { API as LP_API_BASE } from '../lib/api';
+const site = import.meta.env.PUBLIC_SITE_URL ?? 'https://logopulse.example.com';
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -44,6 +45,7 @@ const jsonLd = {
   />
   <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   <noscript><style>.reveal, #cta-banner { opacity: 1 !important; transform: none !important; }</style></noscript>
+  <script define:vars={{ lpApiBase: LP_API_BASE }}>window.__lpApiBase = lpApiBase;</script>
 </head>
 <body class="bg-white text-slate-900 antialiased">
   <slot />

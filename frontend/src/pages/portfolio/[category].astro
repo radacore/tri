@@ -7,7 +7,8 @@ import { FALLBACK_PORTFOLIO } from '../../lib/api';
 export async function getStaticPaths() {
   let slugs: string[] = ['tech', 'fnb', 'fashion', 'health'];
   try {
-    const r = await fetch('http://localhost:8080/api/v1/categories');
+    const __api = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+    const r = await fetch(`${__api}/categories`);
     if (r.ok) {
       const j = await r.json();
       const list = j?.data ?? j;
@@ -47,7 +48,7 @@ const { category } = Astro.params;
   <Footer />
   <script define:vars={{ slug: category }}>
     (function () {
-      var base = 'http://localhost:8080/api/v1';
+      var base = (window.__lpApiBase || 'http://localhost:8080/api/v1');
       var items = Array.from(document.querySelectorAll('.pf-item'));
       function applyFilter(name) {
         var shown = 0;
