@@ -96,10 +96,15 @@ else
   ssh "$SERVER" "rm -rf /tmp/lp-src $REL && mkdir -p /tmp/lp-src $REL && tar -xzf /tmp/lp-backend.tgz -C /tmp/lp-src && cd /tmp/lp-src && export PATH=\$PATH:/usr/local/go/bin && go build -o $REL/api ./cmd/server && rm -rf /tmp/lp-src /tmp/lp-backend.tgz && chown -R brandingpulse:brandingpulse $REL" && rm -f /tmp/lp-backend.tgz
 fi
 # npm ci hanya bila node_modules belum ada atau lockfile berubah
+lockhash() {
+  if command -v sha1sum >/dev/null 2>&1; then sha1sum "$1";
+  elif command -v shasum >/dev/null 2>&1; then shasum -a 1 "$1";
+  else cksum "$1"; fi | cut -d' ' -f1
+}
 npm_smart() {
   local dir="$1"
   local hash
-  hash=$(sha1sum "$dir/package-lock.json" 2>/dev/null | cut -d' ' -f1)
+  hash=$(lockhash "$dir/package-lock.json" 2>/dev/null || true)
   if [[ -d "$dir/node_modules" && -f "$dir/node_modules/.lp-lock" ]] && [[ "$(cat "$dir/node_modules/.lp-lock")" == "$hash" ]]; then
     echo "  (node_modules segar — npm ci dilewati)"
   else
