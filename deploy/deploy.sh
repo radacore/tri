@@ -56,6 +56,35 @@ else
   # dev = ujung main yang sedang aktif (harus bersih)
   git diff --quiet && git diff --cached --quiet || { echo "working tree kotor — commit dulu"; exit 1; }
   WORK="$PWD"
+  # Deteksi otomatis: bandingkan dengan deploy dev terakhir.
+  # Override manual tetap menang (flag --only / --skip-db).
+  STATE="/tmp/lp-deploy-dev"
+  if [[ "$ONLY" == all && "$SKIP_DB" == 0 && -f "$STATE" ]]; then
+    LAST=$(cat "$STATE" 2>/dev/null)
+    if git cat-file -e "$LAST" 2>/dev/null; then
+      CHANGED=$(git diff --name-only "$LAST"..HEAD; git ls-files --others --exclude-standard)
+      if [[ -z "$CHANGED" ]]; then
+        echo "tidak ada perubahan sejak deploy terakhir ($LAST) — selesai."
+        echo "(paksa penuh: hapus $STATE lalu ulangi)"
+        exit 0
+      fi
+      NEED_API=0; NEED_WEB=0; NEED_DB=0
+      while IFS= read -r f; do
+        case "$f" in
+          backend/scripts/migrate_*|backend/scripts/seed.sql) NEED_DB=1;;
+          backend/*) NEED_API=1;;
+          frontend/*) NEED_WEB=1;;
+          admin/*) NEED_WEB=1;;
+          *) NEED_API=1; NEED_WEB=1; NEED_DB=1;;
+        esac
+      done <<< "$CHANGED"
+      [[ "$NEED_API" == 0 && "$NEED_WEB" == 0 ]] && { echo "hanya non-kode berubah — lewati."; echo "$CHANGED" | head -5; exit 0; }
+      [[ "$NEED_API" == 1 && "$NEED_WEB" == 0 ]] && ONLY=api
+      [[ "$NEED_API" == 0 && "$NEED_WEB" == 1 ]] && ONLY=web
+      [[ "$NEED_DB" == 0 ]] && SKIP_DB=1
+      echo "terdeteksi: api=$NEED_API web=$NEED_WEB db=$NEED_DB -> ONLY=$ONLY SKIP_DB=$SKIP_DB"
+    fi
+  fi
 fi
 
 echo "== build backend (di server — butuh CGO untuk WebP) =="
@@ -141,4 +170,7 @@ HOST=$([ "$TARGET" = dev ] && echo "https://dev.brandingpulse.co" || echo "https
 echo "== cek =="
 curl -sm 10 "$HOST/api/v1/health" || echo "WARN: health check gagal — cek manual"
 curl -sm 10 -o /dev/null -w "landing %{http_code}\n" "$HOST/" || true
+if [[ "$TARGET" == dev ]]; then
+  git -C "$WORK" rev-parse HEAD > /tmp/lp-deploy-dev 2>/dev/null || true
+fi
 echo "OK — $TARGET @ $STAMP"
