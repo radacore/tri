@@ -48,7 +48,7 @@ var publicSettingsAllowlist = map[string]bool{
 	"sections": true, "hero_images": true, "media": true, "pages": true,
 	"pricing": true, "hero": true, "footer": true, "testimonials": true,
 	"clients": true, "order": true, "contact": true, "about": true,
-	"legal": true, "identity": true,
+	"legal": true, "identity": true, "seo": true,
 }
 
 // GetPublicSettings returns allowlisted site_settings for public consumption.

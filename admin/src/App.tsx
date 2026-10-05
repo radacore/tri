@@ -16,6 +16,7 @@ import ClientsPage from "./pages/ClientsPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import IdentityPage from "./pages/IdentityPage";
 import SettingsPage from "./pages/SettingsPage";
+import SeoPage from "./pages/SeoPage";
 
 const qc = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="identity" element={<IdentityPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="seo" element={<SeoPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

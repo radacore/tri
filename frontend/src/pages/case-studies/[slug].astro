@@ -154,6 +154,26 @@ if (gslug) {
       </div>
     </div>
   </main>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: `${client} — brand identity case study`,
+        description: excerpt,
+        image: mockup ? [mockup] : undefined,
+        author: { '@type': 'Organization', name: 'BrandingPulse' },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://brandingpulse.co/' },
+          { '@type': 'ListItem', position: 2, name: 'Case studies', item: 'https://brandingpulse.co/case-studies/' },
+          { '@type': 'ListItem', position: 3, name: client },
+        ],
+      },
+    ],
+  })} />
   <CTABanner />
   <Footer />
   <script>

@@ -4,12 +4,25 @@ interface Props {
   description?: string;
 }
 const {
-  title = 'BrandingPulse — Logo & Brand Identity in 48 Hours',
-  description = 'Custom logo & brand identity. From $49, ready in 48 hours, 100% money-back guarantee.',
+  title: titleProp,
+  description: descProp,
 } = Astro.props as Props;
 import '../styles/global.css';
 import { API as LP_API_BASE } from '../lib/api';
-const site = import.meta.env.PUBLIC_SITE_URL ?? 'https://brandingpulse.example.com';
+const site = import.meta.env.PUBLIC_SITE_URL ?? 'https://brandingpulse.co';
+// SEO dari admin (site_settings.seo): dibaca saat build agar crawler
+// melihat tag final tanpa JavaScript. Runtime override tetap via data-site.
+let seo: Record<string, string> = {};
+try {
+  const r = await fetch(`${LP_API_BASE}/settings`, { headers: { 'Accept': 'application/json' } });
+  if (r.ok) {
+    const j = await r.json();
+    const d = j?.data ?? j;
+    if (d && typeof d.seo === 'object') seo = d.seo;
+  }
+} catch { /* offline — fallback */ }
+const title = titleProp ?? seo.default_title ?? 'BrandingPulse — Logo & Brand Identity in 48 Hours';
+const description = descProp ?? seo.default_description ?? 'Custom logo & brand identity. From $49, ready in 48 hours, 100% money-back guarantee.';
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -30,12 +43,18 @@ const jsonLd = {
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={site + Astro.url.pathname} />
-  <meta property="og:image" data-site-content="media.og_image" content={site + '/og-cover.jpg'} />
+  <meta property="og:image" data-site-content="media.og_image" content={seo.og_image || site + '/og-cover.jpg'} />
+  {seo.twitter_handle && <meta name="twitter:site" content={'@' + seo.twitter_handle.replace(/^@/, '')} />}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={site + '/og-cover.jpg'} />
+  <meta name="twitter:image" content={seo.og_image || site + '/og-cover.jpg'} />
   <meta name="theme-color" content="#0158FE" />
+  {seo.keywords && <meta name="keywords" content={seo.keywords} />}
+  {seo.google_verification && <meta name="google-site-verification" content={seo.google_verification} />}
+  {seo.bing_verification && <meta name="msvalidate.01" content={seo.bing_verification} />}
+  {seo.ga_id && <script async src={`https://www.googletagmanager.com/gtag/js?id=${seo.ga_id}`}></script>}
+  {seo.ga_id && <script set:html={`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${seo.ga_id}');`} />}
   <link rel="icon" type="image/svg+xml" data-site-href="media.favicon" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

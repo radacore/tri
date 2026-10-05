@@ -69,6 +69,27 @@ const SHARE_BTNS = [
     </div>
     <a href="/order?plan=professional" class="btn-active mt-8 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Get my logo — from $49</a>
   </main>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        headline: post?.title || fb.title,
+        description: desc,
+        image: cover ? [cover] : undefined,
+        datePublished: date || undefined,
+        author: { '@type': 'Organization', name: 'BrandingPulse' },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://brandingpulse.co/' },
+          { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://brandingpulse.co/blog/' },
+          { '@type': 'ListItem', position: 3, name: post?.title || fb.title },
+        ],
+      },
+    ],
+  })} />
   <Footer />
   <script define:vars={{ slug, md: body }}>
     import { sanitizeHtml } from '../../lib/sanitize-html';

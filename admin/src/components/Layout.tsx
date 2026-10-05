@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Newspaper,
+  Globe,
   Palette,
   Quote,
   Settings,
@@ -37,6 +38,7 @@ const GROUPS: {
       { to: "/clients", label: "Clients", icon: CheckCheck },
       { to: "/categories", label: "Categories", icon: Tags },
       { to: "/identity", label: "Website Identity", icon: Palette },
+      { to: "/seo", label: "SEO", icon: Globe },
     ],
   },
   {
