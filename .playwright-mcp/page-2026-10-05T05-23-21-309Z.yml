@@ -1,8 +1,0 @@
-- generic [ref=e4]:
-  - heading "LogoPulse Admin" [level=1] [ref=e10]
-  - paragraph [ref=e11]: Sign in to manage content
-  - generic [ref=e12]: Email
-  - textbox "Email" [ref=e13]
-  - generic [ref=e14]: Password
-  - textbox "Password" [ref=e15]
-  - button "Sign in" [ref=e16] [cursor=pointer]

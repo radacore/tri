@@ -6,3 +6,4 @@ pg_data/
 backend/*.test
 .DS_Store
 .backup/
+.playwright-mcp/
