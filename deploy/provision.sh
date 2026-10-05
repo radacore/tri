@@ -34,8 +34,9 @@ for env in "" "$DEV_SUFFIX"; do
 done
 
 # PostgreSQL: database + user untuk prod dan dev. Password dibaca dari
-# environment DB_PASSWORD / DB_PASSWORD_DEV saat script dijalankan, contoh:
-#   DB_PASSWORD=... DB_PASSWORD_DEV=... bash deploy/provision.sh
+# environment DB_PASSWORD saat script dijalankan. WAJIB alfanumerik saja
+# (/ + = merusak URL koneksi), contoh:
+#   DB_PASSWORD=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 32) bash deploy/provision.sh
 # Tanpa itu, database dibuat tapi password belum diset (lihat .env).
 su postgres -c "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='brandingpulse'\"" | grep -q 1 \
   || su postgres -c "psql -c \"CREATE USER brandingpulse WITH PASSWORD '${DB_PASSWORD:-changeme-tolong-ganti}';\""

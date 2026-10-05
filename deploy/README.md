@@ -7,7 +7,8 @@
 
 ## 1. Provisioning VPS kosong (sekali, sebagai root)
 ```bash
-DB_PASSWORD=$(openssl rand -base64 32) bash deploy/provision.sh
+DB_PASSWORD=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 32) bash deploy/provision.sh
+# PENTING: hanya huruf-angka (karakter seperti / + = merusak URL koneksi DB)
 ```
 
 ## 2. File env di server (sekali per env, sebagai root)
