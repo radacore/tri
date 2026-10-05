@@ -3,7 +3,7 @@ import { FALLBACK_PORTFOLIO } from '../lib/api';
 const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
 // Ukuran bento diacak di browser setiap refresh (lihat <script> shuffle);
 // pola dasar L=4u, W=2u, T=2u, S=1u agar selalu menutup rapat.
-const PILL_BASE = 'pf-btn btn-active rounded-full px-4 py-2 text-sm font-bold border transition';
+const PILL_BASE = 'pf-btn btn-active shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition sm:px-4 sm:py-2 sm:text-sm';
 const PILL_ON = 'bg-black text-white border-black';
 const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
 ---
@@ -13,7 +13,7 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
       <p class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-slate-500" data-site="sections.pf_kicker">Portfolio</p>
       <h2 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight" data-site="sections.pf_title">Fresh work, shipped weekly</h2>
     </div>
-    <div id="pf-filters" class="flex flex-wrap gap-2" role="tablist" aria-label="Filter portfolio">
+    <div id="pf-filters" class="no-scrollbar flex max-w-full flex-nowrap gap-2 overflow-x-auto sm:flex-wrap" role="tablist" aria-label="Filter portfolio">
       {filters.map((f, i) => (
         <button
           type="button"

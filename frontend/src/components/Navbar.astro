@@ -14,9 +14,20 @@
       <a class="nav-link px-3 py-2 hover:text-white" href="/blog">Blog</a>
     </div>
     <div class="flex items-center gap-2">
-      <a href="/#pricing" data-site="nav.cta" class="btn-active inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover">View Pricing</a>
+      <a href="/#pricing" data-site="nav.cta" class="btn-active hidden rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover md:inline-flex">View Pricing</a>
+      <button id="nav-burger" type="button" aria-label="Menu" aria-expanded="false" class="grid h-10 w-10 place-items-center rounded-full text-white transition hover:bg-white/10 md:hidden">
+        <svg id="nav-burger-open" class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5.5h14M3 10h14M3 14.5h14" /></svg>
+        <svg id="nav-burger-close" class="hidden h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15" /></svg>
+      </button>
     </div>
   </nav>
+  <div id="nav-menu" class="invisible pointer-events-none mt-2 -translate-y-2 rounded-3xl bg-black p-2 text-white opacity-0 ring-1 ring-white/10 transition-all duration-300 motion-reduce:transition-none md:hidden" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(2, 8, 30, 0.35);">
+    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/#portfolio">Portfolio</a>
+    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/case-studies">Case Studies</a>
+    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/#how-it-works">How It Works</a>
+    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/#pricing">Pricing</a>
+    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/blog">Blog</a>
+  </div>
 </header>
 <script>
   (function () {
@@ -53,5 +64,29 @@
       if (!ticking) { ticking = true; requestAnimationFrame(apply); }
     }, { passive: true });
     apply();
+    // menu mobile: meluncur ke bawah (opacity + translate saja)
+    var burger = document.getElementById('nav-burger');
+    var menu = document.getElementById('nav-menu');
+    var iconOpen = document.getElementById('nav-burger-open');
+    var iconClose = document.getElementById('nav-burger-close');
+    function setMenu(open) {
+      if (!menu || !burger) return;
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menu.classList.toggle('invisible', !open);
+      menu.classList.toggle('pointer-events-none', !open);
+      menu.classList.toggle('opacity-0', !open);
+      menu.classList.toggle('-translate-y-2', !open);
+      if (iconOpen) iconOpen.classList.toggle('hidden', open);
+      if (iconClose) iconClose.classList.toggle('hidden', !open);
+    }
+    if (burger) burger.addEventListener('click', function () {
+      setMenu(burger.getAttribute('aria-expanded') !== 'true');
+    });
+    if (menu) menu.addEventListener('click', function (e) {
+      if (e.target && e.target.closest('a')) setMenu(false);
+    });
+    window.addEventListener('resize', function () {
+      if (window.innerWidth >= 768) setMenu(false);
+    });
   })();
 </script>
