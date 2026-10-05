@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Star, Trash2 } from "lucide-react";
 import {
@@ -10,6 +10,8 @@ import {
 } from "../api/client";
 import ImageUploader from "../components/ImageUploader";
 import { useConfirm } from "../components/ConfirmDialog";
+import Pager, { paginate } from "../components/Pager";
+import { Search } from "lucide-react";
 import { toast } from "../components/Layout";
 
 const EMPTY = { name: "", role: "", company: "", avatar_url: "", quote: "", rating: 5, featured: false, published: true };
@@ -35,14 +37,22 @@ export default function TestimonialsPage() {
     queryKey: ["testimonials"],
     queryFn: async (): Promise<Testimonial[]> => {
       try {
-        const r = await get<Testimonial[] | { items: Testimonial[] }>("/testimonials");
+        const r = await get<Testimonial[] | { items: Testimonial[] }>("/admin/testimonials");
         return Array.isArray(r) ? r : (r.items ?? []);
       } catch {
         return [];
       }
     },
   });
-  const items = data ?? [];
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(0);
+  const items = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return data ?? [];
+    return (data ?? []).filter((x) => `${x.name} ${x.company} ${x.quote}`.toLowerCase().includes(needle));
+  }, [data, q]);
+  useEffect(() => { setPage(0); }, [q, data?.length]);
+  const pg = paginate(items, page, 8);
 
   const saveMut = useMutation({
     mutationFn: (f: typeof EMPTY & { id?: string }) =>
@@ -67,7 +77,11 @@ export default function TestimonialsPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Testimonials</h1>
-      <div className="flex items-center justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="input input-pill w-44 pl-8 text-xs" />
+        </div>
         <button className="btn-primary inline-flex items-center gap-2" onClick={() => setModal({ ...EMPTY })}>
           <Plus className="h-4 w-4" /> Add Testimonial
         </button>
@@ -84,8 +98,9 @@ export default function TestimonialsPage() {
           <p className="mt-1 text-sm text-ink-secondary">Add the first customer review.</p>
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {items.map((t, i) => (
+          {pg.slice.map((t, i) => (
             <div key={t.id} className="anim-rise lift rounded-[24px] bg-white p-5 shadow-sm" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -120,6 +135,8 @@ export default function TestimonialsPage() {
             </div>
           ))}
         </div>
+        <Pager page={pg.safe} pages={pg.pages} onPage={setPage} from={pg.from} to={pg.to} total={items.length} />
+        </>
       )}
       {dialog}
       {modal && (

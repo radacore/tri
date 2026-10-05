@@ -62,6 +62,7 @@ func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {
 			r.Put("/admin/orders/{id}", handlers.AdminUpdateOrder(pool))
 			r.Delete("/admin/orders/{id}", handlers.AdminDeleteOrder(pool))
 			// Portfolio
+			r.Get("/admin/portfolio", handlers.AdminListPortfolio(pool))
 			r.Post("/admin/portfolio", handlers.AdminCreatePortfolio(pool))
 			r.Put("/admin/portfolio/{id}", handlers.AdminUpdatePortfolio(pool))
 			r.Delete("/admin/portfolio/{id}", handlers.AdminDeletePortfolio(pool))

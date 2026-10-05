@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
 import {
@@ -9,10 +9,11 @@ import {
   type ClientLogo,
 } from "../api/client";
 import ImageUploader from "../components/ImageUploader";
+import Pager, { paginate } from "../components/Pager";
 import { useConfirm } from "../components/ConfirmDialog";
 import { toast } from "../components/Layout";
 
-const EMPTY = { name: "", logo_url: "", website: "", sort_order: 0, published: true };
+const EMPTY = { name: "", logo_url: "", sort_order: 0 };
 
 export default function ClientsPage() {
   const qc = useQueryClient();
@@ -30,9 +31,18 @@ export default function ClientsPage() {
       }
     },
   });
-  const items = [...(data ?? [])].sort(
-    (a, b) => ((a as any).sort_order ?? 0) - ((b as any).sort_order ?? 0)
-  );
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(0);
+  const items = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const list = [...(data ?? [])].sort(
+      (a, b) => ((a as any).sort_order ?? 0) - ((b as any).sort_order ?? 0)
+    );
+    if (!needle) return list;
+    return list.filter((c) => `${c.name} ${c.id}`.toLowerCase().includes(needle));
+  }, [data, q]);
+  useEffect(() => { setPage(0); }, [q, data?.length]);
+  const pg = paginate(items, page, 9);
 
   const saveMut = useMutation({
     mutationFn: (f: typeof EMPTY & { id?: string }) =>
@@ -71,7 +81,9 @@ export default function ClientsPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Clients</h1>
-      <div className="flex items-center justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search logos…"
+          className="input input-pill w-52 pl-4 text-xs" />
         <button className="btn-primary inline-flex items-center gap-2" onClick={() => setModal({ ...EMPTY, sort_order: items.length })}>
           <Plus className="h-4 w-4" /> Add Logo
         </button>
@@ -92,28 +104,34 @@ export default function ClientsPage() {
             <p className="mt-1 text-xs text-ink-secondary">Logos appear in the homepage marquee, in this order.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((c, i) => (
-              <div key={c.id} className="anim-rise lift rounded-[20px] border border-[#e2eceb] p-5 text-center hover:bg-surface-hover" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
-                {c.logo_url ? (
-                  <div className="flex h-28 items-center justify-center rounded-[14px] bg-white">
-                    <img src={c.logo_url} alt={c.name} className="max-h-24 w-auto max-w-full object-contain" />
+          <>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+            {pg.slice.map((c, i) => (
+              <div key={c.id} className="anim-rise lift overflow-hidden rounded-[20px] border border-[#e2eceb] bg-white hover:bg-surface-hover" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
+                <div className="flex h-28 items-center justify-center overflow-hidden bg-surface-muted">
+                  {c.logo_url ? (
+                    <img src={c.logo_url} alt={c.name} loading="lazy" className="h-full w-full object-cover" />
+                  ) : (
+                    <p className="truncate px-4 text-base font-bold text-ink-primary">{c.name}</p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 px-3.5 py-3">
+                  <span className="tabular rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-bold text-ink-secondary">
+                    #{(c as any).sort_order ?? 0}
+                  </span>
+                  <p className="min-w-0 flex-1 truncate text-sm font-semibold text-ink-primary">{c.name}</p>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button aria-label="Edit" className="flex h-7 w-7 items-center justify-center rounded-full text-ink-secondary transition hover:bg-white hover:text-ink-primary" onClick={() => setModal({ name: c.name, logo_url: c.logo_url ?? "", sort_order: (c as any).sort_order ?? 0, id: c.id })}><Pencil className="h-3.5 w-3.5" /></button>
+                    <button aria-label="Move up" className="flex h-7 w-7 items-center justify-center rounded-full text-ink-secondary transition hover:bg-white hover:text-ink-primary" onClick={() => void move(c.id, -1)}><ArrowUp className="h-3.5 w-3.5" /></button>
+                    <button aria-label="Move down" className="flex h-7 w-7 items-center justify-center rounded-full text-ink-secondary transition hover:bg-white hover:text-ink-primary" onClick={() => void move(c.id, 1)}><ArrowDown className="h-3.5 w-3.5" /></button>
+                    <button aria-label="Delete" className="flex h-7 w-7 items-center justify-center rounded-full text-[#991b1b] transition hover:bg-[#fee2e2]" onClick={() => ask("Delete client logo?", c.name, () => delMut.mutate(c.id))}><Trash2 className="h-3.5 w-3.5" /></button>
                   </div>
-                ) : (
-                  <div className="flex h-28 items-center justify-center rounded-[14px] bg-surface-muted">
-                    <p className="text-lg font-bold text-ink-primary">{c.name}</p>
-                  </div>
-                )}
-                <p className="mt-3 truncate text-sm font-semibold text-ink-primary">{c.name}</p>
-                <div className="mt-2 flex items-center justify-center gap-1.5">
-                  <button aria-label="Edit" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:text-ink-primary" onClick={() => setModal({ ...(EMPTY as any), ...(c as any), id: c.id })}><Pencil className="h-3.5 w-3.5" /></button>
-                  <button aria-label="Move up" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:text-ink-primary" onClick={() => void move(c.id, -1)}><ArrowUp className="h-3.5 w-3.5" /></button>
-                  <button aria-label="Move down" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] bg-white text-ink-secondary transition hover:text-ink-primary" onClick={() => void move(c.id, 1)}><ArrowDown className="h-3.5 w-3.5" /></button>
-                  <button aria-label="Delete" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#fee2e2] text-[#991b1b] transition hover:bg-[#fee2e2]" onClick={() => ask("Delete client logo?", c.name, () => delMut.mutate(c.id))}><Trash2 className="h-3.5 w-3.5" /></button>
                 </div>
               </div>
             ))}
           </div>
+          <Pager page={pg.safe} pages={pg.pages} onPage={setPage} from={pg.from} to={pg.to} total={items.length} />
+          </>
         )}
       </section>
       {dialog}
@@ -125,10 +143,6 @@ export default function ClientsPage() {
               <div>
                 <label className="label">Name</label>
                 <input className="input" value={(modal as any).name} onChange={(e) => setModal({ ...modal, name: e.target.value })} />
-              </div>
-              <div>
-                <label className="label">Website (optional)</label>
-                <input className="input" value={(modal as any).website ?? ""} onChange={(e) => setModal({ ...modal, website: e.target.value })} />
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Logo image (SVG or PNG)</label>

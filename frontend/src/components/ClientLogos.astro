@@ -9,7 +9,7 @@ const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 gray
     <span class="logo-fade-l" aria-hidden="true"></span>
     <span class="logo-fade-r" aria-hidden="true"></span>
     <div class="marquee overflow-hidden" role="presentation">
-      <div class="marquee-track-rev">
+      <div class="marquee-track-rev" data-logo-row="0">
         {[0, 1, 2].map((dup) => (
           <div class="logo-group" aria-hidden={dup > 0 ? 'true' : undefined}>
             {rowA.map((f) => (
@@ -20,7 +20,7 @@ const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 gray
       </div>
     </div>
     <div class="marquee overflow-hidden" role="presentation">
-      <div class="marquee-track items-center">
+      <div class="marquee-track items-center" data-logo-row="1">
         {[0, 1, 2].map((dup) => (
           <div class="logo-group" aria-hidden={dup > 0 ? 'true' : undefined}>
             {rowB.map((f) => (
@@ -32,3 +32,37 @@ const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 gray
     </div>
   </div>
 </section>
+<script>
+  // Hydrate marquee dari API (/client-logos, urut sort_order); statis jadi fallback.
+  (function () {
+    var rows = [document.querySelector('[data-logo-row="0"]'), document.querySelector('[data-logo-row="1"]')];
+    if (!rows[0] || !rows[1]) return;
+    var base = (window.__lpApiBase || 'http://localhost:8080/api/v1');
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    fetch(base + '/client-logos?limit=60', { cache: 'no-store' }).then(function (r) {
+      return r.ok ? r.json() : null;
+    }).then(function (j) {
+      var list = (j && (j.data || j)) || [];
+      if (!Array.isArray(list)) list = list.items || [];
+      list = list.filter(function (c) { return c && c.logo_url; });
+      if (list.length === 0) return;
+      var half = Math.max(1, Math.ceil(list.length / 2));
+      [list.slice(0, half), list.slice(half)].forEach(function (part, ri) {
+        if (part.length === 0) part = list;
+        var html = '';
+        for (var dup = 0; dup < 3; dup++) {
+          html += '<div class="logo-group"' + (dup > 0 ? ' aria-hidden="true"' : '') + '>'
+            + part.map(function (c) {
+              return '<img src="' + esc(c.logo_url) + '" alt="' + esc(c.name || '') + '" width="160" height="64" loading="' + (dup === 0 ? 'eager' : 'lazy') + '" decoding="async" class="h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 grayscale transition hover:opacity-100 hover:grayscale-0" />';
+            }).join('')
+            + '</div>';
+        }
+        rows[ri].innerHTML = html;
+      });
+    }).catch(function () {});
+  })();
+</script>

@@ -69,6 +69,45 @@ func ListPortfolio(pool *pgxpool.Pool) http.HandlerFunc {
 	}
 }
 
+// AdminListPortfolio lists all items including drafts.
+func AdminListPortfolio(pool *pgxpool.Pool) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		page, limit, offset := pageLimit(r, 50)
+		var total int64
+		if err := pool.QueryRow(r.Context(), `SELECT COUNT(*) FROM portfolio_items`).Scan(&total); err != nil {
+			fail(w, http.StatusInternalServerError, "query failed")
+			return
+		}
+		rows, err := pool.Query(r.Context(), `SELECT id, title, category, image_url, description, featured, published, sort_order, created_at, updated_at FROM portfolio_items ORDER BY sort_order ASC, created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
+		if err != nil {
+			fail(w, http.StatusInternalServerError, "query failed")
+			return
+		}
+		defer rows.Close()
+		items := []map[string]any{}
+		for rows.Next() {
+			var id, title, image string
+			var cat, desc *string
+			var feat, pub bool
+			var sort int
+			var ca, ua tsString
+			if err := rows.Scan(&id, &title, &cat, &image, &desc, &feat, &pub, &sort, &ca, &ua); err != nil {
+				fail(w, http.StatusInternalServerError, "scan failed")
+				return
+			}
+			items = append(items, map[string]any{
+				"id": id, "title": title, "category": strp(cat), "image_url": image,
+				"description": strp(desc), "featured": feat, "published": pub,
+				"sort_order": sort, "created_at": ca.String(), "updated_at": ua.String(),
+			})
+		}
+		if items == nil {
+			items = []map[string]any{}
+		}
+		okMeta(w, items, Meta{Page: page, Limit: limit, Total: &total})
+	}
+}
+
 // GetPortfolio returns one item by id.
 func GetPortfolio(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

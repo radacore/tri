@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import {
@@ -13,6 +13,8 @@ import CategorySelect from "../components/CategorySelect";
 import { useConfirm } from "../components/ConfirmDialog";
 import { toast } from "../components/Layout";
 import Badge from "../components/Badge";
+import Pager, { paginate } from "../components/Pager";
+import { Search } from "lucide-react";
 
 const EMPTY_FORM = {
   title: "",
@@ -34,7 +36,7 @@ export default function PortfolioPage() {
     queryFn: async (): Promise<PortfolioItem[]> => {
       try {
         const r = await get<PortfolioItem[] | { items: PortfolioItem[] }>(
-          "/portfolio"
+          "/admin/portfolio"
         );
         return Array.isArray(r) ? r : (r.items ?? []);
       } catch {
@@ -42,9 +44,18 @@ export default function PortfolioPage() {
       }
     },
   });
-  const items = [...(data ?? [])].sort(
-    (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
-  );
+  const [q, setQ] = useState("");
+  const [page, setPage] = useState(0);
+  const items = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const list = [...(data ?? [])].sort(
+      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+    );
+    if (!needle) return list;
+    return list.filter((x) => `${x.title} ${x.category} ${x.id}`.toLowerCase().includes(needle));
+  }, [data, q]);
+  useEffect(() => { setPage(0); }, [q, data?.length]);
+  const pg = paginate(items, page, 9);
 
   const saveMut = useMutation({
     mutationFn: (f: typeof EMPTY_FORM & { id?: string }) =>
@@ -89,13 +100,19 @@ export default function PortfolioPage() {
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Portfolio</h1>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-ink-secondary">
           <span className="tabular font-semibold text-ink-primary">{items.length}</span> items
         </p>
-        <button className="btn-primary inline-flex items-center gap-2" onClick={() => setModal({ ...EMPTY_FORM })}>
-          <Plus className="h-4 w-4" /> Add Item
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="input input-pill w-44 pl-8 text-xs" />
+          </div>
+          <button className="btn-primary inline-flex items-center gap-2" onClick={() => setModal({ ...EMPTY_FORM })}>
+            <Plus className="h-4 w-4" /> Add Item
+          </button>
+        </div>
       </div>
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -112,8 +129,9 @@ export default function PortfolioPage() {
           </button>
         </div>
       ) : (
+        <>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((p, i) => (
+          {pg.slice.map((p, i) => (
             <div key={p.id} className="anim-rise lift overflow-hidden rounded-[24px] bg-white shadow-sm" style={{ "--i": Math.min(i, 8) } as React.CSSProperties}>
               {p.image_url && (
                 <img src={p.image_url} alt={p.title} className="h-40 w-full object-cover" />
@@ -147,6 +165,8 @@ export default function PortfolioPage() {
             </div>
           ))}
         </div>
+        <Pager page={pg.safe} pages={pg.pages} onPage={setPage} from={pg.from} to={pg.to} total={items.length} />
+        </>
       )}
       {dialog}
       {modal && (
