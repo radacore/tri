@@ -1,11 +1,8 @@
 -- Seed dummy yang selaras dengan konten fallback frontend (localhost:4321).
 -- Jalankan: PGPASSWORD=brandingpulse_dev psql -h localhost -U brandingpulse -d brandingpulse -f backend/scripts/seed.sql
 
--- Admin (password: admin123)
-INSERT INTO users (email, password, name, role) VALUES
-  ('admin@brandingpulse.co', '$2a$10$Z13qfm.DhRIMBVMJbSqyE.Q1qRoOvkGFWB9uAn9xxSgCM3CLAhBQe', 'Admin', 'admin')
-ON CONFLICT (email) DO NOTHING;
-
+-- Admin TIDAK di-seed di sini (keamanan C4): dibuat via ADMIN_PASSWORD_HASH
+-- + langkah tutorial langkah 5.
 -- Portfolio (8 item, sama seperti homepage)
 INSERT INTO portfolio_items (title, category, image_url, description, featured, published, sort_order) VALUES
   ('Nexora SaaS', 'Tech', 'https://picsum.photos/seed/nexora/600/450.webp', 'SaaS rebrand', TRUE, TRUE, 1),

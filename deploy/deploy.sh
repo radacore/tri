@@ -68,6 +68,11 @@ for m in "$WORK"/backend/scripts/migrate_*.sql; do
 done
 
 echo "== aktifkan rilis =="
+# seed konten contoh hanya untuk dev (prod mulai kosong, diisi via admin)
+if [ "$TARGET" = dev ]; then
+  echo "== seed konten dev =="
+  ssh "$SERVER" "set -a; . $BASE/.env; set +a; PGPASSWORD=\"$DB_PASSWORD\" psql -h localhost -U brandingpulse -d $DBNAME -v ON_ERROR_STOP=1 -f -" < "$WORK/backend/scripts/seed.sql"
+fi
 ssh "$SERVER" "chmod +x $REL/api && ln -sfn $REL $BASE/current && sudo systemctl restart $SVC && sudo systemctl reload nginx"
 sleep 3
 HOST=$([ "$TARGET" = dev ] && echo "https://dev.brandingpulse.co" || echo "https://brandingpulse.co")
