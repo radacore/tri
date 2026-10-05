@@ -66,10 +66,13 @@ cf_purge() {
     return 0
   fi
   local host="${HOST#https://}"
+  local hdr=(-H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json")
   if curl -sm 15 -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
-    -H "Authorization: Bearer $CF_API_TOKEN" -H "Content-Type: application/json" \
-    --data "{\"prefixes\":[\"$host/admin/\",\"$host/blog/\",\"$host/case-studies/\"]}" 2>/dev/null | grep -q '"success":true'; then
+    "${hdr[@]}" --data "{\"prefixes\":[\"$host/admin/\",\"$host/blog/\",\"$host/case-studies/\"]}" 2>/dev/null | grep -q '"success":true'; then
     echo "  (cache CF di-purge)"
+  elif curl -sm 15 -X POST "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" \
+    "${hdr[@]}" --data '{"purge_everything":true}' 2>/dev/null | grep -q '"success":true'; then
+    echo "  (cache CF di-purge total — prefix tak didukung paket ini)"
   else
     echo "  WARN: purge CF gagal — hard refresh bila masih basi"
   fi
