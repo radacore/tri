@@ -693,6 +693,14 @@ export default function IdentityPage() {
             />
           </div>
           <div>
+            <label className="label">Favicon (tab browser)</label>
+            <ImageUploader
+              value={cur.media?.favicon ?? ""}
+              onChange={(url) => set("media", "favicon", url)}
+            />
+            <p className="mt-1 text-xs text-ink-secondary">SVG, PNG, or WebP square image. Browsers pick it up automatically after landing rebuild.</p>
+          </div>
+          <div>
             <label className="label">Hero collage images (uploads via tombol di bawah, urutan = kiri ke kanan, dibagi rata ke 3 kolom)</label>
             <HeroImages
               value={cur.hero_images?.images ?? []}
