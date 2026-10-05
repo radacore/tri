@@ -19,7 +19,7 @@ function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const EMPTY = { title: "", slug: "", industry: "", hero_image: "", content: "", published: false };
+const EMPTY = { title: "", slug: "", industry: "", hero_image: "", content: "", published: false, client: "", result: "", excerpt: "", logo: "", mockup: "", year: "", website: "" };
 
 export default function CaseStudiesPage() {
   const qc = useQueryClient();
@@ -30,7 +30,7 @@ export default function CaseStudiesPage() {
     queryKey: ["case-studies"],
     queryFn: async (): Promise<CaseStudy[]> => {
       try {
-        const r = await get<CaseStudy[] | { items: CaseStudy[] }>("/case-studies");
+        const r = await get<CaseStudy[] | { items: CaseStudy[] }>("/admin/case-studies");
         return Array.isArray(r) ? r : (r.items ?? []);
       } catch {
         return [];
@@ -80,7 +80,7 @@ export default function CaseStudiesPage() {
               { key: "published", label: "Status", render: (r) => <Badge status={r.published ? "completed" : "pending"} /> },
               { key: "actions", label: "Actions", render: (r) => (
                 <div className="flex gap-1.5">
-                  <button aria-label="Edit" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary" onClick={() => setModal({ title: r.title, slug: r.slug, industry: r.industry ?? "", hero_image: r.hero_image ?? "", content: r.content ?? "", published: !!r.published, id: r.id })}><Pencil className="h-3.5 w-3.5" /></button>
+                  <button aria-label="Edit" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary" onClick={() => setModal({ title: r.title, slug: r.slug, industry: r.industry ?? "", hero_image: r.hero_image ?? "", content: r.content ?? "", published: !!r.published, client: r.client ?? "", result: r.result ?? "", excerpt: r.excerpt ?? "", logo: r.logo ?? "", mockup: r.mockup ?? "", year: r.year ?? "", website: r.website ?? "", id: r.id })}><Pencil className="h-3.5 w-3.5" /></button>
                   <button aria-label="Delete" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#fee2e2] text-[#991b1b] transition hover:bg-[#fee2e2]" onClick={() => ask("Delete case study?", r.title, () => delMut.mutate(r.id))}><Trash2 className="h-3.5 w-3.5" /></button>
                 </div>
               ) },
@@ -103,6 +103,34 @@ export default function CaseStudiesPage() {
               <div>
                 <label className="label">Industry</label>
                 <input className="input" value={modal.industry} onChange={(e) => setModal({ ...modal, industry: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Client</label>
+                <input className="input" value={modal.client} onChange={(e) => setModal({ ...modal, client: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Result (e.g. +112% conversion)</label>
+                <input className="input" value={modal.result} onChange={(e) => setModal({ ...modal, result: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Year</label>
+                <input className="input" value={modal.year} onChange={(e) => setModal({ ...modal, year: e.target.value })} />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Excerpt</label>
+                <textarea className="input" rows={2} value={modal.excerpt} onChange={(e) => setModal({ ...modal, excerpt: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Website URL</label>
+                <input className="input" value={modal.website} onChange={(e) => setModal({ ...modal, website: e.target.value })} />
+              </div>
+              <div>
+                <label className="label">Logo image</label>
+                <ImageUploader value={modal.logo} onChange={(url) => setModal({ ...modal, logo: url })} />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Mockup image</label>
+                <ImageUploader value={modal.mockup} onChange={(url) => setModal({ ...modal, mockup: url })} />
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Hero image</label>

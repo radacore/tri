@@ -21,7 +21,7 @@ function slugify(s: string) {
 
 const EMPTY = {
   title: "", slug: "", category: "", thumbnail: "", content: "",
-  meta_title: "", meta_description: "", published: false, published_at: "",
+  meta_title: "", meta_description: "", published: false,
 };
 
 export default function BlogPage() {
@@ -33,7 +33,7 @@ export default function BlogPage() {
     queryKey: ["blog"],
     queryFn: async (): Promise<BlogPost[]> => {
       try {
-        const r = await get<BlogPost[] | { items: BlogPost[] }>("/blog");
+        const r = await get<BlogPost[] | { items: BlogPost[] }>("/admin/blog");
         return Array.isArray(r) ? r : (r.items ?? []);
       } catch {
         return [];
@@ -42,9 +42,13 @@ export default function BlogPage() {
   });
   const items = data ?? [];
 
+  const toPayload = (f: typeof EMPTY & { id?: string }) => {
+    const { thumbnail, published_at: _drop, id: _id, ...rest } = f as Record<string, unknown>;
+    return { ...(rest as object), thumbnail_url: (thumbnail as string) || null };
+  };
   const saveMut = useMutation({
     mutationFn: (f: typeof EMPTY & { id?: string }) =>
-      f.id ? put(`/admin/blog/${f.id}`, { ...f, published_at: f.published_at || null }) : post("/admin/blog", { ...f, published_at: f.published_at || null }),
+      f.id ? put(`/admin/blog/${f.id}`, toPayload(f)) : post("/admin/blog", toPayload(f)),
     onSuccess: () => {
       toast("Article saved");
       setModal(null);
@@ -83,7 +87,7 @@ export default function BlogPage() {
               { key: "published_at", label: "Publish At", render: (r) => <span className="tabular text-xs text-ink-secondary">{(r.published_at ?? "").slice(0, 16).replace("T", " ") || "—"}</span> },
               { key: "actions", label: "Actions", render: (r) => (
                 <div className="flex gap-1.5">
-                  <button aria-label="Edit" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary" onClick={() => setModal({ title: r.title, slug: r.slug, category: r.category ?? "", thumbnail: r.thumbnail ?? "", content: r.content ?? "", meta_title: r.meta_title ?? "", meta_description: r.meta_description ?? "", published: !!r.published, published_at: (r.published_at ?? "").slice(0, 16), id: r.id })}><Pencil className="h-3.5 w-3.5" /></button>
+                  <button aria-label="Edit" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#e2eceb] text-ink-secondary transition hover:bg-surface-hover hover:text-ink-primary" onClick={() => setModal({ title: r.title, slug: r.slug, category: r.category ?? "", thumbnail: r.thumbnail ?? "", content: r.content ?? "", meta_title: r.meta_title ?? "", meta_description: r.meta_description ?? "", published: !!r.published, id: r.id })}><Pencil className="h-3.5 w-3.5" /></button>
                   <button aria-label="Delete" className="flex h-8 w-8 items-center justify-center rounded-full border border-[#fee2e2] text-[#991b1b] transition hover:bg-[#fee2e2]" onClick={() => ask("Delete article?", r.title, () => delMut.mutate(r.id))}><Trash2 className="h-3.5 w-3.5" /></button>
                 </div>
               ) },
@@ -118,10 +122,6 @@ export default function BlogPage() {
               <div>
                 <label className="label">Meta title</label>
                 <input className="input" value={modal.meta_title} onChange={(e) => setModal({ ...modal, meta_title: e.target.value })} />
-              </div>
-              <div>
-                <label className="label">Scheduled publish (optional)</label>
-                <input className="input tabular" type="datetime-local" value={modal.published_at} onChange={(e) => setModal({ ...modal, published_at: e.target.value })} />
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Meta description</label>

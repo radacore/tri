@@ -89,5 +89,5 @@ export const FALLBACK_TESTIMONIALS: Testimonial[] = [
 
 export const getPortfolio = () => safe<Portfolio[]>('/portfolio', FALLBACK_PORTFOLIO);
 export const getCases = () => safe<CaseStudy[]>('/case-studies', FALLBACK_CASES);
-export const getPosts = () => safe<BlogPost[]>('/posts', FALLBACK_POSTS);
+export const getPosts = () => safe<BlogPost[]>('/blog', FALLBACK_POSTS);
 export const getTestimonials = () => safe<Testimonial[]>('/testimonials', FALLBACK_TESTIMONIALS);

@@ -9,7 +9,7 @@ import { FALLBACK_POSTS } from '../../lib/api';
   <main class="mx-auto max-w-content px-5 pt-32 pb-20">
     <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Blog</p>
     <h1 class="mt-2 text-4xl font-extrabold tracking-tight" data-site="pages.blog_title">Branding advice for founders</h1>
-    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div id="blog-grid" class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {FALLBACK_POSTS.map((p) => (
         <a href={`/blog/${p.slug}`} class="block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:shadow-xl transition hover:-translate-y-1" style="border-radius:20px">
           <img src={p.cover} alt={p.title} loading="lazy" class="aspect-[16/9] w-full object-cover" />
@@ -23,4 +23,38 @@ import { FALLBACK_POSTS } from '../../lib/api';
     </div>
   </main>
   <Footer />
+  <script>
+    // Hydrate blog list from API; diam bila offline (fallback SSR tetap tampil).
+    (function () {
+      var grid = document.getElementById('blog-grid');
+      if (!grid) return;
+      var base = (window.__lpApiBase || 'http://localhost:8080/api/v1');
+      function esc(s) {
+        return String(s ?? '').replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+      function fmtDate(iso) {
+        if (!iso) return '';
+        var d = new Date(iso);
+        return isNaN(d.getTime()) ? String(iso).slice(0, 10) : d.toISOString().slice(0, 10);
+      }
+      fetch(base + '/blog?limit=24', { cache: 'no-store' }).then(function (r) {
+        return r.ok ? r.json() : null;
+      }).then(function (j) {
+        var list = (j && (j.data || j)) || [];
+        if (!Array.isArray(list) || list.length === 0) return;
+        grid.innerHTML = list.map(function (p) {
+          var excerpt = p.meta_description || (p.content || '').slice(0, 140);
+          return '<a href="/blog/' + esc(p.slug) + '" class="block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:shadow-xl transition hover:-translate-y-1" style="border-radius:20px">'
+            + (p.thumbnail_url ? '<img src="' + esc(p.thumbnail_url) + '" alt="' + esc(p.title) + '" loading="lazy" class="aspect-[16/9] w-full object-cover" />' : '')
+            + '<div class="p-5">'
+            + '<p class="text-xs text-slate-400 font-semibold">' + esc(fmtDate(p.published_at || p.created_at)) + (p.category ? ' · ' + esc(p.category) : '') + '</p>'
+            + '<h2 class="mt-1 font-extrabold leading-snug">' + esc(p.title) + '</h2>'
+            + '<p class="mt-1 text-sm text-slate-500">' + esc(excerpt) + '</p>'
+            + '</div></a>';
+        }).join('');
+      }).catch(function () {});
+    })();
+  </script>
 </BaseLayout>

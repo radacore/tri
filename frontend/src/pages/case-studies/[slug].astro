@@ -7,15 +7,25 @@ import CaseStudyCard from '../../components/CaseStudyCard.astro';
 import { FALLBACK_CASES } from '../../lib/api';
 
 export async function getStaticPaths() {
-  return FALLBACK_CASES.map((c) => ({ params: { slug: c.slug } }));
+  const slugs = new Set(FALLBACK_CASES.map((c) => c.slug));
+  try {
+    const base = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+    const r = await fetch(`${base}/case-studies?limit=100`);
+    if (r.ok) {
+      const j = await r.json();
+      for (const c of j?.data ?? []) if (c?.slug) slugs.add(String(c.slug));
+    }
+  } catch { /* build offline — fallback slugs */ }
+  return [...slugs].map((slug) => ({ params: { slug } }));
 }
 
+const API = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
 const { slug } = Astro.params;
 const found = FALLBACK_CASES.find((c) => c.slug === slug) ?? FALLBACK_CASES[0];
 let item: any = found;
 try {
-  const r = await fetch(`http://localhost:8080/api/v1/case-studies/${slug}`);
-  if (r.ok) item = await r.json();
+  const r = await fetch(`${API}/case-studies/${slug}`);
+  if (r.ok) item = (await r.json())?.data ?? found;
 } catch { /* fallback to static */ }
 
 const client = item.client ?? item.title;

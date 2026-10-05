@@ -19,11 +19,11 @@ INSERT INTO portfolio_items (title, category, image_url, description, featured, 
 ON CONFLICT DO NOTHING;
 
 -- Case studies (4)
-INSERT INTO case_studies (title, slug, industry, hero_image, content, published) VALUES
-  ('Nexora doubles signup conversion', 'nexora-rebrand', 'SaaS', 'https://picsum.photos/seed/nexora-mockup/600/450.webp', 'A 48-hour rebrand that turned a generic SaaS mark into a conversion asset.', TRUE),
-  ('Kopi Lantai brews a franchise-ready brand', 'kopi-lantai', 'F&B', 'https://picsum.photos/seed/kopi-mockup/600/450.webp', 'Warm, memorable identity built for cups, signage, and social.', TRUE),
-  ('Maison Rue goes premium', 'maison-rue', 'Fashion', 'https://picsum.photos/seed/maison-mockup/600/450.webp', 'Serif wordmark and system that lifted perceived value overnight.', TRUE),
-  ('VitalCare earns patient trust', 'vitalcare', 'Health', 'https://picsum.photos/seed/vital-mockup/600/450.webp', 'Calm, clinical identity designed for trust at first glance.', TRUE)
+INSERT INTO case_studies (title, slug, industry, hero_image, content, published, client, result, excerpt, year, website) VALUES
+  ('Nexora doubles signup conversion', 'nexora-rebrand', 'SaaS', 'https://picsum.photos/seed/nexora-mockup/600/450.webp', 'A 48-hour rebrand that turned a generic SaaS mark into a conversion asset.', TRUE, 'Nexora', '+112% signup conversion', 'A 48-hour rebrand that turned a generic SaaS mark into a conversion asset.', '2026', '#'),
+  ('Kopi Lantai brews a franchise-ready brand', 'kopi-lantai', 'F&B', 'https://picsum.photos/seed/kopi-mockup/600/450.webp', 'Warm, memorable identity built for cups, signage, and social.', TRUE, 'Kopi Lantai', '3 new outlets in 90 days', 'Warm, memorable identity built for cups, signage, and social.', '2026', '#'),
+  ('Maison Rue goes premium', 'maison-rue', 'Fashion', 'https://picsum.photos/seed/maison-mockup/600/450.webp', 'Serif wordmark and system that lifted perceived value overnight.', TRUE, 'Maison Rue', '+68% average order value', 'Serif wordmark and system that lifted perceived value overnight.', '2026', '#'),
+  ('VitalCare earns patient trust', 'vitalcare', 'Health', 'https://picsum.photos/seed/vital-mockup/600/450.webp', 'Calm, clinical identity designed for trust at first glance.', TRUE, 'VitalCare', '4.9 rating across 2k reviews', 'Calm, clinical identity designed for trust at first glance.', '2026', '#')
 ON CONFLICT (slug) DO NOTHING;
 
 -- Blog (3)

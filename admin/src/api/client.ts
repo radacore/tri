@@ -70,6 +70,8 @@ function normalize<T>(body: unknown): T {
     normalizeOrder(r);
     if ("pending_count" in r && !("pending_orders" in r))
       r.pending_orders = r.pending_count;
+    if ("thumbnail_url" in r && !("thumbnail" in r))
+      (r as Record<string, unknown>).thumbnail = r.thumbnail_url;
     if (Array.isArray(r.recent_orders))
       r.recent_orders = r.recent_orders.map(normalizeOrder);
   }
@@ -176,6 +178,13 @@ export interface CaseStudy {
   hero_image?: string;
   content?: string;
   published?: boolean;
+  client?: string;
+  result?: string;
+  excerpt?: string;
+  logo?: string;
+  mockup?: string;
+  year?: string;
+  website?: string;
   created_at?: string;
 }
 

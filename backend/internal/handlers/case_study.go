@@ -19,7 +19,7 @@ func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		rows, err := pool.Query(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, created_at, updated_at FROM case_studies WHERE published=TRUE ORDER BY created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
+		rows, err := pool.Query(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website, created_at, updated_at FROM case_studies WHERE published=TRUE ORDER BY created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
 		if err != nil {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
@@ -29,15 +29,18 @@ func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 		for rows.Next() {
 			var id, title, slug string
 			var ind, hero, content *string
+			var client, result, excerpt, logo, mockup, year, website *string
 			var pub bool
 			var ca, ua tsString
-			if err := rows.Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &ca, &ua); err != nil {
+			if err := rows.Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &client, &result, &excerpt, &logo, &mockup, &year, &website, &ca, &ua); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
 			}
 			items = append(items, map[string]any{
 				"id": id, "title": title, "slug": slug, "industry": strp(ind),
 				"hero_image": strp(hero), "content": strp(content), "published": pub,
+				"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
+				"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
 				"created_at": ca.String(), "updated_at": ua.String(),
 			})
 		}
@@ -54,9 +57,10 @@ func GetCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 		slug := chi.URLParam(r, "slug")
 		var id, title string
 		var ind, hero, content *string
+		var client, result, excerpt, logo, mockup, year, website *string
 		var pub bool
 		var ca, ua tsString
-		err := pool.QueryRow(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, created_at, updated_at FROM case_studies WHERE slug=$1 AND published=TRUE`, slug).Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &ca, &ua)
+		err := pool.QueryRow(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website, created_at, updated_at FROM case_studies WHERE slug=$1 AND published=TRUE`, slug).Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &client, &result, &excerpt, &logo, &mockup, &year, &website, &ca, &ua)
 		if err != nil {
 			fail(w, http.StatusNotFound, "case study not found")
 			return
@@ -64,6 +68,8 @@ func GetCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 		ok(w, map[string]any{
 			"id": id, "title": title, "slug": slug, "industry": strp(ind),
 			"hero_image": strp(hero), "content": strp(content), "published": pub,
+			"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
+			"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
 			"created_at": ca.String(), "updated_at": ua.String(),
 		})
 	}
@@ -78,7 +84,7 @@ func AdminListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		rows, err := pool.Query(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, created_at, updated_at FROM case_studies ORDER BY created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
+		rows, err := pool.Query(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website, created_at, updated_at FROM case_studies ORDER BY created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
 		if err != nil {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
@@ -88,15 +94,18 @@ func AdminListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 		for rows.Next() {
 			var id, title, slug string
 			var ind, hero, content *string
+			var client, result, excerpt, logo, mockup, year, website *string
 			var pub bool
 			var ca, ua tsString
-			if err := rows.Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &ca, &ua); err != nil {
+			if err := rows.Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &client, &result, &excerpt, &logo, &mockup, &year, &website, &ca, &ua); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
 			}
 			items = append(items, map[string]any{
 				"id": id, "title": title, "slug": slug, "industry": strp(ind),
 				"hero_image": strp(hero), "content": strp(content), "published": pub,
+				"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
+				"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
 				"created_at": ca.String(), "updated_at": ua.String(),
 			})
 		}
@@ -117,6 +126,13 @@ func AdminCreateCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 			HeroImage *string `json:"hero_image"`
 			Content   *string `json:"content"`
 			Published *bool   `json:"published"`
+			Client    *string `json:"client"`
+			Result    *string `json:"result"`
+			Excerpt   *string `json:"excerpt"`
+			Logo      *string `json:"logo"`
+			Mockup    *string `json:"mockup"`
+			Year      *string `json:"year"`
+			Website   *string `json:"website"`
 		}
 		if !decodeJSON(w, r, &b) {
 			return
@@ -130,7 +146,7 @@ func AdminCreateCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 			pub = *b.Published
 		}
 		var id string
-		err := pool.QueryRow(r.Context(), `INSERT INTO case_studies (title, slug, industry, hero_image, content, published) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`, b.Title, b.Slug, b.Industry, b.HeroImage, b.Content, pub).Scan(&id)
+		err := pool.QueryRow(r.Context(), `INSERT INTO case_studies (title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`, b.Title, b.Slug, b.Industry, b.HeroImage, b.Content, pub, b.Client, b.Result, b.Excerpt, b.Logo, b.Mockup, b.Year, b.Website).Scan(&id)
 		if err != nil {
 			fail(w, http.StatusConflict, "create failed (slug may exist)")
 			return
@@ -149,7 +165,7 @@ func AdminUpdateCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 		}
 		allowed := map[string]string{
 			"title": "title", "slug": "slug", "industry": "industry",
-			"hero_image": "hero_image", "content": "content", "published": "published",
+			"hero_image": "hero_image", "content": "content", "published": "published", "client": "client", "result": "result", "excerpt": "excerpt", "logo": "logo", "mockup": "mockup", "year": "year", "website": "website",
 		}
 		if err := genericUpdate(w, r, pool, "case_studies", id, b, allowed); err != nil {
 			return
