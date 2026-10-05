@@ -16,8 +16,16 @@ ufw allow OpenSSH >/dev/null 2>&1 || true
 ufw allow 'Nginx Full' >/dev/null 2>&1 || true
 ufw --force enable >/dev/null 2>&1 || true
 
-# User sistem (tanpa login shell)
 id "$APP_USER" >/dev/null 2>&1 || useradd -r -m -s /usr/sbin/nologin "$APP_USER"
+
+# Go toolchain (untuk build API di server — lib WebP butuh CGO)
+if [ ! -x /usr/local/go/bin/go ]; then
+  ARCH="$(uname -m)"; [ "$ARCH" = "x86_64" ] && GOARCH=amd64 || GOARCH=arm64
+  curl -fsSL "https://go.dev/dl/go1.26.1.linux-$GOARCH.tar.gz" -o /tmp/go.tgz
+  rm -rf /usr/local/go && tar -C /usr/local -xzf /tmp/go.tgz && rm /tmp/go.tgz
+fi
+export PATH="$PATH:/usr/local/go/bin"
+go version
 
 # Direktori rilis + uploads (dev & prod terpisah)
 for env in "" "$DEV_SUFFIX"; do

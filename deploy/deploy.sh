@@ -47,8 +47,10 @@ else
   WORK="$PWD"
 fi
 
-echo "== build backend =="
-(cd "$WORK/backend" && go build -o /tmp/lp-rel-api ./cmd/server)
+echo "== build backend (di server — butuh CGO untuk WebP) =="
+tar -czf /tmp/lp-backend.tgz -C "$WORK/backend" .
+scp -q /tmp/lp-backend.tgz "$SERVER:/tmp/"
+ssh "$SERVER" "rm -rf /tmp/lp-src $REL && mkdir -p /tmp/lp-src $REL && tar -xzf /tmp/lp-backend.tgz -C /tmp/lp-src && cd /tmp/lp-src && export PATH=\$PATH:/usr/local/go/bin && go build -o $REL/api ./cmd/server && rm -rf /tmp/lp-src /tmp/lp-backend.tgz && chown -R brandingpulse:brandingpulse $REL" && rm -f /tmp/lp-backend.tgz
 echo "== build landing =="
 (cd "$WORK/frontend" && npm ci --no-audit --no-fund >/dev/null 2>&1; npm run build >/dev/null 2>&1)
 echo "== build admin =="
@@ -56,7 +58,7 @@ echo "== build admin =="
 
 echo "== kirim $STAMP ke $TARGET =="
 ssh "$SERVER" "mkdir -p $REL/landing $REL/admin"
-scp -q /tmp/lp-rel-api "$SERVER:$REL/api"
+# (binary sudah dibangun di server pada langkah build)
 scp -qr "$WORK/frontend/dist/." "$SERVER:$REL/landing/"
 scp -qr "$WORK/admin/dist/." "$SERVER:$REL/admin/"
 
@@ -73,7 +75,7 @@ if [ "$TARGET" = dev ]; then
   echo "== seed konten dev =="
   ssh "$SERVER" 'set -a; . '"$BASE"'/.env; set +a; PGPASSWORD="$DB_PASSWORD" psql -h localhost -U brandingpulse -d '"$DBNAME"' -v ON_ERROR_STOP=1 -f -' < "$WORK/backend/scripts/seed.sql"
 fi
-ssh "$SERVER" "chmod +x $REL/api && ln -sfn $REL $BASE/current && sudo systemctl restart $SVC && sudo systemctl reload nginx"
+ssh "$SERVER" "chmod +x $REL/api && chown -R brandingpulse:brandingpulse $REL && ln -sfn $REL $BASE/current && sudo systemctl restart $SVC && sudo systemctl reload nginx"
 sleep 3
 HOST=$([ "$TARGET" = dev ] && echo "https://dev.brandingpulse.co" || echo "https://brandingpulse.co")
 echo "== cek =="
