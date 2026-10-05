@@ -167,16 +167,6 @@ body {
 #site-nav-inner [data-lang-btn][aria-pressed="true"] { background-color: #fff; color: #0a0a0a; }
 #site-nav-inner [data-lang-btn][aria-pressed="false"] { color: rgba(255, 255, 255, 0.6); }
 
-/* tombol CTA panel Delivery — fade mengikuti siklus SMIL 10 detik.
-   Sinkronisasi ulang via repeatEvent (lihat HowItWorks.astro). */
-.st-btn-live { opacity: 0; }
-.st-btn-live.go { animation: btn-in 10s linear infinite; }
-.st-paused-all .st-btn-live { animation-play-state: paused; }
-@keyframes btn-in {
-  0%, 30% { opacity: 0; transform: translateY(8px); }
-  38%, 62% { opacity: 1; transform: none; }
-  70%, 100% { opacity: 0; transform: translateY(8px); }
-}
 .btn-active:active { transform: scale(.97); }
 .share-btn { display: inline-flex; height: 2.25rem; width: 2.25rem; align-items: center; justify-content: center; border-radius: 9999px; background: #fff; color: #475569; box-shadow: inset 0 0 0 1px rgba(15,23,42,.12); transition: all .2s ease; }
 .share-btn:hover { background: #0f172a; color: #fff; box-shadow: inset 0 0 0 1px #0f172a; }
@@ -294,7 +284,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visibl
 .tabular { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal, #cta-banner, .marquee-track, .marquee-track-rev, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse, .st-btn-live { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
+  .reveal, #cta-banner, .marquee-track, .marquee-track-rev, .v-track, .hanging-track, .cta-animated, .star-pop, .badge-pop, .btn-shine::after, .glow-drift, .dot-pulse { animation: none !important; transition: none !important; opacity: 1 !important; transform: none !important; }
   #site-nav { animation: none !important; }
   html { scroll-behavior: auto; }
 }

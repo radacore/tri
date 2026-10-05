@@ -174,7 +174,7 @@ const last = { n: '04', title: 'Delivery', text: 'Full brand kit: vector files, 
         </p>
         <p class="mt-3 text-slate-600" data-site="how_steps.3.d">Full brand kit: vector files, colors, fonts, mockups, social pack.</p>
         <div class="mt-5">
-          <a id="how-cta-btn" href="/order?plan=professional" class="st-btn-live btn-active inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Start my project →</a>
+          <a href="/order?plan=professional" class="btn-active inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Start my project →</a>
         </div>
       </div>
       <div class="overflow-hidden bg-[#E2E7F9]">
@@ -225,11 +225,10 @@ const last = { n: '04', title: 'Delivery', text: 'Full brand kit: vector files, 
   </div>
 </section>
 <script>
-  // Sinkronisasi + hemat daya untuk loop SMIL 10 detik.
+  // Hemat daya untuk loop SMIL 10 detik: pause saat tak terlihat / tab hidden.
   (function () {
     var sec = document.getElementById('how-it-works-sec');
     if (!sec) return;
-    var btn = document.getElementById('how-cta-btn');
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var svgs = Array.from(sec.querySelectorAll('svg.st-smil'));
     function setPaused(p) {
@@ -238,14 +237,6 @@ const last = { n: '04', title: 'Delivery', text: 'Full brand kit: vector files, 
       });
       document.body.classList.toggle('st-paused-all', p);
     }
-    function syncBtn() {
-      if (!btn || reduce) return;
-      btn.classList.remove('go');
-      void btn.offsetWidth;
-      btn.classList.add('go');
-    }
-    var deliv = document.getElementById('how-svg-4');
-    if (deliv) deliv.addEventListener('repeatEvent', syncBtn);
     if (reduce) {
       setPaused(true);
       return;
@@ -254,12 +245,10 @@ const last = { n: '04', title: 'Delivery', text: 'Full brand kit: vector files, 
       new IntersectionObserver(function (entries) {
         entries.forEach(function (e) {
           setPaused(!e.isIntersecting);
-          if (e.isIntersecting) syncBtn();
         });
       }, { threshold: 0.2 }).observe(sec);
     } else {
       setPaused(false);
-      syncBtn();
     }
     document.addEventListener('visibilitychange', function () {
       setPaused(document.hidden);
