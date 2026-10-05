@@ -52,9 +52,14 @@ tar -czf /tmp/lp-backend.tgz -C "$WORK/backend" .
 scp -q /tmp/lp-backend.tgz "$SERVER:/tmp/"
 ssh "$SERVER" "rm -rf /tmp/lp-src $REL && mkdir -p /tmp/lp-src $REL && tar -xzf /tmp/lp-backend.tgz -C /tmp/lp-src && cd /tmp/lp-src && export PATH=\$PATH:/usr/local/go/bin && go build -o $REL/api ./cmd/server && rm -rf /tmp/lp-src /tmp/lp-backend.tgz && chown -R brandingpulse:brandingpulse $REL" && rm -f /tmp/lp-backend.tgz
 echo "== build landing =="
-(cd "$WORK/frontend" && npm ci --no-audit --no-fund >/dev/null 2>&1; npm run build >/dev/null 2>&1)
+if [ "$TARGET" = dev ]; then
+  API_URL="https://dev.brandingpulse.co/api/v1"; SITE_URL="https://dev.brandingpulse.co"
+else
+  API_URL="https://brandingpulse.co/api/v1"; SITE_URL="https://brandingpulse.co"
+fi
+(cd "$WORK/frontend" && npm ci --no-audit --no-fund >/dev/null 2>&1; PUBLIC_API_URL="$API_URL" PUBLIC_SITE_URL="$SITE_URL" npm run build >/dev/null 2>&1)
 echo "== build admin =="
-(cd "$WORK/admin" && npm ci --no-audit --no-fund >/dev/null 2>&1; npm run build >/dev/null 2>&1)
+(cd "$WORK/admin" && npm ci --no-audit --no-fund >/dev/null 2>&1; VITE_API_URL="$API_URL" VITE_LANDING_URL="$SITE_URL" VITE_SITE_URL="$SITE_URL" npm run build >/dev/null 2>&1)
 
 echo "== kirim $STAMP ke $TARGET =="
 ssh "$SERVER" "mkdir -p $REL/landing $REL/admin"
