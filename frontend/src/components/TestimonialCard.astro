@@ -6,7 +6,7 @@ const tilts = ['-5.7deg', '-0.5deg', '3.8deg', '-3.2deg', '2.4deg', '-1.1deg'];
 const loop = [...FALLBACK_TESTIMONIALS, ...FALLBACK_TESTIMONIALS]; // digandakan agar marquee mulus
 ---
 <section class="pb-4">
-  <div class="hanging-stage reveal relative h-[440px] overflow-x-clip" data-hanging-stage>
+  <div class="hanging-stage reveal relative hidden h-[440px] overflow-x-clip md:block" data-hanging-stage>
     <div class="hanging-track absolute inset-y-0 left-0 flex items-start">
       {loop.map((t, i) => (
         <div
@@ -30,6 +30,28 @@ const loop = [...FALLBACK_TESTIMONIALS, ...FALLBACK_TESTIMONIALS]; // digandakan
             </blockquote>
           </figure>
         </div>
+      ))}
+    </div>
+  </div>
+  <!-- mobile: marquee vertikal 2 kartu, jalan otomatis -->
+  <div class="mx-auto max-w-md overflow-hidden px-5 md:hidden" aria-label="Testimonials" style="height:340px;-webkit-mask-image:linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);mask-image:linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)">
+    <div class="v-track flex flex-col gap-4">
+      {[...FALLBACK_TESTIMONIALS, ...FALLBACK_TESTIMONIALS].map((t, i) => (
+        <figure
+          class="flex shrink-0 select-none flex-col gap-2 rounded-[20px] border border-slate-200 bg-white px-5 py-4 shadow-sm"
+          aria-hidden={i >= FALLBACK_TESTIMONIALS.length ? 'true' : undefined}
+        >
+          <figcaption class="flex items-center justify-between gap-3">
+            <div class="flex flex-col leading-5">
+              <cite class="text-sm font-bold tracking-tight text-slate-900 not-italic">{t.name}</cite>
+              <span class="text-xs text-slate-500">{t.role}</span>
+            </div>
+            <div class="flex shrink-0 items-center gap-[3px] text-sm text-amber-400" role="img" aria-label={`${t.rating} out of 5 stars`}>★★★★★</div>
+          </figcaption>
+          <blockquote class="line-clamp-3 text-sm leading-relaxed text-slate-700">
+            “{t.quote}”
+          </blockquote>
+        </figure>
       ))}
     </div>
   </div>

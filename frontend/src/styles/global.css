@@ -174,6 +174,10 @@ body {
 /* carousel mobile: geser horizontal, tanpa scrollbar */
 .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+@media (max-width: 767px) {
+  [data-hanging-stage] { scrollbar-width: none; -ms-overflow-style: none; }
+  [data-hanging-stage]::-webkit-scrollbar { display: none; }
+}
 /* isi artikel: gambar di dalam figure rapat ke caption-nya */
 .post-body figure { margin: 1rem 0; }
 .post-body figure img { margin: 0 !important; border-radius: 1rem; width: 100%; }
@@ -238,6 +242,10 @@ body {
   backface-visibility: hidden;
 }
 .hanging-stage:hover .hanging-track { animation-play-state: paused; }
+/* marquee vertikal mobile — 2 kartu, loop mulus */
+@keyframes v-scroll { to { transform: translateY(-50%); } }
+.v-track { animation: v-scroll 28s linear infinite; will-change: transform; }
+.v-track:hover { animation-play-state: paused; }
 .hanger-card {
   transform: rotate(var(--tilt, 0deg));
   transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s ease;
