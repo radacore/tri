@@ -240,6 +240,7 @@ export interface DashboardStats {
   featured_count?: number;
   new_customers?: number;
   revenue_by_month?: { month: string; revenue_cents: number }[];
+  revenue_by_week?: { week: string; revenue_cents: number }[];
   orders_by_status?: { status: string; count: number }[];
   recent_orders?: Order[];
 }

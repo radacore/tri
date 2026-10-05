@@ -97,7 +97,8 @@ export default function DashboardPage() {
     status: r.status,
     count: r.count,
   }));
-  const maxBar = Math.max(1, ...byStatus.map((b) => b.count));
+  const weeks = s.revenue_by_week ?? [];
+  const maxRev = Math.max(1, ...weeks.map((w) => w.revenue_cents));
   const [barsOn, setBarsOn] = useState(false);
   const [barTip, setBarTip] = useState<number | null>(null);
   useEffect(() => {
@@ -229,51 +230,58 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex flex-col justify-between rounded-[26px] bg-white p-6 shadow-sm lg:col-span-7">
-          <h2 className="mb-4 text-base font-semibold tracking-tight text-ink-primary">
-            Orders Overview
-          </h2>
-          {byStatus.length === 0 ? (
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-base font-semibold tracking-tight text-ink-primary">
+              Weekly Revenue
+            </h2>
+            <span className="text-xs font-medium text-ink-secondary">Last 8 weeks · paid orders</span>
+          </div>
+          {weeks.length === 0 ? (
             <p className="py-8 text-center text-sm text-ink-secondary">
-              No order data yet.
+              No revenue data yet.
             </p>
           ) : (
             <div className="flex h-64 items-stretch gap-4 pt-2">
               <div className="flex shrink-0 flex-col justify-between py-2 text-[11px] font-medium tabular text-ink-muted">
-                <span>{maxBar}</span>
-                <span>{Math.round(maxBar * 0.66)}</span>
-                <span>{Math.round(maxBar * 0.33)}</span>
-                <span>0</span>
+                <span>{centsToUSD(maxRev).replace(".00", "")}</span>
+                <span>{centsToUSD(Math.round(maxRev * 0.66)).replace(".00", "")}</span>
+                <span>{centsToUSD(Math.round(maxRev * 0.33)).replace(".00", "")}</span>
+                <span>$0</span>
               </div>
-              <div className="grid h-full flex-1 grid-cols-5 items-end gap-3 sm:gap-6">
-                {byStatus.slice(0, 5).map((b, i) => (
-                  <div
-                    key={b.status}
-                    className="relative flex h-full flex-col items-center justify-end"
-                    onMouseEnter={() => setBarTip(i)}
-                    onMouseLeave={() => setBarTip(null)}
-                  >
-                    {barTip === i && (
-                      <div className="pointer-events-none absolute -top-1 z-10 -translate-y-full whitespace-nowrap rounded-lg bg-[#0f3738] px-2.5 py-1.5 text-xs font-semibold capitalize text-white shadow-lg">
-                        {b.status.replace(/_/g, " ")}: {b.count} ({Math.round((b.count / Math.max(1, byStatus.reduce((a, x) => a + x.count, 0))) * 100)}%)
+              <div className="grid h-full flex-1 grid-cols-8 items-end gap-2 sm:gap-3">
+                {weeks.map((w, i) => {
+                  const d = w.week.split("-");
+                  const label = d.length === 3 ? `${d[2]}/${d[1]}` : w.week;
+                  return (
+                    <div
+                      key={w.week}
+                      className="relative flex h-full flex-col items-center justify-end"
+                      onMouseEnter={() => setBarTip(i)}
+                      onMouseLeave={() => setBarTip(null)}
+                    >
+                      {barTip === i && (
+                        <div className="pointer-events-none absolute -top-1 z-10 -translate-y-full whitespace-nowrap rounded-lg bg-[#0f3738] px-2.5 py-1.5 text-xs font-semibold text-white shadow-lg">
+                          {centsToUSD(w.revenue_cents)} · w/c {label}
+                        </div>
+                      )}
+                      <div className="flex h-full w-full max-w-[40px] flex-col justify-end rounded-full bg-[#eef6f5] p-1.5">
+                        <div
+                          className="w-full rounded-full shadow-inner"
+                          style={{
+                            height: barsOn ? `${Math.max(w.revenue_cents > 0 ? 8 : 2, (w.revenue_cents / maxRev) * 100)}%` : "2%",
+                            background: w.revenue_cents > 0 ? STATUS_COLORS[i % STATUS_COLORS.length] : "#cbdcda",
+                            opacity: barTip === null || barTip === i ? 1 : 0.45,
+                            transition: "height 0.9s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease",
+                            cursor: "pointer",
+                          }}
+                        />
                       </div>
-                    )}
-                    <div className="flex h-full w-full max-w-[48px] flex-col justify-end rounded-full bg-surface-subtle bg-[#eef6f5] p-1.5">
-                      <div
-                        className="w-full rounded-full shadow-inner"
-                        style={{
-                          height: barsOn ? `${Math.max(8, (b.count / maxBar) * 100)}%` : "8%",
-                          background: STATUS_COLORS[i % STATUS_COLORS.length],
-                          opacity: barTip === null || barTip === i ? 1 : 0.45,
-                          transition: "height 0.9s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease",
-                          cursor: "pointer",
-                        }}
-                      />
+                      <span className="mt-3 max-w-full truncate text-[11px] font-medium tabular text-ink-secondary">
+                        {label}
+                      </span>
                     </div>
-                    <span className="mt-3 max-w-full truncate text-xs font-medium capitalize text-ink-secondary">
-                      {b.status.replace(/_/g, " ")}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
