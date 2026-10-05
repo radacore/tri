@@ -56,6 +56,8 @@ func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {
 			r.Use(mw.JWTAuth(cfg.JWTSecret))
 			r.Get("/admin/dashboard", handlers.GetDashboardStats(pool))
 			// Orders
+			r.Post("/admin/orders", handlers.AdminCreateOrder(pool))
+			r.Get("/admin/orders-summary", handlers.OrdersSummary(pool))
 			r.Get("/admin/orders", handlers.AdminListOrders(pool))
 			r.Put("/admin/orders/{id}", handlers.AdminUpdateOrder(pool))
 			r.Delete("/admin/orders/{id}", handlers.AdminDeleteOrder(pool))

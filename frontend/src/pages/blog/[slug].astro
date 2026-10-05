@@ -27,34 +27,86 @@ try {
   if (r.ok) post = (await r.json())?.data ?? null;
 } catch { /* fallback ke statis */ }
 
+function fmtDate(iso: string) {
+  const d = String(iso || '').slice(0, 10).split('-');
+  return d.length === 3 ? `${d[2]}/${d[1]}/${d[0]}` : String(iso || '');
+}
+
 const title = post?.meta_title || post?.title || fb.title;
 const desc = post?.meta_description || post?.content?.slice(0, 160) || fb.excerpt;
 const cover = post?.thumbnail_url || fb.cover;
-const date = (post?.published_at || post?.created_at || fb.date || '').slice(0, 10);
+const date = fmtDate(post?.published_at || post?.created_at || fb.date || '');
 const body = post?.content || '';
+
+const SHARE_BTNS = [
+  { k: 'x', label: 'Share on X', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.3 22h-6.3l-4.9-6.4L6.5 22H3.4l7.3-8.3L1 2h6.5l4.4 5.9L18.9 2zm-1.1 17.8h1.7L7.6 3.9H5.8l12 16z"/></svg>' },
+  { k: 'facebook', label: 'Share on Facebook', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.6 1.6-1.6h1.7V4.2c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.4V14h2.7v8h3.4z"/></svg>' },
+  { k: 'linkedin', label: 'Share on LinkedIn', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.9 8.6H3.6V21h3.3V8.6zM5.2 3.5a1.9 1.9 0 100 3.9 1.9 1.9 0 000-3.9zM21 13.4c0-3.2-1.7-4.7-4-4.7-1.8 0-2.7 1-3.1 1.7V8.6h-3.4V21h3.4v-6.6c0-1.6.8-2.5 2-2.5s1.9.9 1.9 2.5V21H21v-7.6z"/></svg>' },
+  { k: 'whatsapp', label: 'Share on WhatsApp', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18.2a8.2 8.2 0 01-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1112 20.2zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 01-3.3-2.9c-.3-.4 0-.5.1-.7l.5-.6c.1-.2.1-.4 0-.5L9.4 8c-.2-.5-.5-.4-.6-.4h-.5c-.2 0-.5.2-.7.6-.9 1-.3 2.7.6 4.1a11.2 11.2 0 004.3 3.8c1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.1-.4-.2z"/></svg>' },
+  { k: 'copy', label: 'Copy link', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>' },
+];
 ---
 <BaseLayout title={`${title} — LogoPulse Blog`} description={desc}>
   <Navbar />
   <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
-    <p id="post-date" class="text-xs font-semibold text-slate-400">{date}</p>
-    <h1 id="post-title" class="mt-2 text-4xl font-extrabold tracking-tight">{post?.title || fb.title}</h1>
-    {cover && <img id="post-cover" src={cover} alt={title} class="mt-6 w-full object-cover" style="border-radius:16px" />}
-    <div id="post-body" class="mt-6 text-slate-700 leading-relaxed [&_h1]:text-3xl [&_h1]:font-extrabold [&_h1]:mt-8 [&_h2]:text-2xl [&_h2]:font-extrabold [&_h2]:mt-8 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-6 [&_p]:mt-4 [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mt-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-slate-200 [&_blockquote]:pl-4 [&_blockquote]:italic [&_img]:rounded-2xl [&_img]:my-6 [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_pre]:rounded-2xl [&_pre]:bg-slate-900 [&_pre]:text-slate-100 [&_pre]:p-5 [&_pre]:my-6 [&_pre]:overflow-x-auto [&_pre_code]:bg-transparent">
+    {cover && <img id="post-cover" src={cover} alt={title} class="w-full object-cover" style="border-radius:16px" />}
+    <h1 id="post-title" class="mt-6 text-4xl font-extrabold tracking-tight">{post?.title || fb.title}</h1>
+    <div class="mt-4">
+      <p class="text-sm text-slate-500">Written by <span class="font-semibold text-slate-700">Admin</span> on <span id="post-date">{date}</span></p>
+    </div>
+    <hr class="my-6 border-slate-200" />
+    <div id="post-body" class="post-body text-slate-700 leading-relaxed [&_h1]:text-3xl [&_h1]:font-extrabold [&_h1]:mt-8 [&_h2]:text-2xl [&_h2]:font-extrabold [&_h2]:mt-8 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:mt-6 [&_p]:mt-4 [&_ul]:mt-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mt-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-primary [&_a]:underline [&_blockquote]:border-l-4 [&_blockquote]:border-slate-200 [&_blockquote]:pl-4 [&_blockquote]:italic [&_img]:rounded-2xl [&_img]:my-6 [&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1.5 [&_code]:py-0.5 [&_pre]:rounded-2xl [&_pre]:bg-slate-900 [&_pre]:text-slate-100 [&_pre]:p-5 [&_pre]:my-6 [&_pre]:overflow-x-auto [&_pre_code]:bg-transparent">
       <p class="text-lg">{fb.excerpt}</p>
       <p class="mt-4">Good branding is a growth lever, not decoration. A clear, memorable mark raises perceived value, builds trust in seconds, and compounds across every touchpoint — your site, packaging, ads, and pitch deck. If your current logo was a placeholder, this is the cheapest high-ROI upgrade on your roadmap.</p>
+    </div>
+    <div class="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200" style="border-radius:20px">
+      <p class="text-sm font-extrabold">Share this article</p>
+      <div class="flex items-center gap-2">
+        {SHARE_BTNS.map((b) => (
+          <button type="button" data-share={b.k} aria-label={b.label} title={b.label} class="share-btn" set:html={b.svg} />
+        ))}
+      </div>
     </div>
     <a href="/order?plan=professional" class="btn-active mt-8 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">Get my logo — from $49</a>
   </main>
   <Footer />
   <script define:vars={{ slug, md: body }}>
-    import { marked } from 'marked';
     (function () {
-      function render(mdText) {
+      function render(htmlText) {
         try {
           var el = document.getElementById('post-body');
-          if (el && mdText) el.innerHTML = marked.parse(mdText, { breaks: true });
+          if (el && htmlText) el.innerHTML = htmlText;
         } catch (e) {}
       }
+      function fmt(iso) {
+        var d = String(iso || '').slice(0, 10).split('-');
+        return d.length === 3 ? d[2] + '/' + d[1] + '/' + d[0] : String(iso || '');
+      }
+      // Tombol share (delegasi — berlaku untuk SSR + hasil hidrasi).
+      document.addEventListener('click', function (e) {
+        var b = e.target && e.target.closest ? e.target.closest('[data-share]') : null;
+        if (!b) return;
+        var type = b.getAttribute('data-share');
+        var url = location.href, text = document.title;
+        var enc = encodeURIComponent;
+        if (type === 'copy') {
+          var done = function () {
+            var old = b.innerHTML;
+            b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>';
+            setTimeout(function () { b.innerHTML = old; }, 1500);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(done);
+          else done();
+          return;
+        }
+        var links = {
+          x: 'https://twitter.com/intent/tweet?text=' + enc(text) + '&url=' + enc(url),
+          facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + enc(url),
+          linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc(url),
+          whatsapp: 'https://wa.me/?text=' + enc(text + ' ' + url),
+        };
+        if (links[type]) window.open(links[type], '_blank', 'noopener,width=600,height=540');
+      });
       if (md) { render(md); return; }
       // SSR tanpa API (build offline): ambil langsung dari API saat online.
       var base = (window.__lpApiBase || 'http://localhost:8080/api/v1');
@@ -73,7 +125,7 @@ const body = post?.content || '';
           document.title = p.title + ' — LogoPulse Blog';
         }
         if (p.published_at || p.created_at) {
-          document.getElementById('post-date').textContent = String(p.published_at || p.created_at).slice(0, 10);
+          document.getElementById('post-date').textContent = fmt(p.published_at || p.created_at);
         }
         if (p.thumbnail_url) {
           var img = document.getElementById('post-cover');

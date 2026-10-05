@@ -171,3 +171,23 @@ select:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(15, 55, 56, 0.18);
 }
+
+/* TipTap rich editor */
+.tiptap { outline: none; font-size: 0.875rem; line-height: 1.7; color: #132b2b; }
+.tiptap > *:first-child { margin-top: 0; }
+.tiptap p { margin: 0.5rem 0; }
+.tiptap h1 { font-size: 1.25rem; font-weight: 800; margin: 1rem 0 0.5rem; }
+.tiptap h2 { font-size: 1.1rem; font-weight: 800; margin: 1rem 0 0.5rem; }
+.tiptap h3 { font-size: 1rem; font-weight: 700; margin: 0.75rem 0 0.5rem; }
+.tiptap ul { list-style: disc; padding-left: 1.4rem; margin: 0.5rem 0; }
+.tiptap ol { list-style: decimal; padding-left: 1.4rem; margin: 0.5rem 0; }
+.tiptap blockquote { border-left: 3px solid #cbdcda; padding-left: 0.75rem; color: #4b6362; margin: 0.75rem 0; }
+.tiptap a { color: #0f3738; text-decoration: underline; }
+.tiptap code { background: #eef4f3; border-radius: 6px; padding: 0.1rem 0.35rem; font-size: 0.8rem; }
+.tiptap pre { background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 0.9rem 1rem; margin: 0.75rem 0; overflow-x: auto; }
+.tiptap pre code { background: transparent; padding: 0; }
+.tiptap img { max-width: 100%; height: auto; }
+.tiptap figure { margin: 1rem auto; max-width: 100%; border: 1px solid #e2eceb; border-radius: 16px; padding: 0.6rem; background: #fff; }
+.tiptap figure img.lp-figure-img { border-radius: 10px; width: 100%; }
+.tiptap figure figcaption { font-size: 0.78rem; color: #4b6362; text-align: center; padding: 0.45rem 0.5rem 0.15rem; outline: none; }
+.tiptap figure.ProseMirror-selectednode { outline: 2px solid #0f3738; }

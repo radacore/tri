@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
@@ -22,32 +23,58 @@ const EMPTY: DashboardStats = {
   recent_orders: [],
 };
 
-function Donut({ segments }: { segments: { value: number; color: string }[] }) {
+function Donut({ segments }: { segments: { value: number; color: string; label: string }[] }) {
   const total = segments.reduce((a, s) => a + s.value, 0) || 1;
   const R = 58;
   const C = 2 * Math.PI * R;
+  const [on, setOn] = useState(false);
+  const [tip, setTip] = useState<{ x: number; y: number; i: number } | null>(null);
+  useEffect(() => {
+    const t = requestAnimationFrame(() => requestAnimationFrame(() => setOn(true)));
+    return () => cancelAnimationFrame(t);
+  }, []);
   let acc = 0;
+  const move = (e: React.MouseEvent, i: number) => {
+    const box = (e.currentTarget.ownerSVGElement?.getBoundingClientRect() ?? e.currentTarget.getBoundingClientRect());
+    setTip({ x: e.clientX - box.left, y: e.clientY - box.top, i });
+  };
   return (
-    <svg className="h-56 w-56 -rotate-90" viewBox="0 0 160 160">
-      {segments.map((s, i) => {
-        const len = (s.value / total) * C;
-        const el = (
-          <circle
-            key={i}
-            cx="80"
-            cy="80"
-            r={R}
-            fill="none"
-            stroke={s.color}
-            strokeWidth="22"
-            strokeDasharray={`${len} ${C}`}
-            strokeDashoffset={-acc}
-          />
-        );
-        acc += len;
-        return el;
-      })}
-    </svg>
+    <div className="relative">
+      <svg className="h-56 w-56 -rotate-90" viewBox="0 0 160 160" onMouseLeave={() => setTip(null)}>
+        {segments.map((s, i) => {
+          const len = (s.value / total) * C;
+          const el = (
+            <circle
+              key={i}
+              cx="80"
+              cy="80"
+              r={R}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={tip && tip.i !== i ? 16 : 22}
+              strokeDasharray={`${on ? len : 0} ${C}`}
+              strokeDashoffset={-acc}
+              opacity={tip && tip.i !== i ? 0.45 : 1}
+              style={{ transition: "stroke-dasharray 0.9s ease, stroke-dashoffset 0.9s ease, stroke-width 0.2s ease, opacity 0.2s ease", cursor: "pointer" }}
+              onMouseEnter={(e) => move(e, i)}
+              onMouseMove={(e) => move(e, i)}
+            >
+              <title>{`${s.label}: ${s.value} (${Math.round((s.value / total) * 100)}%)`}</title>
+            </circle>
+          );
+          acc += len;
+          return el;
+        })}
+      </svg>
+      {tip && (
+        <div
+          className="pointer-events-none absolute z-10 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#0f3738] px-2.5 py-1.5 text-xs font-semibold text-white shadow-lg"
+          style={{ left: Math.min(Math.max(tip.x, 60), 180), top: Math.max(tip.y - 14, 0) }}
+        >
+          {segments[tip.i].label}: {segments[tip.i].value} ({Math.round((segments[tip.i].value / total) * 100)}%)
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -71,6 +98,12 @@ export default function DashboardPage() {
     count: r.count,
   }));
   const maxBar = Math.max(1, ...byStatus.map((b) => b.count));
+  const [barsOn, setBarsOn] = useState(false);
+  const [barTip, setBarTip] = useState<number | null>(null);
+  useEffect(() => {
+    const t = requestAnimationFrame(() => requestAnimationFrame(() => setBarsOn(true)));
+    return () => cancelAnimationFrame(t);
+  }, [byStatus.length]);
 
   return (
     <div className="space-y-6">
@@ -164,6 +197,7 @@ export default function DashboardPage() {
                   segments={byStatus.map((b, i) => ({
                     value: b.count,
                     color: STATUS_COLORS[i % STATUS_COLORS.length],
+                    label: b.status.replace(/_/g, " "),
                   }))}
                 />
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
@@ -214,15 +248,24 @@ export default function DashboardPage() {
                 {byStatus.slice(0, 5).map((b, i) => (
                   <div
                     key={b.status}
-                    className="flex h-full flex-col items-center justify-end"
+                    className="relative flex h-full flex-col items-center justify-end"
+                    onMouseEnter={() => setBarTip(i)}
+                    onMouseLeave={() => setBarTip(null)}
                   >
+                    {barTip === i && (
+                      <div className="pointer-events-none absolute -top-1 z-10 -translate-y-full whitespace-nowrap rounded-lg bg-[#0f3738] px-2.5 py-1.5 text-xs font-semibold capitalize text-white shadow-lg">
+                        {b.status.replace(/_/g, " ")}: {b.count} ({Math.round((b.count / Math.max(1, byStatus.reduce((a, x) => a + x.count, 0))) * 100)}%)
+                      </div>
+                    )}
                     <div className="flex h-full w-full max-w-[48px] flex-col justify-end rounded-full bg-surface-subtle bg-[#eef6f5] p-1.5">
                       <div
                         className="w-full rounded-full shadow-inner"
                         style={{
-                          height: `${Math.max(8, (b.count / maxBar) * 100)}%`,
-                          background:
-                            STATUS_COLORS[i % STATUS_COLORS.length],
+                          height: barsOn ? `${Math.max(8, (b.count / maxBar) * 100)}%` : "8%",
+                          background: STATUS_COLORS[i % STATUS_COLORS.length],
+                          opacity: barTip === null || barTip === i ? 1 : 0.45,
+                          transition: "height 0.9s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease",
+                          cursor: "pointer",
                         }}
                       />
                     </div>

@@ -123,7 +123,13 @@ export async function uploadFile(file: File): Promise<UploadResult> {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: fd,
   });
-  return handle<UploadResult>(res);
+  const out = await handle<UploadResult>(res);
+  // Server mengembalikan path relatif (/uploads/...) yang hanya dikenal API.
+  // Jadikan absolut ke origin API agar preview admin + landing bisa memuatnya.
+  if (out && typeof out.url === "string" && out.url.startsWith("/")) {
+    out.url = API_BASE.replace(/\/api\/v1\/?$/, "") + out.url;
+  }
+  return out;
 }
 
 /* ---------- Types ---------- */
@@ -148,12 +154,16 @@ export interface Order {
   id: string;
   customer_name: string;
   customer_email: string;
+  customer_phone?: string;
   tier: string;
   status: OrderStatus;
   total_cents: number;
   currency?: string;
   brief?: Record<string, unknown> | string | null;
   deliverables?: string[] | null;
+  payment_proof?: string | null;
+  notes?: string | null;
+  paid_at?: string | null;
   created_at: string;
   updated_at?: string;
   history?: OrderHistoryEntry[];
@@ -256,4 +266,6 @@ export const ORDER_STATUSES: OrderStatus[] = [
   "revision",
   "completed",
   "delivered",
+  "cancelled",
+  "refunded",
 ];

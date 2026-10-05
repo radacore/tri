@@ -7,7 +7,9 @@ import DashboardPage from "./pages/DashboardPage";
 import OrdersPage from "./pages/OrdersPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import CaseStudiesPage from "./pages/CaseStudiesPage";
+import CaseStudyEditorPage from "./pages/CaseStudyEditorPage";
 import BlogPage from "./pages/BlogPage";
+import BlogEditorPage from "./pages/BlogEditorPage";
 import TestimonialsPage from "./pages/TestimonialsPage";
 import ClientsPage from "./pages/ClientsPage";
 import CategoriesPage from "./pages/CategoriesPage";
@@ -40,7 +42,11 @@ export default function App() {
               <Route path="orders" element={<OrdersPage />} />
               <Route path="portfolio" element={<PortfolioPage />} />
               <Route path="case-studies" element={<CaseStudiesPage />} />
+              <Route path="case-studies/new" element={<CaseStudyEditorPage />} />
+              <Route path="case-studies/:id" element={<CaseStudyEditorPage />} />
               <Route path="blog" element={<BlogPage />} />
+              <Route path="blog/new" element={<BlogEditorPage />} />
+              <Route path="blog/:id" element={<BlogEditorPage />} />
               <Route path="testimonials" element={<TestimonialsPage />} />
               <Route path="clients" element={<ClientsPage />} />
           <Route path="categories" element={<CategoriesPage />} />

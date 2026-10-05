@@ -48,6 +48,20 @@ const website = item.website ?? '';
 const idx = FALLBACK_CASES.findIndex((c) => c.slug === (item.slug ?? slug));
 const next = idx >= 0 ? FALLBACK_CASES[(idx + 1) % FALLBACK_CASES.length] : null;
 const others = FALLBACK_CASES.filter((c) => c.slug !== (item.slug ?? slug)).slice(0, 3);
+function esc(s: unknown) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+}
+const rawContent = typeof item.content === 'string' ? item.content : '';
+const aboutHtml = /<[a-z][\s>]/i.test(rawContent)
+  ? rawContent
+  : `<p>${esc(excerpt)}</p><p>The brand had to earn trust at first glance — modern, distinctive, and flexible enough to work everywhere from favicons to signage.</p>`;
+const SHARE_BTNS = [
+  { k: 'x', label: 'Share on X', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.3 22h-6.3l-4.9-6.4L6.5 22H3.4l7.3-8.3L1 2h6.5l4.4 5.9L18.9 2zm-1.1 17.8h1.7L7.6 3.9H5.8l12 16z"/></svg>' },
+  { k: 'facebook', label: 'Share on Facebook', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.6 1.6-1.6h1.7V4.2c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.4V14h2.7v8h3.4z"/></svg>' },
+  { k: 'linkedin', label: 'Share on LinkedIn', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.9 8.6H3.6V21h3.3V8.6zM5.2 3.5a1.9 1.9 0 100 3.9 1.9 1.9 0 000-3.9zM21 13.4c0-3.2-1.7-4.7-4-4.7-1.8 0-2.7 1-3.1 1.7V8.6h-3.4V21h3.4v-6.6c0-1.6.8-2.5 2-2.5s1.9.9 1.9 2.5V21H21v-7.6z"/></svg>' },
+  { k: 'whatsapp', label: 'Share on WhatsApp', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18.2a8.2 8.2 0 01-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1112 20.2zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 01-3.3-2.9c-.3-.4 0-.5.1-.7l.5-.6c.1-.2.1-.4 0-.5L9.4 8c-.2-.5-.5-.4-.6-.4h-.5c-.2 0-.5.2-.7.6-.9 1-.3 2.7.6 4.1a11.2 11.2 0 004.3 3.8c1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.1-.4-.2z"/></svg>' },
+  { k: 'copy', label: 'Copy link', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>' },
+];
 const deliverables = ['Logo design', 'Logo variations', 'Typography', 'Color palette', 'Brand mockups', 'Social media kit'];
 const gallery: { src: string; alt: string }[] = logo ? [{ src: logo, alt: `${client} logo variations` }] : [];
 if (gslug) {
@@ -89,7 +103,7 @@ if (gslug) {
     )}
     <div class="mx-auto max-w-3xl px-5">
       <h2 class="mt-12 text-2xl sm:text-3xl font-extrabold tracking-tight">About the project</h2>
-      <p class="mt-4 text-slate-600 leading-relaxed">{item.content ?? excerpt} The brand had to earn trust at first glance — modern, distinctive, and flexible enough to work everywhere from favicons to signage.</p>
+      <div class="post-body mt-4 text-slate-600 leading-relaxed" set:html={aboutHtml} />
       <h2 class="mt-10 text-2xl sm:text-3xl font-extrabold tracking-tight">What we designed</h2>
       <p class="mt-4 text-slate-600 leading-relaxed">We designed the {client} logo to communicate professionalism and character in a crowded market — a custom mark with thoughtful construction, paired with typography and colors that scale from a 16-pixel favicon to a full storefront.</p>
       <h2 class="mt-10 text-2xl sm:text-3xl font-extrabold tracking-tight">What we delivered</h2>
@@ -124,7 +138,14 @@ if (gslug) {
     <div class="mx-auto mt-14 max-w-content px-5">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">More case studies</h2>
-        <a href="/case-studies" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-200 hover:ring-primary hover:text-primary">All case studies →</a>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            {SHARE_BTNS.map((b) => (
+              <button type="button" data-share={b.k} aria-label={b.label} title={b.label} class="share-btn" set:html={b.svg} />
+            ))}
+          </div>
+          <a href="/case-studies" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-200 hover:ring-primary hover:text-primary">All case studies →</a>
+        </div>
       </div>
       <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {others.map((c) => (
@@ -135,4 +156,31 @@ if (gslug) {
   </main>
   <CTABanner />
   <Footer />
+  <script>
+    // Tombol share (delegasi).
+    document.addEventListener('click', function (e) {
+      var b = e.target && e.target.closest ? e.target.closest('[data-share]') : null;
+      if (!b) return;
+      var type = b.getAttribute('data-share');
+      var url = location.href, text = document.title;
+      var enc = encodeURIComponent;
+      if (type === 'copy') {
+        var done = function () {
+          var old = b.innerHTML;
+          b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>';
+          setTimeout(function () { b.innerHTML = old; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(done);
+        else done();
+        return;
+      }
+      var links = {
+        x: 'https://twitter.com/intent/tweet?text=' + enc(text) + '&url=' + enc(url),
+        facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + enc(url),
+        linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc(url),
+        whatsapp: 'https://wa.me/?text=' + enc(text + ' ' + url),
+      };
+      if (links[type]) window.open(links[type], '_blank', 'noopener,width=600,height=540');
+    });
+  </script>
 </BaseLayout>
