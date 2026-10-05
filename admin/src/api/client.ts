@@ -157,6 +157,7 @@ export interface Order {
   customer_phone?: string;
   tier: string;
   status: OrderStatus;
+  stage?: string;
   total_cents: number;
   currency?: string;
   brief?: Record<string, unknown> | string | null;

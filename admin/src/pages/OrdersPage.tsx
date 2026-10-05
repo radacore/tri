@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ExternalLink, Filter, MessageCircle, Plus, Search, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ChevronDown, ExternalLink, Filter, LayoutGrid, MessageCircle, Plus, Search, X } from "lucide-react";
 import {
   ORDER_STATUSES,
   centsToUSD,
@@ -14,6 +15,7 @@ import DataTable from "../components/DataTable";
 import Badge from "../components/Badge";
 import ImageUploader from "../components/ImageUploader";
 import OrderInvoice from "../components/OrderInvoice";
+import { useConfirm } from "../components/ConfirmDialog";
 import { toast } from "../components/Layout";
 
 const TIER_USD: Record<string, number> = { starter: 49, professional: 149, premium: 399 };
@@ -126,6 +128,9 @@ export default function OrdersPage() {
   const [proof, setProof] = useState("");
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ ...NEW_EMPTY });
+  const { dialog: confirmDialog, ask } = useConfirm();
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState("");
 
   const range = useMemo(() => {
     if (period === "all") return "";
@@ -181,6 +186,15 @@ export default function OrdersPage() {
     void qc.invalidateQueries({ queryKey: ["dashboard"] });
   };
 
+  const stageMut = useMutation({
+    mutationFn: (body: { id: string; stage: string }) => put(`/admin/orders/${body.id}`, { stage: body.stage }),
+    onSuccess: (_d, v) => {
+      toast("Stage updated");
+      setSelected((s) => (s ? { ...s, stage: v.stage } : s));
+      refresh();
+    },
+    onError: (e: any) => toast(`Update failed: ${e?.message ?? "error"}`),
+  });
   const updateMut = useMutation({
     mutationFn: (body: Record<string, unknown> & { id: string }) => {
       const { id, ...rest } = body;
@@ -235,6 +249,9 @@ export default function OrdersPage() {
             <option value="30">Last 30 days</option>
             <option value="all">All time</option>
           </select>
+          <Link to="/orders/board" className="btn-secondary inline-flex items-center gap-2 whitespace-nowrap">
+            <LayoutGrid className="h-4 w-4" /> Board
+          </Link>
           <button className="btn-primary inline-flex items-center gap-2 whitespace-nowrap" onClick={() => { setForm({ ...NEW_EMPTY }); setCreating(true); }}>
             <Plus className="h-4 w-4" /> New order
           </button>
@@ -312,8 +329,8 @@ export default function OrdersPage() {
       </section>
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f3738]/25 p-4 backdrop-blur-[4px]">
-          <div className="anim-pop max-h-[92vh] w-full max-w-[920px] overflow-y-auto rounded-[24px] bg-white p-6 shadow-xl sm:p-7">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "transparent", backdropFilter: "none", WebkitBackdropFilter: "none" }}>
+          <div className="anim-pop max-h-[92vh] w-full max-w-[920px] overflow-y-auto rounded-[24px] bg-white p-6 shadow-xl ring-1 ring-black/10 sm:p-7">
             <div className="flex items-start justify-between">
               <div>
                 <h2 className="text-base font-semibold text-ink-primary">Order {selected.id.slice(0, 8)}</h2>
@@ -340,11 +357,11 @@ export default function OrdersPage() {
             {selected.status === "pending" && (
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <button className="btn-primary" disabled={updateMut.isPending}
-                  onClick={() => { if (!window.confirm(`Accept order ${shortId(selected.id)} (mark as paid)?`)) return; updateMut.mutate({ id: selected.id, status: "paid", note: note || "Accepted via WhatsApp" }); }}>
+                  onClick={() => ask(`Accept order ${shortId(selected.id)}?`, `${selected.customer_name} — mark as paid.`, () => updateMut.mutate({ id: selected.id, status: "paid", note: note || "Accepted via WhatsApp" }), { label: "Accept", danger: false })}>
                   Accept — mark paid
                 </button>
                 <button className="btn-secondary" disabled={updateMut.isPending}
-                  onClick={() => { const reason = window.prompt("Rejection reason (recorded in history):", note); if (reason === null) return; updateMut.mutate({ id: selected.id, status: "cancelled", note: reason || "Rejected" }); }}>
+                  onClick={() => { setRejecting(true); setReason(note); }}>
                   Reject
                 </button>
               </div>
@@ -394,12 +411,24 @@ export default function OrdersPage() {
               </>
             )}
 
-            <label className="label mt-4">Update status</label>
-            <select className="input" value={newStatus} onChange={(e) => setNewStatus(e.target.value as OrderStatus)}>
-              {ORDER_STATUSES.map((s) => (
-                <option key={s} value={s} className="capitalize">{s.replace(/_/g, " ")}</option>
-              ))}
-            </select>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="label mt-4">Payment status</label>
+                <select className="input" value={newStatus} onChange={(e) => setNewStatus(e.target.value as OrderStatus)}>
+                  {ORDER_STATUSES.map((s) => (
+                    <option key={s} value={s} className="capitalize">{s.replace(/_/g, " ")}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="label mt-4">Design stage</label>
+                <select className="input capitalize" value={selected.stage ?? "brief"} disabled={stageMut.isPending} onChange={(e) => stageMut.mutate({ id: selected.id, stage: e.target.value })}>
+                  {["brief", "concepts", "revision", "delivery", "done"].map((s) => (
+                    <option key={s} value={s} className="capitalize">{s}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className="label mt-3">Note (goes to history)</label>
@@ -435,10 +464,48 @@ export default function OrdersPage() {
           </div>
         </div>
       )}
+      {confirmDialog}
+      {rejecting && selected && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: "transparent", backdropFilter: "none", WebkitBackdropFilter: "none" }}>
+          <div className="anim-pop w-full max-w-[420px] rounded-[24px] bg-white p-6 shadow-xl ring-1 ring-black/10">
+            <h2 className="text-base font-semibold text-ink-primary">Reject order?</h2>
+            <p className="mt-1 text-sm text-ink-secondary">
+              {selected.customer_name} will be moved to Closed.
+            </p>
+            <label className="label mt-4">Reason (recorded in history)</label>
+            <input
+              className="input"
+              autoFocus
+              placeholder="e.g. spam, duplicate, cancelled by customer"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  updateMut.mutate({ id: selected.id, status: "cancelled", note: reason.trim() || "Rejected" });
+                  setRejecting(false);
+                }
+              }}
+            />
+            <div className="mt-5 flex justify-end gap-2">
+              <button className="btn-secondary" onClick={() => setRejecting(false)}>Cancel</button>
+              <button
+                className="btn-primary"
+                disabled={updateMut.isPending}
+                onClick={() => {
+                  updateMut.mutate({ id: selected.id, status: "cancelled", note: reason.trim() || "Rejected" });
+                  setRejecting(false);
+                }}
+              >
+                {updateMut.isPending ? "Rejecting…" : "Reject order"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {creating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f3738]/25 p-4 backdrop-blur-[4px]">
-          <div className="anim-pop max-h-[90vh] w-full max-w-[520px] overflow-y-auto rounded-[24px] bg-white p-7 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "transparent", backdropFilter: "none", WebkitBackdropFilter: "none" }}>
+          <div className="anim-pop max-h-[90vh] w-full max-w-[520px] overflow-y-auto rounded-[24px] bg-white p-7 shadow-xl ring-1 ring-black/10">
             <h2 className="text-base font-semibold text-ink-primary">New manual order</h2>
             <p className="mt-1 text-xs text-ink-secondary">For WhatsApp orders that never went through the landing form.</p>
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">

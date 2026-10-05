@@ -6,6 +6,7 @@ export default function ConfirmDialog({
   title,
   message,
   confirmLabel = "Delete",
+  danger = true,
   onCancel,
   onConfirm,
 }: {
@@ -13,13 +14,14 @@ export default function ConfirmDialog({
   title: string;
   message: string;
   confirmLabel?: string;
+  danger?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f3738]/25 p-4 backdrop-blur-[4px]">
-      <div className="anim-pop w-full max-w-sm rounded-[24px] bg-white p-7 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "transparent", backdropFilter: "none", WebkitBackdropFilter: "none" }}>
+      <div className="anim-pop w-full max-w-sm rounded-[24px] bg-white p-7 shadow-xl ring-1 ring-black/10">
         <div className="flex items-start justify-between">
           <h3 className="text-base font-semibold text-ink-primary">{title}</h3>
           <button
@@ -36,7 +38,7 @@ export default function ConfirmDialog({
             Cancel
           </button>
           <button
-            className="rounded-full bg-[#ef4444] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#dc2626]"
+            className={danger ? "rounded-full bg-[#ef4444] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#dc2626]" : "btn-primary"}
             onClick={onConfirm}
           >
             {confirmLabel}
@@ -52,14 +54,18 @@ export function useConfirm() {
     open: boolean;
     title: string;
     message: string;
+    confirmLabel: string;
+    danger: boolean;
     action: (() => void) | null;
-  }>({ open: false, title: "", message: "", action: null });
+  }>({ open: false, title: "", message: "", confirmLabel: "Delete", danger: true, action: null });
 
   const dialog = (
     <ConfirmDialog
       open={state.open}
       title={state.title}
       message={state.message}
+      confirmLabel={state.confirmLabel}
+      danger={state.danger}
       onCancel={() => setState((s) => ({ ...s, open: false }))}
       onConfirm={() => {
         state.action?.();
@@ -68,8 +74,20 @@ export function useConfirm() {
     />
   );
 
-  const ask = (title: string, message: string, action: () => void) =>
-    setState({ open: true, title, message, action });
+  const ask = (
+    title: string,
+    message: string,
+    action: () => void,
+    opts?: { label?: string; danger?: boolean }
+  ) =>
+    setState({
+      open: true,
+      title,
+      message,
+      action,
+      confirmLabel: opts?.label ?? "Delete",
+      danger: opts?.danger ?? true,
+    });
 
   return { dialog, ask };
 }

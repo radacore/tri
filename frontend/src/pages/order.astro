@@ -381,7 +381,7 @@ const COLORS = [
         var mail = document.getElementById('send-mail');
         if (mail) mail.setAttribute('href',
           'mailto:' + orderEmail + '?subject=' + encodeURIComponent(S('pages.mail_subj', 'Logo order') + ' ' + pname + ' — ' + val('f-business')) +
-          '&body=' + msg.replace(/%0A/g, '\n'));
+          '&body=' + msg.replace(/%0A/g, '\r\n'));
         try {
           fetch(base + '/orders', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },

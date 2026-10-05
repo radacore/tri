@@ -154,7 +154,7 @@ func AdminListOrders(pool *pgxpool.Pool) http.HandlerFunc {
 			return
 		}
 		args = append(args, limit, offset)
-		q := `SELECT id, customer_name, customer_email, customer_phone, package_tier, status, brief, amount, currency, stripe_session, paid_at, notes, payment_proof, deliverables, created_at, updated_at FROM orders WHERE ` + strings.Join(where, " AND ") + fmt.Sprintf(` ORDER BY created_at DESC LIMIT $%d OFFSET $%d`, len(args)-1, len(args))
+		q := `SELECT id, customer_name, customer_email, customer_phone, package_tier, status, stage, brief, amount, currency, stripe_session, paid_at, notes, payment_proof, deliverables, created_at, updated_at FROM orders WHERE ` + strings.Join(where, " AND ") + fmt.Sprintf(` ORDER BY created_at DESC LIMIT $%d OFFSET $%d`, len(args)-1, len(args))
 		rows, err := pool.Query(r.Context(), q, args...)
 		if err != nil {
 			fail(w, http.StatusInternalServerError, "query failed")
@@ -173,7 +173,7 @@ func AdminListOrders(pool *pgxpool.Pool) http.HandlerFunc {
 		_ = row{}
 		items := []map[string]any{}
 		for rows.Next() {
-			var id, cn, ce, pt, st, cur string
+			var id, cn, ce, pt, st, stage, cur string
 			var phone, notes, proof *string
 			var brief []byte
 			var amt int
@@ -181,13 +181,13 @@ func AdminListOrders(pool *pgxpool.Pool) http.HandlerFunc {
 			var delivs []string
 			// scan paid_at/created/updated as strings via text
 			var paidStr, cStr, uStr tsString
-			if err := rows.Scan(&id, &cn, &ce, &phone, &pt, &st, &brief, &amt, &cur, &sess, &paidStr, &notes, &proof, &delivs, &cStr, &uStr); err != nil {
+			if err := rows.Scan(&id, &cn, &ce, &phone, &pt, &st, &stage, &brief, &amt, &cur, &sess, &paidStr, &notes, &proof, &delivs, &cStr, &uStr); err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
 			}
 			m := map[string]any{
 				"id": id, "customer_name": cn, "customer_email": ce,
-				"customer_phone": strp(phone), "package_tier": pt, "status": st, "amount": amt, "currency": cur,
+				"customer_phone": strp(phone), "package_tier": pt, "status": st, "stage": stage, "amount": amt, "currency": cur,
 				"notes": strp(notes), "payment_proof": strp(proof), "deliverables": delivs,
 				"created_at": cStr.String(), "updated_at": uStr.String(),
 			}
@@ -226,24 +226,24 @@ func attachOrderHistory(ctx context.Context, pool *pgxpool.Pool, items []map[str
 	if len(ids) == 0 {
 		return
 	}
-	rows, err := pool.Query(ctx, `SELECT order_id, from_status, to_status, note, created_at FROM order_status_history WHERE order_id = ANY($1) ORDER BY created_at ASC`, ids)
+	rows, err := pool.Query(ctx, `SELECT order_id, from_status, to_status, stage_to, note, created_at FROM order_status_history WHERE order_id = ANY($1) ORDER BY created_at ASC`, ids)
 	if err != nil {
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var oid string
-		var from, note *string
+		var from, stageTo, note *string
 		var to string
 		var at tsString
-		if err := rows.Scan(&oid, &from, &to, &note, &at); err != nil {
+		if err := rows.Scan(&oid, &from, &to, &stageTo, &note, &at); err != nil {
 			continue
 		}
 		m := byID[oid]
 		if m == nil {
 			continue
 		}
-		h := map[string]any{"at": at.String(), "status": to, "note": strp(note)}
+		h := map[string]any{"at": at.String(), "status": to, "stage": strp(stageTo), "note": strp(note)}
 		if from != nil {
 			h["from"] = *from
 		}
@@ -258,6 +258,7 @@ func AdminUpdateOrder(pool *pgxpool.Pool) http.HandlerFunc {
 		id := chi.URLParam(r, "id")
 		var body struct {
 			Status       *string  `json:"status"`
+			Stage        *string  `json:"stage"`
 			Note         *string  `json:"note"`
 			Deliverables []string `json:"deliverables"`
 			PaymentProof *string  `json:"payment_proof"`
@@ -274,6 +275,19 @@ func AdminUpdateOrder(pool *pgxpool.Pool) http.HandlerFunc {
 			fail(w, http.StatusNotFound, "order not found")
 			return
 		}
+		stageTo := ""
+		if body.Stage != nil {
+			stageTo = strings.ToLower(strings.TrimSpace(*body.Stage))
+			validStage := map[string]bool{"brief": true, "concepts": true, "revision": true, "delivery": true, "done": true}
+			if !validStage[stageTo] {
+				fail(w, http.StatusBadRequest, "invalid stage")
+				return
+			}
+			if _, err := pool.Exec(ctx, `UPDATE orders SET stage=$1, updated_at=NOW() WHERE id=$2`, stageTo, id); err != nil {
+				fail(w, http.StatusInternalServerError, "update failed")
+				return
+			}
+		}
 		if body.Status != nil {
 			st := strings.ToLower(strings.TrimSpace(*body.Status))
 			valid := map[string]bool{"pending": true, "paid": true, "in_progress": true, "revision": true, "completed": true, "delivered": true, "cancelled": true, "refunded": true}
@@ -282,7 +296,10 @@ func AdminUpdateOrder(pool *pgxpool.Pool) http.HandlerFunc {
 				return
 			}
 			if st == "paid" {
-				_, err = pool.Exec(ctx, `UPDATE orders SET status='paid', paid_at=COALESCE(paid_at, NOW()), updated_at=NOW() WHERE id=$1`, id)
+				_, err = pool.Exec(ctx, `UPDATE orders SET status='paid', paid_at=COALESCE(paid_at, NOW()), stage=CASE WHEN stage='brief' THEN 'concepts' ELSE stage END, updated_at=NOW() WHERE id=$1`, id)
+				if err == nil && stageTo == "" {
+					_, _ = pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status, stage_to, note) VALUES ($1,'pending','paid','concepts','accepted, moved to concepts')`, id)
+				}
 			} else {
 				_, err = pool.Exec(ctx, `UPDATE orders SET status=$1, updated_at=NOW() WHERE id=$2`, st, id)
 			}
@@ -296,6 +313,13 @@ func AdminUpdateOrder(pool *pgxpool.Pool) http.HandlerFunc {
 			}
 			_, _ = pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status, note) VALUES ($1,$2,$3,$4)`, id, prev, st, note)
 			prev = st
+		}
+		if stageTo != "" {
+			note := "moved to " + stageTo + " via kanban"
+			if body.Note != nil && strings.TrimSpace(*body.Note) != "" {
+				note = strings.TrimSpace(*body.Note)
+			}
+			_, _ = pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status, stage_to, note) VALUES ($1,$2,$2,$3,$4)`, id, prev, stageTo, note)
 		}
 		if body.Deliverables != nil {
 			if _, err := pool.Exec(ctx, `UPDATE orders SET deliverables=$1, updated_at=NOW() WHERE id=$2`, body.Deliverables, id); err != nil {

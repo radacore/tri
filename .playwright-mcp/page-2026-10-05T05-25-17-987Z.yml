@@ -1,0 +1,233 @@
+- generic [ref=f1e3]:
+  - complementary [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - link "L LogoPulse" [ref=f1e6] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=f1e7]: L
+        - generic [ref=f1e8]: LogoPulse
+      - generic [ref=f1e9]:
+        - paragraph [ref=f1e10]: Main Menu
+        - navigation [ref=f1e11]:
+          - link "Dashboard" [ref=f1e12] [cursor=pointer]:
+            - /url: /admin
+          - link "Orders" [ref=f1e19] [cursor=pointer]:
+            - /url: /admin/orders
+          - link "Portfolio" [ref=f1e26] [cursor=pointer]:
+            - /url: /admin/portfolio
+          - link "Case Studies" [ref=f1e33] [cursor=pointer]:
+            - /url: /admin/case-studies
+          - link "Blog" [ref=f1e36] [cursor=pointer]:
+            - /url: /admin/blog
+      - generic [ref=f1e41]:
+        - paragraph [ref=f1e42]: Content
+        - navigation [ref=f1e43]:
+          - link "Testimonials" [ref=f1e44] [cursor=pointer]:
+            - /url: /admin/testimonials
+          - link "Clients" [ref=f1e49] [cursor=pointer]:
+            - /url: /admin/clients
+          - link "Categories" [ref=f1e54] [cursor=pointer]:
+            - /url: /admin/categories
+          - link "Website Identity" [ref=f1e60] [cursor=pointer]:
+            - /url: /admin/identity
+      - generic [ref=f1e68]:
+        - paragraph [ref=f1e69]: System
+        - navigation [ref=f1e70]:
+          - link "Settings" [ref=f1e71] [cursor=pointer]:
+            - /url: /admin/settings
+    - button "Logout" [ref=f1e76] [cursor=pointer]
+  - generic [ref=f1e81]:
+    - banner [ref=f1e82]:
+      - generic [ref=f1e84]:
+        - generic [ref=f1e85]: A
+        - generic [ref=f1e86]:
+          - paragraph [ref=f1e87]: Admin
+          - paragraph [ref=f1e88]: Content manager
+    - main [ref=f1e89]:
+      - generic [ref=f1e91]:
+        - heading "Testimonials" [level=1] [ref=f1e92]
+        - generic [ref=f1e93]:
+          - textbox "Search…" [ref=f1e98]
+          - button "Add Testimonial" [active] [ref=f1e99] [cursor=pointer]
+        - generic [ref=f1e104]:
+          - generic [ref=f1e105]:
+            - generic [ref=f1e106]:
+              - generic [ref=f1e107]:
+                - generic [ref=f1e108]: T
+                - generic [ref=f1e109]:
+                  - paragraph [ref=f1e110]: Tom Becker
+                  - paragraph [ref=f1e111]: PulseFit
+              - generic [ref=f1e112]:
+                - button "★" [ref=f1e113] [cursor=pointer]
+                - button "★" [ref=f1e114] [cursor=pointer]
+                - button "★" [ref=f1e115] [cursor=pointer]
+                - button "★" [ref=f1e116] [cursor=pointer]
+                - button "★" [ref=f1e117] [cursor=pointer]
+            - paragraph [ref=f1e118]: “Delivered in 48 hours as promised. The brand kit saved our designer weeks.”
+            - generic [ref=f1e119]:
+              - button "Edit" [ref=f1e120] [cursor=pointer]
+              - button "Delete" [ref=f1e124] [cursor=pointer]
+          - generic [ref=f1e128]:
+            - generic [ref=f1e129]:
+              - generic [ref=f1e130]:
+                - generic [ref=f1e131]: A
+                - generic [ref=f1e132]:
+                  - paragraph [ref=f1e133]: Aisha Rahman
+                  - paragraph [ref=f1e134]: Atelier Nord
+              - generic [ref=f1e135]:
+                - button "★" [ref=f1e136] [cursor=pointer]
+                - button "★" [ref=f1e137] [cursor=pointer]
+                - button "★" [ref=f1e138] [cursor=pointer]
+                - button "★" [ref=f1e139] [cursor=pointer]
+                - button "★" [ref=f1e140] [cursor=pointer]
+            - paragraph [ref=f1e141]: “It feels like a $5k agency identity. Investors noticed immediately.”
+            - generic [ref=f1e142]:
+              - button "Edit" [ref=f1e143] [cursor=pointer]
+              - button "Delete" [ref=f1e147] [cursor=pointer]
+          - generic [ref=f1e151]:
+            - generic [ref=f1e152]:
+              - generic [ref=f1e153]:
+                - generic [ref=f1e154]: J
+                - generic [ref=f1e155]:
+                  - paragraph [ref=f1e156]: James Wright
+                  - paragraph [ref=f1e157]: VitalCare
+              - generic [ref=f1e158]:
+                - button "★" [ref=f1e159] [cursor=pointer]
+                - button "★" [ref=f1e160] [cursor=pointer]
+                - button "★" [ref=f1e161] [cursor=pointer]
+                - button "★" [ref=f1e162] [cursor=pointer]
+                - button "★" [ref=f1e163] [cursor=pointer]
+            - paragraph [ref=f1e164]: “Professional process, zero chasing. Revisions came back fast and actually better.”
+            - generic [ref=f1e165]:
+              - button "Edit" [ref=f1e166] [cursor=pointer]
+              - button "Delete" [ref=f1e170] [cursor=pointer]
+          - generic [ref=f1e174]:
+            - generic [ref=f1e175]:
+              - generic [ref=f1e176]:
+                - generic [ref=f1e177]: M
+                - generic [ref=f1e178]:
+                  - paragraph [ref=f1e179]: Maria Santos
+                  - paragraph [ref=f1e180]: Saffron House
+              - generic [ref=f1e181]:
+                - button "★" [ref=f1e182] [cursor=pointer]
+                - button "★" [ref=f1e183] [cursor=pointer]
+                - button "★" [ref=f1e184] [cursor=pointer]
+                - button "★" [ref=f1e185] [cursor=pointer]
+                - button "★" [ref=f1e186] [cursor=pointer]
+            - paragraph [ref=f1e187]: “Customers photograph our cups now. The logo paid for itself within a month.”
+            - generic [ref=f1e188]:
+              - button "Edit" [ref=f1e189] [cursor=pointer]
+              - button "Delete" [ref=f1e193] [cursor=pointer]
+          - generic [ref=f1e197]:
+            - generic [ref=f1e198]:
+              - generic [ref=f1e199]:
+                - generic [ref=f1e200]: D
+                - generic [ref=f1e201]:
+                  - paragraph [ref=f1e202]: Daniel Okafor
+                  - paragraph [ref=f1e203]: Cloudgrid
+              - generic [ref=f1e204]:
+                - button "★" [ref=f1e205] [cursor=pointer]
+                - button "★" [ref=f1e206] [cursor=pointer]
+                - button "★" [ref=f1e207] [cursor=pointer]
+                - button "★" [ref=f1e208] [cursor=pointer]
+                - button "★" [ref=f1e209] [cursor=pointer]
+            - paragraph [ref=f1e210]: “The money-back guarantee sold me. The quality kept me. Best $149 I have spent on this company.”
+            - generic [ref=f1e211]:
+              - generic [ref=f1e212]: Featured
+              - button "Edit" [ref=f1e215] [cursor=pointer]
+              - button "Delete" [ref=f1e219] [cursor=pointer]
+          - generic [ref=f1e223]:
+            - generic [ref=f1e224]:
+              - generic [ref=f1e225]:
+                - generic [ref=f1e226]: S
+                - generic [ref=f1e227]:
+                  - paragraph [ref=f1e228]: Sarah Chen
+                  - paragraph [ref=f1e229]: Nexora
+              - generic [ref=f1e230]:
+                - button "★" [ref=f1e231] [cursor=pointer]
+                - button "★" [ref=f1e232] [cursor=pointer]
+                - button "★" [ref=f1e233] [cursor=pointer]
+                - button "★" [ref=f1e234] [cursor=pointer]
+                - button "★" [ref=f1e235] [cursor=pointer]
+            - paragraph [ref=f1e236]: “Two concepts on day one, final files on day two. Our signup page finally looks like the product we built.”
+            - generic [ref=f1e237]:
+              - generic [ref=f1e238]: Featured
+              - button "Edit" [ref=f1e241] [cursor=pointer]
+              - button "Delete" [ref=f1e245] [cursor=pointer]
+          - generic [ref=f1e249]:
+            - generic [ref=f1e250]:
+              - generic [ref=f1e251]:
+                - generic [ref=f1e252]: D
+                - generic [ref=f1e253]:
+                  - paragraph [ref=f1e254]: Daniel Okafor
+                  - paragraph [ref=f1e255]: Cloudgrid
+              - generic [ref=f1e256]:
+                - button "★" [ref=f1e257] [cursor=pointer]
+                - button "★" [ref=f1e258] [cursor=pointer]
+                - button "★" [ref=f1e259] [cursor=pointer]
+                - button "★" [ref=f1e260] [cursor=pointer]
+                - button "★" [ref=f1e261] [cursor=pointer]
+            - paragraph [ref=f1e262]: “The money-back guarantee sold me. The quality kept me. Best $149 I have spent on this company.”
+            - generic [ref=f1e263]:
+              - generic [ref=f1e264]: Featured
+              - button "Edit" [ref=f1e267] [cursor=pointer]
+              - button "Delete" [ref=f1e271] [cursor=pointer]
+          - generic [ref=f1e275]:
+            - generic [ref=f1e276]:
+              - generic [ref=f1e277]:
+                - generic [ref=f1e278]: T
+                - generic [ref=f1e279]:
+                  - paragraph [ref=f1e280]: Tom Becker
+                  - paragraph [ref=f1e281]: PulseFit
+              - generic [ref=f1e282]:
+                - button "★" [ref=f1e283] [cursor=pointer]
+                - button "★" [ref=f1e284] [cursor=pointer]
+                - button "★" [ref=f1e285] [cursor=pointer]
+                - button "★" [ref=f1e286] [cursor=pointer]
+                - button "★" [ref=f1e287] [cursor=pointer]
+            - paragraph [ref=f1e288]: “Delivered in 48 hours as promised. The brand kit saved our designer weeks.”
+            - generic [ref=f1e289]:
+              - button "Edit" [ref=f1e290] [cursor=pointer]
+              - button "Delete" [ref=f1e294] [cursor=pointer]
+        - generic [ref=f1e298]:
+          - paragraph [ref=f1e299]: Showing 1–8 of 20
+          - generic [ref=f1e300]:
+            - button "Previous page" [disabled] [ref=f1e301]: ←
+            - button "Page 1" [ref=f1e302] [cursor=pointer]: "1"
+            - button "Page 2" [ref=f1e303] [cursor=pointer]: "2"
+            - button "Page 3" [ref=f1e304] [cursor=pointer]: "3"
+            - button "Next page" [ref=f1e305] [cursor=pointer]: →
+        - generic [ref=f1e307]:
+          - heading "Add Testimonial" [level=2] [ref=f1e308]
+          - generic [ref=f1e309]:
+            - generic [ref=f1e310]:
+              - generic [ref=f1e311]: Name
+              - textbox [ref=f1e312]
+            - generic [ref=f1e313]:
+              - generic [ref=f1e314]: Role
+              - textbox [ref=f1e315]
+            - generic [ref=f1e316]:
+              - generic [ref=f1e317]: Company
+              - textbox [ref=f1e318]
+            - generic [ref=f1e319]:
+              - generic [ref=f1e320]: Rating
+              - generic [ref=f1e322]:
+                - button "★" [ref=f1e323] [cursor=pointer]
+                - button "★" [ref=f1e324] [cursor=pointer]
+                - button "★" [ref=f1e325] [cursor=pointer]
+                - button "★" [ref=f1e326] [cursor=pointer]
+                - button "★" [ref=f1e327] [cursor=pointer]
+            - generic [ref=f1e328]:
+              - generic [ref=f1e329]: Photo
+              - paragraph [ref=f1e338]: Drag & drop an image here, or click to browse
+            - generic [ref=f1e339]:
+              - generic [ref=f1e340]: Quote
+              - textbox [ref=f1e341]
+            - generic [ref=f1e342]:
+              - checkbox "Featured on homepage" [ref=f1e343]
+              - text: Featured on homepage
+            - generic [ref=f1e344]:
+              - checkbox "Published" [checked] [ref=f1e345]
+              - text: Published
+          - generic [ref=f1e346]:
+            - button "Cancel" [ref=f1e347] [cursor=pointer]
+            - button "Save" [ref=f1e348] [cursor=pointer]

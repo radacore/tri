@@ -5,6 +5,7 @@ import Layout from "./components/Layout";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import OrdersPage from "./pages/OrdersPage";
+import BoardPage from "./pages/BoardPage";
 import PortfolioPage from "./pages/PortfolioPage";
 import CaseStudiesPage from "./pages/CaseStudiesPage";
 import CaseStudyEditorPage from "./pages/CaseStudyEditorPage";
@@ -40,6 +41,7 @@ export default function App() {
             >
               <Route index element={<DashboardPage />} />
               <Route path="orders" element={<OrdersPage />} />
+              <Route path="orders/board" element={<BoardPage />} />
               <Route path="portfolio" element={<PortfolioPage />} />
               <Route path="case-studies" element={<CaseStudiesPage />} />
               <Route path="case-studies/new" element={<CaseStudyEditorPage />} />

@@ -113,8 +113,8 @@ export default function CategoriesPage() {
       </section>
       {dialog}
       {modal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f3738]/25 p-4 backdrop-blur-[4px]">
-          <div className="anim-pop w-full max-w-sm rounded-[24px] bg-white p-7 shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "transparent", backdropFilter: "none", WebkitBackdropFilter: "none" }}>
+          <div className="anim-pop w-full max-w-sm rounded-[24px] bg-white p-7 shadow-xl ring-1 ring-black/10">
             <h2 className="text-base font-semibold text-ink-primary">{modal.id ? "Edit" : "Add"} Category</h2>
             <div className="mt-4 space-y-4">
               <div>
