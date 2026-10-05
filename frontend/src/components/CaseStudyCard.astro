@@ -12,13 +12,13 @@ interface Props {
 }
 const { slug = '#', title = 'Case study', client = 'Client', excerpt = '' } = Astro.props as Props;
 ---
-<a href={slug === '#' ? '/case-studies' : `/case-studies/${slug}`} class="crossfade group flex flex-col gap-3.5 rounded-[10px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+<a href={slug === '#' ? '/case-studies' : `/case-studies/${slug}`} class="crossfade group flex flex-col gap-2 sm:gap-3.5 rounded-[10px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
   <div class="relative aspect-[322/303] overflow-hidden rounded-[10px] bg-slate-100">
     {Astro.props.mockup && <img src={Astro.props.mockup} alt={`${client} brand mockup`} loading="lazy" decoding="async" width="644" height="606" class="case-media h-full w-full object-cover" />}
     {Astro.props.logo && <img src={Astro.props.logo} alt="" loading="lazy" decoding="async" width="644" height="606" class="case-media-hover absolute inset-0 h-full w-full object-cover" />}
   </div>
-  <div class="flex flex-col gap-1 leading-[25px] tracking-[-0.03em]">
-    <h3 class="truncate text-xl font-medium text-[#151515] transition-colors duration-200 group-hover:text-primary">{client}</h3>
-    <p class="truncate text-base text-[#9c9c9c]">{excerpt || title}</p>
+  <div class="flex flex-col gap-0.5 sm:gap-1 leading-snug sm:leading-[25px] tracking-[-0.03em]">
+    <h3 class="truncate text-base sm:text-xl font-medium text-[#151515] transition-colors duration-200 group-hover:text-primary">{client}</h3>
+    <p class="truncate text-sm sm:text-base text-[#9c9c9c]">{excerpt || title}</p>
   </div>
 </a>
