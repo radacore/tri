@@ -1,12 +1,12 @@
 ---
 ---
 <header id="site-nav" class="fixed top-4 left-1/2 z-50 w-[min(1200px,calc(100%-2rem))] transition-all duration-300">
-  <nav id="site-nav-inner" class="flex items-center justify-between gap-4 rounded-full bg-black text-white ring-1 ring-white/10 px-4 sm:px-6 py-3 transition-all duration-300" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(2, 8, 30, 0.35);">
+  <nav id="site-nav-inner" class="relative z-50 flex items-center justify-between gap-4 rounded-full bg-black text-white ring-1 ring-white/10 px-4 sm:px-6 py-3 transition-all duration-300" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(2, 8, 30, 0.35);">
     <a href="/" class="flex items-center gap-2 font-extrabold text-lg tracking-tight">
       <span data-site-logo class="grid h-8 w-8 place-items-center rounded-full bg-primary text-white text-sm">L</span>
       BrandingPulse
     </a>
-    <div class="hidden md:flex items-center gap-1 text-sm font-semibold text-white/70">
+    <div class="hidden min-[810px]:flex items-center gap-1 text-sm font-semibold text-white/70">
       <a class="nav-link px-3 py-2 hover:text-white" href="/#portfolio">Portfolio</a>
       <a class="nav-link px-3 py-2 hover:text-white" href="/case-studies">Case Studies</a>
       <a class="nav-link px-3 py-2 hover:text-white" href="/#how-it-works">How</a>
@@ -14,21 +14,36 @@
       <a class="nav-link px-3 py-2 hover:text-white" href="/blog">Blog</a>
     </div>
     <div class="flex items-center gap-2">
-      <a href="/#pricing" data-site="nav.cta" class="btn-active hidden rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover md:inline-flex">View Pricing</a>
-      <button id="nav-burger" type="button" aria-label="Menu" aria-expanded="false" class="grid h-10 w-10 place-items-center rounded-full text-white transition hover:bg-white/10 md:hidden">
+      <a href="/#pricing" data-site="nav.cta" class="btn-active hidden rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover min-[810px]:inline-flex">View Pricing</a>
+      <button id="nav-burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-menu" class="grid h-10 w-10 place-items-center rounded-full text-white transition hover:bg-white/10 min-[810px]:hidden">
         <svg id="nav-burger-open" class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5.5h14M3 10h14M3 14.5h14" /></svg>
         <svg id="nav-burger-close" class="hidden h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15" /></svg>
       </button>
     </div>
   </nav>
-  <div id="nav-menu" class="invisible pointer-events-none mt-2 -translate-y-2 rounded-3xl bg-black p-2 text-white opacity-0 ring-1 ring-white/10 transition-all duration-300 motion-reduce:transition-none md:hidden" style="backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 16px 40px rgba(2, 8, 30, 0.35);">
-    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/#portfolio">Portfolio</a>
-    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/case-studies">Case Studies</a>
-    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/#how-it-works">How It Works</a>
-    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/#pricing">Pricing</a>
-    <a class="block rounded-2xl px-4 py-3 text-sm font-semibold text-white/70 hover:bg-white/10 hover:text-white" href="/blog">Blog</a>
-  </div>
 </header>
+<div id="nav-menu" class="invisible pointer-events-none fixed inset-0 z-40 flex h-[100dvh] w-full flex-col bg-black text-white opacity-0 transition-opacity duration-300 motion-reduce:transition-none min-[810px]:hidden" aria-hidden="true">
+  <nav class="flex flex-1 flex-col justify-center gap-1 px-8 pt-24 pb-6" aria-label="Mobile">
+    <a class="nav-full-link group flex items-baseline gap-4 border-b border-white/10 py-4" href="/#portfolio"><span class="text-xs font-bold text-white/30">01</span><span class="text-4xl font-extrabold tracking-tight transition-colors group-hover:text-primary">Portfolio</span></a>
+    <a class="nav-full-link group flex items-baseline gap-4 border-b border-white/10 py-4" href="/case-studies"><span class="text-xs font-bold text-white/30">02</span><span class="text-4xl font-extrabold tracking-tight transition-colors group-hover:text-primary">Case Studies</span></a>
+    <a class="nav-full-link group flex items-baseline gap-4 border-b border-white/10 py-4" href="/#how-it-works"><span class="text-xs font-bold text-white/30">03</span><span class="text-4xl font-extrabold tracking-tight transition-colors group-hover:text-primary">How It Works</span></a>
+    <a class="nav-full-link group flex items-baseline gap-4 border-b border-white/10 py-4" href="/#pricing"><span class="text-xs font-bold text-white/30">04</span><span class="text-4xl font-extrabold tracking-tight transition-colors group-hover:text-primary">Pricing</span></a>
+    <a class="nav-full-link group flex items-baseline gap-4 py-4" href="/blog"><span class="text-xs font-bold text-white/30">05</span><span class="text-4xl font-extrabold tracking-tight transition-colors group-hover:text-primary">Blog</span></a>
+  </nav>
+  <div class="px-8 pb-10">
+    <a href="/#pricing" class="btn-active flex w-full items-center justify-center rounded-full bg-primary px-8 py-4 text-base font-bold text-white hover:bg-primary-hover">View Pricing — from $49</a>
+    <p class="mt-5 text-center text-sm text-white/50">Prefer chat? <a href="https://wa.me/6281241525485" class="font-semibold text-white underline underline-offset-4">WhatsApp us</a></p>
+  </div>
+</div>
+<style>
+  #nav-menu .nav-full-link { opacity: 0; transform: translateY(14px); transition: opacity .35s ease, transform .35s ease; }
+  #nav-menu.menu-open .nav-full-link { opacity: 1; transform: none; }
+  #nav-menu.menu-open .nav-full-link:nth-child(1) { transition-delay: .05s; }
+  #nav-menu.menu-open .nav-full-link:nth-child(2) { transition-delay: .1s; }
+  #nav-menu.menu-open .nav-full-link:nth-child(3) { transition-delay: .15s; }
+  #nav-menu.menu-open .nav-full-link:nth-child(4) { transition-delay: .2s; }
+  #nav-menu.menu-open .nav-full-link:nth-child(5) { transition-delay: .25s; }
+</style>
 <script>
   (function () {
     var header = document.getElementById('site-nav');
@@ -36,20 +51,18 @@
     var nav = document.getElementById('site-nav-inner');
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var lastY = window.scrollY || 0;
-    var HIDE_AFTER = 140; // dead-zone: jangan sembunyikan di area hero
-    var TOLERANCE = 4;    // abaikan micro-scroll biar tidak kedip
+    var HIDE_AFTER = 140;
+    var TOLERANCE = 4;
     var ticking = false;
+    var menuOpen = false;
     function apply() {
       ticking = false;
       var y = window.scrollY || 0;
       if (!nav) return;
-      // efek ramping yang sudah ada
       var shrink = y > 40;
       nav.style.paddingTop = shrink ? '0.5rem' : '';
       nav.style.paddingBottom = shrink ? '0.5rem' : '';
-      // mengecil ke tengah + hilang saat scroll turun (ala obsidian);
-      // muncul lagi saat scroll naik — transform-only, murah di GPU
-      if (!reduceMotion) {
+      if (!reduceMotion && !menuOpen) {
         var scrollingDown = y > lastY + TOLERANCE;
         var scrollingUp = y < lastY - TOLERANCE;
         if (scrollingDown && y > HIDE_AFTER) {
@@ -64,20 +77,25 @@
       if (!ticking) { ticking = true; requestAnimationFrame(apply); }
     }, { passive: true });
     apply();
-    // menu mobile: meluncur ke bawah (opacity + translate saja)
     var burger = document.getElementById('nav-burger');
     var menu = document.getElementById('nav-menu');
     var iconOpen = document.getElementById('nav-burger-open');
     var iconClose = document.getElementById('nav-burger-close');
     function setMenu(open) {
       if (!menu || !burger) return;
+      menuOpen = open;
       burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+      burger.setAttribute('aria-label', open ? 'Close menu' : 'Menu');
+      menu.setAttribute('aria-hidden', open ? 'false' : 'true');
       menu.classList.toggle('invisible', !open);
       menu.classList.toggle('pointer-events-none', !open);
       menu.classList.toggle('opacity-0', !open);
-      menu.classList.toggle('-translate-y-2', !open);
+      menu.classList.toggle('menu-open', open);
       if (iconOpen) iconOpen.classList.toggle('hidden', open);
       if (iconClose) iconClose.classList.toggle('hidden', !open);
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      document.body.style.overflow = open ? 'hidden' : '';
+      if (open) header.classList.remove('nav-gone');
     }
     if (burger) burger.addEventListener('click', function () {
       setMenu(burger.getAttribute('aria-expanded') !== 'true');
@@ -85,8 +103,11 @@
     if (menu) menu.addEventListener('click', function (e) {
       if (e.target && e.target.closest('a')) setMenu(false);
     });
+    window.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menuOpen) setMenu(false);
+    });
     window.addEventListener('resize', function () {
-      if (window.innerWidth >= 768) setMenu(false);
+      if (window.innerWidth >= 810 && menuOpen) setMenu(false);
     });
   })();
 </script>
