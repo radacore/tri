@@ -29,7 +29,7 @@ import { FALLBACK_CASES } from '../lib/api';
         </div>
         <a href="/case-studies" data-site="sections.cases_all" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-200 hover:ring-primary hover:text-primary">All case studies →</a>
       </div>
-      <div class="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
+      <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
         {FALLBACK_CASES.map((c, i) => (
           <CaseStudyCard index={i} slug={c.slug} title={c.title} client={c.client} industry={c.industry} result={c.result} mockup={c.mockup} logo={c.logo} excerpt={c.excerpt} />
         ))}
