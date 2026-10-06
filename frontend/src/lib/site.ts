@@ -54,6 +54,11 @@ export function applySite(s: Settings) {
     if (typeof v === "string" && v !== "")
       el.setAttribute("href", v);
   });
+  // tampil/sembunyi elemen (toggle sosmed footer); default tampil bila key belum ada
+  document.querySelectorAll("[data-site-show]").forEach((el) => {
+    const v = get(s, el.getAttribute("data-site-show") || "");
+    (el as HTMLElement).style.display = v === false ? "none" : "";
+  });
   // placeholder input/textarea
   document.querySelectorAll("[data-site-ph]").forEach((el) => {
     const v = get(s, el.getAttribute("data-site-ph") || "");

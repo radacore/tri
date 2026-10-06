@@ -186,8 +186,21 @@ const FOOTER_FIELDS: [string, string, string][] = [
   ["instagram_url", "Instagram URL", "url"],
   ["dribbble_url", "Dribbble URL", "url"],
   ["linkedin_url", "LinkedIn URL", "url"],
+  ["facebook_url", "Facebook URL", "url"],
+  ["threads_url", "Threads URL", "url"],
+  ["behance_url", "Behance URL", "url"],
   ["rating", "Rating note", "text"],
   ["copyright", "Copyright", "text"],
+];
+
+const SOCIAL_TOGGLES: [string, string][] = [
+  ["show_x", "X"],
+  ["show_instagram", "Instagram"],
+  ["show_dribbble", "Dribbble"],
+  ["show_linkedin", "LinkedIn"],
+  ["show_facebook", "Facebook"],
+  ["show_threads", "Threads"],
+  ["show_behance", "Behance"],
 ];
 
 function PagesTab({
@@ -733,6 +746,30 @@ export default function IdentityPage() {
               />
             </div>
           ))}
+          <div>
+            <p className="label">Show icons (default: all on)</p>
+            <div className="flex flex-wrap gap-2">
+              {SOCIAL_TOGGLES.map(([f, label]) => {
+                const on = (cur.footer?.[f] ?? true) !== false;
+                return (
+                  <button
+                    key={f}
+                    type="button"
+                    role="switch"
+                    aria-checked={on}
+                    onClick={() => set("footer", f, !on)}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                      on
+                        ? "bg-brand text-white"
+                        : "bg-white text-ink-secondary ring-1 ring-[#e2eceb] hover:text-ink-primary"
+                    }`}
+                  >
+                    {on ? "● " : "○ "}{label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <SaveBar k="footer" />
         </div>
       )}
