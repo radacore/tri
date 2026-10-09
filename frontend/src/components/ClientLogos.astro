@@ -37,7 +37,7 @@ const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 gray
   (function () {
     var rows = [document.querySelector('[data-logo-row="0"]'), document.querySelector('[data-logo-row="1"]')];
     if (!rows[0] || !rows[1]) return;
-    var base = (window.__lpApiBase || 'http://localhost:8080/api/v1');
+    var base = (window.__lpApiBase || '/api/v1');
     function esc(s) {
       return String(s ?? '').replace(/[&<>"']/g, function (c) {
         return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];

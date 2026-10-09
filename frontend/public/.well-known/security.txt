@@ -1,0 +1,4 @@
+Contact: mailto:hello@brandingpulse.co
+Expires: 2027-12-31T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://brandingpulse.co/.well-known/security.txt

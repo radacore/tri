@@ -1,6 +1,6 @@
 export const API: string =
   (import.meta as unknown as { env: Record<string, string | undefined> }).env.PUBLIC_API_URL ??
-  'http://localhost:8080/api/v1';
+  '/api/v1';
 
 export interface Portfolio {
   id: string;

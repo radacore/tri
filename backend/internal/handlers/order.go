@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -18,6 +19,11 @@ var tierAmounts = map[string]int{
 	"professional": 14900,
 	"premium":      39900,
 }
+
+var (
+	emailRe = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]{2,}$`)
+	phoneRe = regexp.MustCompile(`^\+?[0-9][0-9\s().-]{5,}$`)
+)
 
 // CreateOrder validates the brief, inserts a pending order and returns it.
 // No payment gateway: customer sends the brief via WhatsApp/email afterwards
@@ -52,12 +58,28 @@ func CreateOrder(pool *pgxpool.Pool, cfg *config.Config) http.HandlerFunc {
 			fail(w, http.StatusBadRequest, "name, business and package_tier are required")
 			return
 		}
+		// Batas panjang & ukuran array: cegah input ekstrem sebelum menyentuh DB.
+		if len(name) > 120 || len(business) > 160 ||
+			len(body.Industry) > 120 || len(body.Target) > 200 || len(body.Notes) > 4000 ||
+			len(body.Vibes) > 20 || len(body.Colors) > 20 {
+			fail(w, http.StatusBadRequest, "input too long")
+			return
+		}
 		if contact == "" {
 			fail(w, http.StatusBadRequest, "contact (email or WhatsApp) is required")
 			return
 		}
-		if strings.Contains(contact, "@") && !strings.Contains(contact, ".") {
-			fail(w, http.StatusBadRequest, "invalid email")
+		if len(contact) > 200 {
+			fail(w, http.StatusBadRequest, "input too long")
+			return
+		}
+		if strings.Contains(contact, "@") {
+			if !emailRe.MatchString(contact) {
+				fail(w, http.StatusBadRequest, "invalid email")
+				return
+			}
+		} else if !phoneRe.MatchString(contact) {
+			fail(w, http.StatusBadRequest, "invalid contact")
 			return
 		}
 		amount, okTier := tierAmounts[tier]
@@ -85,7 +107,7 @@ func CreateOrder(pool *pgxpool.Pool, cfg *config.Config) http.HandlerFunc {
 		brief, _ := json.Marshal(briefMap)
 		ctx := r.Context()
 		if _, err := pool.Exec(ctx, `INSERT INTO orders (id, customer_name, customer_email, package_tier, status, brief, amount, currency) VALUES ($1,$2,$3,$4,'pending',$5,$6,'USD')`, id, name, contact, tier, string(brief), amount); err != nil {
-			fail(w, http.StatusInternalServerError, "failed to create order")
+			failErr(w, r, http.StatusInternalServerError, "failed to create order", err)
 			return
 		}
 		if _, err := pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status) VALUES ($1, NULL, 'pending')`, id); err != nil {

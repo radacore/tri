@@ -6,6 +6,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/crypto/bcrypt"
+
+	"brandingpulse/backend/internal/config"
+	mw "brandingpulse/backend/internal/middleware"
 )
 
 // GetSettings returns all site_settings (admin).
@@ -133,5 +137,44 @@ func UpdateSetting(pool *pgxpool.Pool) http.HandlerFunc {
 			return
 		}
 		ok(w, map[string]any{"key": key, "value": v})
+	}
+}
+
+// ChangePassword mengganti password admin yang sedang login (bcrypt cost 12).
+// Bila admin berasal dari env (ADMIN_PASSWORD_HASH) dan belum ada baris DB,
+// barisnya dibuat agar perubahan benar-benar tersimpan.
+func ChangePassword(pool *pgxpool.Pool, cfg *config.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var body struct {
+			Password string `json:"password"`
+		}
+		if !decodeJSON(w, r, &body) {
+			return
+		}
+		if len(body.Password) < 8 || len(body.Password) > 128 {
+			fail(w, http.StatusBadRequest, "password must be 8-128 characters")
+			return
+		}
+		email := mw.EmailFromContext(r.Context())
+		if email == "" {
+			email = cfg.AdminEmail
+		}
+		hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 12)
+		if err != nil {
+			fail(w, http.StatusInternalServerError, "failed to hash password")
+			return
+		}
+		tag, err := pool.Exec(r.Context(), `UPDATE users SET password=$1 WHERE email=$2`, string(hash), email)
+		if err != nil {
+			failErr(w, r, http.StatusInternalServerError, "update failed", err)
+			return
+		}
+		if tag.RowsAffected() == 0 {
+			if _, err := pool.Exec(r.Context(), `INSERT INTO users (email, password, name, role) VALUES ($1,$2,'Admin','admin')`, email, string(hash)); err != nil {
+				failErr(w, r, http.StatusInternalServerError, "update failed", err)
+				return
+			}
+		}
+		ok(w, map[string]any{"updated": true})
 	}
 }

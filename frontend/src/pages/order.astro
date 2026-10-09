@@ -10,7 +10,7 @@ const FALLBACK_PLANS: Record<string, { name: string; price: number }> = {
 };
 const q = (Astro.url.searchParams.get('plan') ?? 'professional').toLowerCase();
 const initial = FALLBACK_PLANS[q] ?? FALLBACK_PLANS['professional'];
-const apiBase = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+const apiBase = import.meta.env.PUBLIC_API_URL ?? '/api/v1';
 const waNumberFallback = import.meta.env.PUBLIC_WA_NUMBER ?? '6281241525485';
 const orderEmailFallback = import.meta.env.PUBLIC_ORDER_EMAIL ?? 'hello@brandingpulse.co';
 const VIBES = ['minimalis', 'berani', 'elegan', 'playful', 'klasik', 'futuristis', 'mewah', 'organik'];
@@ -131,7 +131,7 @@ const COLORS = [
       var waNumber = typeof waNumberFallback !== 'undefined' ? waNumberFallback : '6281241525485';
       var orderEmail = typeof orderEmailFallback !== 'undefined' ? orderEmailFallback : 'hello@brandingpulse.co';
       var plan = initialKey, price = initialPrice, pname = initialName;
-      var base = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : 'http://localhost:8080/api/v1';
+      var base = (typeof apiBase !== 'undefined' && apiBase) ? apiBase : '/api/v1';
       try {
         fetch(base + '/settings', { cache: 'no-store' }).then(function (r) {
           return r.ok ? r.json() : null;

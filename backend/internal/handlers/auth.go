@@ -13,6 +13,11 @@ import (
 	"brandingpulse/backend/internal/config"
 )
 
+// dummyBcryptHash dipakai saat email tidak ditemukan: tetap jalankan bcrypt
+// agar waktu respons tidak membocorkan apakah sebuah email terdaftar
+// (menutup timing oracle / user enumeration).
+const dummyBcryptHash = "$2a$12$47c9lFDEPGvd1ZWpYYdXBeiB5bAtG39uNruyPea70LgJjNQXoJGTq"
+
 func findUser(ctx context.Context, pool *pgxpool.Pool, email string) (id, hash, name, role string, found bool) {
 	err := pool.QueryRow(ctx, `SELECT id, password, COALESCE(name,''), COALESCE(role,'admin') FROM users WHERE email=$1`, email).Scan(&id, &hash, &name, &role)
 	if err != nil {
@@ -50,6 +55,9 @@ func Login(pool *pgxpool.Pool, cfg *config.Config) http.HandlerFunc {
 			id, name, role, found = "seed-admin", "Admin", "admin", true
 		}
 		if !found {
+			// Bandingkan dengan hash dummy supaya biaya bcrypt tetap dibayar
+			// walau email tidak ada (respons time konstan).
+			_ = bcrypt.CompareHashAndPassword([]byte(dummyBcryptHash), []byte(body.Password))
 			fail(w, http.StatusUnauthorized, "invalid credentials")
 			return
 		}

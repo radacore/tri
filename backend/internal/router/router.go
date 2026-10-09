@@ -58,7 +58,7 @@ func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {
 
 	r.Route("/api/v1", func(r chi.Router) {
 		// Public orders
-		r.Post("/orders", handlers.CreateOrder(pool, cfg))
+		r.With(mw.RateLimitOrders).Post("/orders", handlers.CreateOrder(pool, cfg))
 		r.Get("/orders/{id}/status", handlers.GetOrderStatus(pool))
 
 		// Public content
@@ -118,6 +118,7 @@ func New(pool *pgxpool.Pool, cfg *config.Config) http.Handler {
 			r.Delete("/admin/categories/{id}", handlers.AdminDeleteCategory(pool))
 			// Upload + settings
 			r.Post("/admin/upload", handlers.UploadFile(cfg))
+			r.Post("/admin/change-password", handlers.ChangePassword(pool, cfg))
 			r.Get("/admin/settings", handlers.GetSettings(pool))
 			r.Put("/admin/settings/{key}", handlers.UpdateSetting(pool))
 		})

@@ -16,38 +16,42 @@ type visitor struct {
 	lastSeen time.Time
 }
 
-var (
-	visitors = make(map[string]*visitor)
+// limiterStore menyimpan bucket per-IP. Tiap middleware punya store sendiri
+// supaya bucket login tidak habis terpakai oleh endpoint order (dan sebaliknya).
+type limiterStore struct {
 	mu       sync.Mutex
-)
+	visitors map[string]*visitor
+}
 
-// getLimiter returns a per-IP limiter (5 events/min burst 5).
-func getLimiter(ip string) *rate.Limiter {
-	mu.Lock()
-	defer mu.Unlock()
-	v, ok := visitors[ip]
+func newLimiterStore() *limiterStore {
+	s := &limiterStore{visitors: make(map[string]*visitor)}
+	go func() {
+		for {
+			time.Sleep(time.Minute)
+			s.mu.Lock()
+			for ip, v := range s.visitors {
+				if time.Since(v.lastSeen) > 5*time.Minute {
+					delete(s.visitors, ip)
+				}
+			}
+			s.mu.Unlock()
+		}
+	}()
+	return s
+}
+
+func (s *limiterStore) get(ip string, perMin, burst int) *rate.Limiter {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	v, ok := s.visitors[ip]
 	if !ok {
-		lim := rate.NewLimiter(rate.Every(time.Minute/5), 5)
-		visitors[ip] = &visitor{limiter: lim, lastSeen: time.Now()}
+		lim := rate.NewLimiter(rate.Every(time.Minute/time.Duration(perMin)), burst)
+		v = &visitor{limiter: lim, lastSeen: time.Now()}
+		s.visitors[ip] = v
 		return lim
 	}
 	v.lastSeen = time.Now()
 	return v.limiter
-}
-
-func init() {
-	go func() {
-		for {
-			time.Sleep(time.Minute)
-			mu.Lock()
-			for ip, v := range visitors {
-				if time.Since(v.lastSeen) > 5*time.Minute {
-					delete(visitors, ip)
-				}
-			}
-			mu.Unlock()
-		}
-	}()
 }
 
 func clientIP(r *http.Request) string {
@@ -70,13 +74,25 @@ func clientIP(r *http.Request) string {
 	return ip
 }
 
-// RateLimitLogin limits login attempts to 5/minute per IP.
-func RateLimitLogin(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !getLimiter(clientIP(r)).Allow() {
-			http.Error(w, `{"error":"too many requests"}`, http.StatusTooManyRequests)
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+// rateLimit membangun middleware per-IP dengan kuota sendiri.
+func rateLimit(perMin, burst int) func(http.Handler) http.Handler {
+	store := newLimiterStore()
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !store.get(clientIP(r), perMin, burst).Allow() {
+				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("Retry-After", "60")
+				w.WriteHeader(http.StatusTooManyRequests)
+				_, _ = w.Write([]byte(`{"error":"too many requests"}`))
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
+
+// RateLimitLogin limits login attempts to 5/minute per IP.
+var RateLimitLogin = rateLimit(5, 5)
+
+// RateLimitOrders limits order submissions to 10/minute per IP.
+var RateLimitOrders = rateLimit(10, 10)

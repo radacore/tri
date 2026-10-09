@@ -10,7 +10,7 @@ const STATIC_ROUTES: { path: string; changefreq: string; priority: number }[] = 
   { path: "/terms/", changefreq: "yearly", priority: 0.3 },
 ];
 
-const API = import.meta.env.PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
+const API = import.meta.env.PUBLIC_API_URL ?? "/api/v1";
 const SITE = import.meta.env.PUBLIC_SITE_URL ?? "https://brandingpulse.co";
 const site = SITE.replace(/\/$/, "");
 

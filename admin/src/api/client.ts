@@ -1,6 +1,6 @@
 const RAW = (import.meta as any).env?.VITE_API_URL as string | undefined;
 export const API_BASE: string =
-  RAW && RAW.length > 0 ? RAW : "http://localhost:8080/api/v1";
+  RAW && RAW.length > 0 ? RAW : "/api/v1";
 
 function authHeaders(extra?: HeadersInit): HeadersInit {
   const token =

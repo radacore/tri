@@ -24,7 +24,7 @@ import Footer from '../components/Footer.astro';
       var m = location.pathname.match(/^\/(blog|case-studies)\/([^/]+)\/?$/);
       if (!m) return;
       var kind = m[1], slug = decodeURIComponent(m[2]);
-      var base = (window.__lpApiBase || 'http://localhost:8080/api/v1');
+      var base = (window.__lpApiBase || '/api/v1');
       function esc(s) {
         return String(s ?? '').replace(/[&<>"']/g, function (c) {
           return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];

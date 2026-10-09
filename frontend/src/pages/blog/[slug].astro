@@ -4,10 +4,10 @@ import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import { FALLBACK_POSTS } from '../../lib/api';
 
-const API = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+const API = import.meta.env.PUBLIC_API_URL ?? '/api/v1';
 
 export async function getStaticPaths() {
-  const base = import.meta.env.PUBLIC_API_URL ?? 'http://localhost:8080/api/v1';
+  const base = import.meta.env.PUBLIC_API_URL ?? '/api/v1';
   const slugs = new Set(FALLBACK_POSTS.map((p) => p.slug));
   try {
     const r = await fetch(`${base}/blog?limit=100`);
@@ -131,7 +131,7 @@ const SHARE_BTNS = [
       });
       if (md) { render(md); return; }
       // SSR tanpa API (build offline): ambil langsung dari API saat online.
-      var base = (window.__lpApiBase || 'http://localhost:8080/api/v1');
+      var base = (window.__lpApiBase || '/api/v1');
       function esc(s) {
         return String(s ?? '').replace(/[&<>"']/g, function (c) {
           return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
