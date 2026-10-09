@@ -29,6 +29,8 @@ cp deploy/nginx-prod.conf /etc/nginx/sites-available/brandingpulse.co
 cp deploy/nginx-dev.conf /etc/nginx/sites-available/dev.brandingpulse.co
 ln -s /etc/nginx/sites-available/brandingpulse.co /etc/nginx/sites-enabled/
 ln -s /etc/nginx/sites-available/dev.brandingpulse.co /etc/nginx/sites-enabled/
+# IP klien asli dari Cloudflare (agar rate limit + log akurat):
+cp deploy/nginx-cloudflare-realip.conf /etc/nginx/conf.d/00-cloudflare-realip.conf
 nginx -t && systemctl reload nginx
 ```
 
