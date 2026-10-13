@@ -13,9 +13,14 @@ function authHeaders(extra?: HeadersInit): HeadersInit {
   };
 }
 
-async function handle<T>(res: Response): Promise<T> {
-  if (res.status === 401) {
-    // Sesi kedaluwarsa / token tak valid: bersihkan + tendang ke login.
+async function handle<T>(
+  res: Response,
+  opts?: { skipAuthRedirect?: boolean }
+): Promise<T> {
+  // 401 pada panggilan biasa = token tak valid/kedaluwarsa: bersihkan lalu
+  // arahkan ke login tanpa pesan apa pun. Endpoint login sendiri di-skip
+  // supaya pesan asli dari server ("invalid credentials") tetap sampai ke user.
+  if (res.status === 401 && !opts?.skipAuthRedirect) {
     // Jangan redirect bila sudah di halaman login (hindari loop).
     try {
       localStorage.removeItem("brandingpulse_token");
@@ -26,9 +31,9 @@ async function handle<T>(res: Response): Promise<T> {
       typeof window !== "undefined" &&
       !window.location.pathname.endsWith("/login")
     ) {
-      window.location.assign("/admin/login?expired=1");
+      window.location.assign("/admin/login");
     }
-    throw new Error("Session expired. Please sign in again.");
+    throw new Error("Unauthorized");
   }
   if (!res.ok) {
     let msg = `API ${res.status}`;
@@ -85,13 +90,17 @@ export async function get<T>(path: string): Promise<T> {
   return handle<T>(res);
 }
 
-export async function post<T>(path: string, body?: unknown): Promise<T> {
+export async function post<T>(
+  path: string,
+  body?: unknown,
+  opts?: { skipAuthRedirect?: boolean }
+): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
     headers: authHeaders({ "Content-Type": "application/json" }),
     body: body === undefined ? undefined : JSON.stringify(body),
   });
-  return handle<T>(res);
+  return handle<T>(res, opts);
 }
 
 export async function put<T>(path: string, body?: unknown): Promise<T> {

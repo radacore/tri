@@ -16,7 +16,12 @@ const TOKEN_KEY = "brandingpulse_token";
 function isExpired(token: string | null): boolean {
   if (!token) return true;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+    // base64url -> base64 + padding, supaya atob tidak melempar pada
+    // panjang payload yang tidak kelipatan 4.
+    const part = token.split(".")[1] ?? "";
+    const b64 = part.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), "=");
+    const payload = JSON.parse(atob(padded));
     if (typeof payload.exp !== "number") return true;
     return payload.exp * 1000 <= Date.now();
   } catch {
@@ -41,9 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const login = useCallback(async (email: string, password: string) => {
+    // skipAuthRedirect: 401 di sini berarti kredensial salah, bukan sesi habis.
     const res = await post<{ token?: string; access_token?: string }>(
       "/auth/login",
-      { email, password }
+      { email, password },
+      { skipAuthRedirect: true }
     );
     const t = res.token ?? res.access_token ?? "";
     if (!t) throw new Error("Login failed: empty token");
