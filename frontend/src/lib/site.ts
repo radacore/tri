@@ -126,15 +126,36 @@ export function applySite(s: Settings) {
       )
       .join("");
   });
+  // Logo adaptif: rasio gambar menentukan apakah nama brand perlu ditulis.
+  // < 1.5 (ikon 1:1) -> teks tampil; >= 1.5 (lockup horizontal, nama sudah
+  // ada di dalam gambar) -> teks disembunyikan dan logo diberi lebar.
+  const LOCKUP_MIN_RATIO = 1.5;
   const logo = get(s, "media.logo_url");
   if (typeof logo === "string" && logo !== "") {
-    document.querySelectorAll("[data-site-logo]").forEach((el) => {
-      if (el.querySelector("img")) return;
-      const img = document.createElement("img");
+    document.querySelectorAll<HTMLElement>("[data-site-logo]").forEach((slot) => {
+      if (slot.querySelector("img")) return;
+      const img = new Image();
+      img.decoding = "async";
+      img.onload = () => {
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        // SVG tanpa width/height intrinsik melaporkan 0: anggap ikon, teks tetap.
+        const lockup = w > 0 && h > 0 && w / h >= LOCKUP_MIN_RATIO;
+        const brand = slot.parentElement?.querySelector<HTMLElement>("[data-site-brand]");
+        if (lockup) {
+          slot.className = "flex items-center";
+          img.className = "h-8 w-auto max-w-[160px] object-contain";
+          img.alt = "BrandingPulse";
+        } else {
+          slot.className = "grid h-8 w-8 place-items-center rounded-full bg-primary text-white";
+          img.className = "h-8 w-8 rounded-full object-contain";
+          img.alt = ""; // nama brand sudah dibacakan oleh teks di sebelahnya
+        }
+        if (brand) brand.style.display = lockup ? "none" : "";
+        slot.replaceChildren(img);
+      };
+      // Gagal muat = biarkan logo default + teks tetap tampil.
       img.src = logo;
-      img.alt = "BrandingPulse";
-      img.className = "h-8 w-8 rounded-full object-contain";
-      el.replaceChildren(img);
     });
   }
 }

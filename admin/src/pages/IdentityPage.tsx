@@ -693,6 +693,10 @@ export default function IdentityPage() {
           </p>
           <div>
             <label className="label">Logo (navbar + footer)</label>
+            <p className="mt-1 text-xs text-ink-secondary">
+              Square logo (1:1) keeps the brand name beside it. A wide logo that
+              already contains the name hides that text automatically.
+            </p>
             <ImageUploader
               value={cur.media?.logo_url ?? ""}
               onChange={(url) => set("media", "logo_url", url)}
