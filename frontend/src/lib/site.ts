@@ -147,8 +147,10 @@ export function applySite(s: Settings) {
           img.className = "h-8 w-auto max-w-[160px] object-contain";
           img.alt = "BrandingPulse";
         } else {
-          slot.className = "grid h-8 w-8 place-items-center rounded-full bg-primary text-white";
-          img.className = "h-8 w-8 rounded-full object-contain";
+          // Tanpa chip biru: logo unggahan biasanya berwarna primary, sehingga
+          // lingkaran bg-primary membuat mark menyatu dan tak terlihat.
+          slot.className = "grid h-8 w-8 place-items-center";
+          img.className = "h-8 w-8 object-contain";
           img.alt = ""; // nama brand sudah dibacakan oleh teks di sebelahnya
         }
         if (brand) brand.style.display = lockup ? "none" : "";
