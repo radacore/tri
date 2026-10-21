@@ -1,17 +1,31 @@
 ---
-import { FALLBACK_TESTIMONIALS } from '../lib/api';
+import { API, FALLBACK_TESTIMONIALS } from '../lib/api';
+import { loadTestimonials, type Quote } from '../lib/testimonials';
+
 // tali + kemiringan bervariasi per kartu (ala gantungan baju)
 const strings = [64, 70, 60, 68, 62, 66];
 const tilts = ['-5.7deg', '-0.5deg', '3.8deg', '-3.2deg', '2.4deg', '-1.1deg'];
-const loop = [...FALLBACK_TESTIMONIALS, ...FALLBACK_TESTIMONIALS]; // digandakan agar marquee mulus
+
+// Testimoni diambil saat build dari admin. API mati = kartu contoh tetap tampil.
+let items: Quote[] = await loadTestimonials(API);
+if (items.length === 0) {
+  items = FALLBACK_TESTIMONIALS.map((t) => ({
+    name: t.name,
+    role: t.role,
+    quote: t.quote,
+    rating: t.rating,
+  }));
+}
+
+const loop = [...items, ...items]; // digandakan agar marquee mulus
 ---
-<section class="pb-4">
+<section class="pb-4" data-testimonials>
   <div class="hanging-stage reveal relative hidden h-[440px] overflow-x-clip md:block" data-hanging-stage>
-    <div class="hanging-track absolute inset-y-0 left-0 flex items-start">
+    <div id="tst-track" class="hanging-track absolute inset-y-0 left-0 flex items-start">
       {loop.map((t, i) => (
         <div
           class="hanger w-[304px] shrink-0 px-3"
-          aria-hidden={i >= FALLBACK_TESTIMONIALS.length ? 'true' : undefined}
+          aria-hidden={i >= items.length ? 'true' : undefined}
         >
           <span class="mx-auto block w-px bg-slate-300" style={`height:${strings[i % strings.length]}px`} aria-hidden="true"></span>
           <figure
@@ -35,11 +49,11 @@ const loop = [...FALLBACK_TESTIMONIALS, ...FALLBACK_TESTIMONIALS]; // digandakan
   </div>
   <!-- mobile: marquee vertikal 2 kartu, jalan otomatis -->
   <div class="mx-auto max-w-md overflow-hidden px-5 md:hidden" aria-label="Testimonials" style="height:340px;-webkit-mask-image:linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent);mask-image:linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)">
-    <div class="v-track flex flex-col gap-4">
-      {[...FALLBACK_TESTIMONIALS, ...FALLBACK_TESTIMONIALS].map((t, i) => (
+    <div id="tst-track-mobile" class="v-track flex flex-col gap-4">
+      {loop.map((t, i) => (
         <figure
           class="flex shrink-0 select-none flex-col gap-2 rounded-[20px] border border-slate-200 bg-white px-5 py-4 shadow-sm"
-          aria-hidden={i >= FALLBACK_TESTIMONIALS.length ? 'true' : undefined}
+          aria-hidden={i >= items.length ? 'true' : undefined}
         >
           <figcaption class="flex items-center justify-between gap-3">
             <div class="flex flex-col leading-5">
@@ -56,3 +70,63 @@ const loop = [...FALLBACK_TESTIMONIALS, ...FALLBACK_TESTIMONIALS]; // digandakan
     </div>
   </div>
 </section>
+<script>
+  import { loadTestimonials } from '../lib/testimonials';
+  import { escapeHTML } from '../lib/html';
+
+  // Segarkan dari API: testimoni baru dari admin tampil tanpa rebuild.
+  // Gagal API atau daftar kosong = markup SSR tetap dipakai.
+  const STAGE_STRINGS = [64, 70, 60, 68, 62, 66];
+  const TILTS = ['-5.7deg', '-0.5deg', '3.8deg', '-3.2deg', '2.4deg', '-1.1deg'];
+
+  function stars(rating: number): string {
+    const count = Math.max(0, Math.min(5, Number(rating) || 5));
+    return '★★★★★'.slice(0, count);
+  }
+
+  function desktopCard(t: { name: string; role: string; quote: string; rating: number }, i: number, hidden: boolean): string {
+    return `<div class="hanger w-[304px] shrink-0 px-3"${hidden ? ' aria-hidden="true"' : ''}>
+      <span class="mx-auto block w-px bg-slate-300" style="height:${STAGE_STRINGS[i % STAGE_STRINGS.length]}px" aria-hidden="true"></span>
+      <figure class="hanger-card flex select-none flex-col gap-4 rounded-[20px] border border-slate-200 bg-white px-5 py-6 shadow-sm" style="--tilt:${TILTS[i % TILTS.length]}">
+        <figcaption class="flex items-start justify-between gap-3">
+          <div class="flex flex-col leading-5">
+            <cite class="text-base font-bold tracking-tight text-slate-900 not-italic">${escapeHTML(t.name)}</cite>
+            <span class="text-[13px] text-slate-500">${escapeHTML(t.role)}</span>
+          </div>
+          <div class="flex shrink-0 items-center gap-[3px] pt-1 text-amber-400" role="img" aria-label="${t.rating} out of 5 stars">${stars(t.rating)}</div>
+        </figcaption>
+        <blockquote class="text-[15px] leading-relaxed text-slate-700">“${escapeHTML(t.quote)}”</blockquote>
+      </figure>
+    </div>`;
+  }
+
+  function mobileCard(t: { name: string; role: string; quote: string; rating: number }, hidden: boolean): string {
+    return `<figure class="flex shrink-0 select-none flex-col gap-2 rounded-[20px] border border-slate-200 bg-white px-5 py-4 shadow-sm"${hidden ? ' aria-hidden="true"' : ''}>
+      <figcaption class="flex items-center justify-between gap-3">
+        <div class="flex flex-col leading-5">
+          <cite class="text-sm font-bold tracking-tight text-slate-900 not-italic">${escapeHTML(t.name)}</cite>
+          <span class="text-xs text-slate-500">${escapeHTML(t.role)}</span>
+        </div>
+        <div class="flex shrink-0 items-center gap-[3px] text-sm text-amber-400" role="img" aria-label="${t.rating} out of 5 stars">${stars(t.rating)}</div>
+      </figcaption>
+      <blockquote class="line-clamp-3 text-sm leading-relaxed text-slate-700">“${escapeHTML(t.quote)}”</blockquote>
+    </figure>`;
+  }
+
+  void (async () => {
+    const list = await loadTestimonials(window.__lpApiBase || '/api/v1');
+    if (list.length === 0) return;
+    const desk = document.getElementById('tst-track');
+    if (desk) {
+      desk.innerHTML =
+        list.map((t, i) => desktopCard(t, i, false)).join('') +
+        list.map((t, i) => desktopCard(t, i + list.length, true)).join('');
+    }
+    const mob = document.getElementById('tst-track-mobile');
+    if (mob) {
+      mob.innerHTML =
+        list.map((t) => mobileCard(t, false)).join('') +
+        list.map((t) => mobileCard(t, true)).join('');
+    }
+  })();
+</script>

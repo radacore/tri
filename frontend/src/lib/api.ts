@@ -2,24 +2,17 @@ export const API: string =
   (import.meta as unknown as { env: Record<string, string | undefined> }).env.PUBLIC_API_URL ??
   '/api/v1';
 
-export interface Portfolio {
-  id: string;
-  title: string;
-  category: 'Tech' | 'F&B' | 'Fashion' | 'Health' | string;
-  image: string;
-  logo?: string;
-  featured?: boolean;
-}
-
 export interface CaseStudy {
   slug: string;
   title: string;
-  client: string;
-  industry: string;
-  result: string;
-  mockup: string;
-  logo: string;
-  excerpt: string;
+  client?: string;
+  industry?: string;
+  result?: string;
+  mockup?: string;
+  logo?: string;
+  excerpt?: string;
+  hero_image?: string;
+  content?: string;
 }
 
 export interface BlogPost {
@@ -38,32 +31,7 @@ export interface Testimonial {
   rating: number;
 }
 
-export async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const r = await fetch(`${API}${path}`, init);
-  if (!r.ok) throw new Error(`API ${r.status}`);
-  return r.json() as Promise<T>;
-}
-
-async function safe<T>(path: string, fallback: T): Promise<T> {
-  try {
-    return await api<T>(path);
-  } catch {
-    return fallback;
-  }
-}
-
 const pic = (seed: string, w = 600, h = 450) => `https://picsum.photos/seed/${seed}/${w}/${h}.webp`;
-
-export const FALLBACK_PORTFOLIO: Portfolio[] = [
-  { id: 'p1', title: 'Nexora SaaS', category: 'Tech', image: pic('nexora'), featured: true },
-  { id: 'p2', title: 'Kopi Lantai', category: 'F&B', image: pic('kopi'), featured: true },
-  { id: 'p3', title: 'Maison Rue', category: 'Fashion', image: pic('maison'), featured: true },
-  { id: 'p4', title: 'VitalCare', category: 'Health', image: pic('vital'), featured: true },
-  { id: 'p5', title: 'Cloudgrid', category: 'Tech', image: pic('cloudgrid') },
-  { id: 'p6', title: 'Saffron House', category: 'F&B', image: pic('saffron') },
-  { id: 'p7', title: 'Atelier Nord', category: 'Fashion', image: pic('atelier') },
-  { id: 'p8', title: 'PulseFit', category: 'Health', image: pic('pulsefit') },
-];
 
 export const FALLBACK_CASES: CaseStudy[] = [
   { slug: 'nexora-rebrand', title: 'Nexora doubles signup conversion', client: 'Nexora', industry: 'SaaS', result: '+112% signup conversion', mockup: '/cases/nexora-mockup.svg', logo: '/cases/nexora-logo.svg', excerpt: 'A 48-hour rebrand that turned a generic SaaS mark into a conversion asset.' },
@@ -86,8 +54,3 @@ export const FALLBACK_TESTIMONIALS: Testimonial[] = [
   { name: 'Aisha Rahman', role: 'Founder, Atelier Nord', avatar: 'https://i.pravatar.cc/96?img=45', quote: 'It feels like a $5k agency identity. Investors noticed immediately.', rating: 5 },
   { name: 'Tom Becker', role: 'Founder, PulseFit', avatar: 'https://i.pravatar.cc/96?img=68', quote: 'Delivered in 48 hours as promised. The brand kit saved our designer weeks.', rating: 5 },
 ];
-
-export const getPortfolio = () => safe<Portfolio[]>('/portfolio', FALLBACK_PORTFOLIO);
-export const getCases = () => safe<CaseStudy[]>('/case-studies', FALLBACK_CASES);
-export const getPosts = () => safe<BlogPost[]>('/blog', FALLBACK_POSTS);
-export const getTestimonials = () => safe<Testimonial[]>('/testimonials', FALLBACK_TESTIMONIALS);

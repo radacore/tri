@@ -99,10 +99,11 @@ export function applySite(s: Settings) {
     if (!Array.isArray(arr) || arr.length === 0) return;
     box.innerHTML = arr
       .map(
-        (it: any) =>
-          `<div class="faq-item rounded-2xl bg-white ring-1 ring-slate-900/10 overflow-hidden" style="border-radius:20px">` +
-          `<button type="button" class="faq-toggle flex w-full items-center justify-between gap-4 px-5 py-4 text-left font-bold hover:text-primary transition-colors" aria-expanded="false">` +
-          `<span>${escHtml(String(it.q ?? ""))}</span>` +
+        (it: any, i: number) =>
+          `<div class="faq-item rounded-2xl bg-white ring-1 ring-slate-900/10 overflow-hidden transition-shadow hover:shadow-md" style="border-radius:20px">` +
+          `<button type="button" class="faq-toggle flex w-full items-center gap-4 px-5 py-4 text-left font-bold hover:text-primary transition-colors" aria-expanded="false">` +
+          `<span class="tabular text-xs font-extrabold text-slate-300 select-none" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>` +
+          `<span class="flex-1">${escHtml(String(it.q ?? ""))}</span>` +
           `<svg class="faq-chevron h-5 w-5 shrink-0 text-primary" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M5 7.5 10 12.5 15 7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` +
           `</button><div class="faq-answer"><div><p class="px-5 pb-5 text-[15px] text-slate-600 leading-relaxed">${escHtml(String(it.a ?? ""))}</p></div></div></div>`
       )

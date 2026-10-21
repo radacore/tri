@@ -1,8 +1,40 @@
 ---
-import { FALLBACK_PORTFOLIO } from '../lib/api';
-const filters = ['All', 'Tech', 'F&B', 'Fashion', 'Health'];
-// Ukuran bento diacak di browser setiap refresh (lihat <script> shuffle);
-// pola dasar L=4u, W=2u, T=2u, S=1u agar selalu menutup rapat.
+import { API } from '../lib/api';
+import {
+  categoriesFrom,
+  portfolioCardHTML,
+  type Category,
+  type PortfolioCard,
+} from '../lib/portfolio';
+
+// Data diambil saat build supaya HTML pertama sudah berisi karya asli dari
+// admin (bukan contoh). Script di bawah menyegarkan lagi tanpa rebuild.
+let items: PortfolioCard[] = [];
+try {
+  const r = await fetch(`${API}/portfolio?limit=6`);
+  if (r.ok) {
+    const j = await r.json();
+    const list: PortfolioCard[] = (j?.data ?? j) ?? [];
+    if (Array.isArray(list)) items = list.filter((p) => p?.image_url).slice(0, 6);
+  }
+} catch { /* build offline — section tetap kosong, script mengisi saat runtime */ }
+
+let categories: string[] = [];
+try {
+  const r = await fetch(`${API}/categories`);
+  if (r.ok) {
+    const j = await r.json();
+    const list: Category[] = (j?.data ?? j) ?? [];
+    if (Array.isArray(list)) categories = list.map((c) => String(c.name)).filter(Boolean);
+  }
+} catch { /* build offline */ }
+if (categories.length === 0) categories = categoriesFrom(items);
+
+const filters = ['All', ...categories];
+const cards = items
+  .map((p, i) => portfolioCardHTML(p, i > 3 ? 'max-md:hidden' : ''))
+  .join('');
+
 const PILL_BASE = 'pf-btn btn-active shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition sm:px-4 sm:py-2 sm:text-sm';
 const PILL_ON = 'bg-black text-white border-black';
 const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
@@ -24,16 +56,7 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
       ))}
     </div>
   </div>
-  <div id="pf-grid" class="relative mt-8 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]">
-    {FALLBACK_PORTFOLIO.slice(0, 6).map((p, i) => (
-      <button type="button" data-category={p.category} data-full={p.image} data-title={p.title} class:list={["pf-item group relative overflow-hidden rounded-2xl text-left sm:rounded-3xl", i > 3 && "max-md:hidden"]}>
-        <img src={p.image} alt={p.title} loading="lazy" decoding="async" width="600" height="450" class="aspect-[4/3] h-full w-full object-cover transition-all duration-300 group-hover:scale-105" />
-          <span class="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 to-transparent" aria-hidden="true"></span>
-          <span class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" aria-hidden="true"></span>
-          <span class="absolute left-4 top-4 rounded-full bg-black/50 backdrop-blur-md text-white text-xs px-3 py-1 font-semibold">{p.category}</span>
-          <span class="absolute bottom-4 left-4 right-4 text-white font-medium text-base md:text-lg leading-snug">{p.title}</span>
-        </button>
-      ))}
+  <div id="pf-grid" class="relative mt-8 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]" set:html={cards}>
   </div>
   <div class="mt-8 text-center">
     <a href="/portfolio" class="btn-active inline-block rounded-full bg-dark px-8 py-3.5 text-sm font-bold text-white hover:bg-slate-800">View all work →</a>
@@ -46,106 +69,110 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
     </div>
   </dialog>
 </section>
-<script define:vars={{ pillBase: PILL_BASE, pillOn: PILL_ON, pillOff: PILL_OFF }}>
-  (function () {
-    var btns = Array.from(document.querySelectorAll('.pf-btn'));
-    var items = Array.from(document.querySelectorAll('.pf-item'));
-    var grid = document.getElementById('pf-grid');
-    // Acak susunan bento setiap refresh: kocok multiset ukuran (total 16
-    // unit = 4 baris penuh) lalu tempelkan ke kartu.
-    var CLS = {
-      l: ['md:col-span-2', 'md:row-span-2'],
-      w: ['md:col-span-2'],
-      t: ['md:row-span-2'],
-      s: []
-    };
-    var ASP = {
-      l: 'aspect-square',
-      w: 'aspect-[16/9]',
-      t: 'aspect-[3/4]',
-      s: 'aspect-[4/3]'
-    };
-    var ASPECTS = ['aspect-square', 'aspect-[16/9]', 'aspect-[3/4]', 'aspect-[4/3]'];
-    var SPANS = ['md:col-span-2', 'md:row-span-2'];
-    function shuffle() {
-      // Homepage (6 item): multiset W,W,S,S,S,S = 8 sel = 2 baris penuh.
-      // Selalu pas tanpa lubang di susunan apapun (dense flow).
-      var deck = ['w', 'w', 's', 's', 's', 's'];
-      for (var k = deck.length - 1; k > 0; k--) {
-        var r = Math.floor(Math.random() * (k + 1));
-        var tmp = deck[k]; deck[k] = deck[r]; deck[r] = tmp;
+<script>
+  import { categoriesFrom, fetchCategories, fetchPortfolio, portfolioCardHTML } from '../lib/portfolio';
+
+  // Ukuran bento diacak setiap refresh: multiset W,W,S,S,S,S = 8 sel = 2 baris penuh.
+  const CLS: Record<string, string[]> = {
+    w: ['md:col-span-2'],
+    s: [],
+  };
+  const ASP: Record<string, string> = { w: 'aspect-[16/9]', s: 'aspect-[4/3]' };
+  const ASPECTS = ['aspect-square', 'aspect-[16/9]', 'aspect-[3/4]', 'aspect-[4/3]'];
+  const SPANS = ['md:col-span-2', 'md:row-span-2'];
+
+  const grid = document.getElementById('pf-grid');
+  const dialog = document.getElementById('pf-lightbox') as HTMLDialogElement | null;
+  const dialogImg = document.getElementById('pf-lightbox-img') as HTMLImageElement | null;
+  const dialogCap = document.getElementById('pf-lightbox-cap');
+  const pillBase = 'pf-btn btn-active shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition sm:px-4 sm:py-2 sm:text-sm';
+  const pillOn = 'bg-black text-white border-black';
+  const pillOff = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
+
+  let cards: HTMLElement[] = [];
+  let pills: HTMLButtonElement[] = [];
+
+  function shuffle() {
+    const deck = ['w', 'w', 's', 's', 's', 's'];
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    cards.forEach((card, idx) => {
+      const size = deck[idx % deck.length];
+      const img = card.querySelector('img');
+      SPANS.forEach((c) => card.classList.remove(c));
+      CLS[size].forEach((c) => card.classList.add(c));
+      if (img) {
+        ASPECTS.forEach((c) => img.classList.remove(c));
+        img.classList.add(ASP[size]);
       }
-      items.forEach(function (it, idx) {
-        var s = deck[idx % deck.length];
-        var img = it.querySelector('img');
-        SPANS.forEach(function (c) { it.classList.remove(c); });
-        CLS[s].forEach(function (c) { it.classList.add(c); });
-        if (img) {
-          ASPECTS.forEach(function (c) { img.classList.remove(c); });
-          img.classList.add(ASP[s]);
-        }
-      });
-    }
+    });
+  }
+
+  function paint(active: string) {
+    pills.forEach((b) => {
+      const on = b.dataset.filter === active;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.className = `${pillBase} ${on ? pillOn : pillOff}`;
+    });
+  }
+
+  function selectFilter(name: string) {
+    paint(name);
+    grid?.classList.toggle('pf-uniform', name !== 'All');
+    cards.forEach((card) => {
+      const show = name === 'All' || card.dataset.category === name;
+      card.classList.toggle('pf-hidden', !show);
+    });
+  }
+
+  function bindCards() {
+    cards = Array.from(document.querySelectorAll<HTMLElement>('#pf-grid .pf-item'));
     shuffle();
-    // Filter pills dari admin (/categories); gagal = pakai bawaan HTML.
-    try {
-      var base = (window.__lpApiBase || '/api/v1');
-      fetch(base + '/categories', { cache: 'no-store' }).then(function (r) {
-        return r.ok ? r.json() : null;
-      }).then(function (j) {
-        var list = (j && (j.data || j)) || [];
-        if (!Array.isArray(list) || list.length === 0) return;
-        var wrap = document.getElementById('pf-filters');
-        if (!wrap) return;
-        var names = ['All'].concat(list.map(function (c) { return c.name; }));
-        wrap.innerHTML = '';
-        names.forEach(function (name, i) {
-          var b = document.createElement('button');
-          b.type = 'button';
-          b.setAttribute('data-filter', name);
-          b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
-          b.className = pillBase + ' ' + (i === 0 ? pillOn : pillOff);
-          b.textContent = name;
-          b.addEventListener('click', function () { selectFilter(name); });
-          wrap.appendChild(b);
-        });
-        btns = Array.from(wrap.querySelectorAll('.pf-btn'));
-      }).catch(function () {});
-    } catch (e) {}
-    function selectFilter(f) {
-      paint(f);
-      if (grid) grid.classList.toggle('pf-uniform', f !== 'All');
-      items.forEach(function (it) {
-        var show = f === 'All' || it.getAttribute('data-category') === f;
-        it.classList.toggle('pf-hidden', !show);
-      });
-    }
-    function paint(active) {
-      btns.forEach(function (b) {
-        var on = b.getAttribute('data-filter') === active;
-        b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        b.className = pillBase + ' ' + (on ? pillOn : pillOff);
-      });
-    }
-    btns.forEach(function (b) {
-      b.addEventListener('click', function () {
-        selectFilter(b.getAttribute('data-filter') || 'All');
+    cards.forEach((card) => {
+      card.addEventListener('click', () => {
+        if (!dialog || !dialogImg || !dialogCap) return;
+        dialogImg.src = card.dataset.full || '';
+        dialogImg.alt = card.dataset.title || '';
+        dialogCap.textContent = card.dataset.title || '';
+        dialog.showModal();
       });
     });
-    var dlg = document.getElementById('pf-lightbox');
-    var img = document.getElementById('pf-lightbox-img');
-    var cap = document.getElementById('pf-lightbox-cap');
-    items.forEach(function (it) {
-      it.addEventListener('click', function () {
-        if (img && cap && dlg && typeof dlg.showModal === 'function') {
-          img.setAttribute('src', it.getAttribute('data-full') || '');
-          img.setAttribute('alt', it.getAttribute('data-title') || '');
-          cap.textContent = it.getAttribute('data-title') || '';
-          dlg.showModal();
-        }
-      });
+  }
+
+  function renderFilters(names: string[]) {
+    const wrap = document.getElementById('pf-filters');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    names.forEach((name, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.filter = name;
+      b.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+      b.className = `${pillBase} ${i === 0 ? pillOn : pillOff}`;
+      b.textContent = name;
+      b.addEventListener('click', () => selectFilter(name));
+      wrap.appendChild(b);
     });
-    var close = document.getElementById('pf-lightbox-close');
-    if (close && dlg) close.addEventListener('click', function () { dlg.close(); });
+    pills = Array.from(wrap.querySelectorAll<HTMLButtonElement>('.pf-btn'));
+  }
+
+  pills = Array.from(document.querySelectorAll<HTMLButtonElement>('#pf-filters .pf-btn'));
+  pills.forEach((b) => b.addEventListener('click', () => selectFilter(b.dataset.filter || 'All')));
+  bindCards();
+  document.getElementById('pf-lightbox-close')?.addEventListener('click', () => dialog?.close());
+
+  // Segarkan dari API: item baru dari admin muncul tanpa rebuild landing.
+  void (async () => {
+    const [list, cats] = await Promise.all([fetchPortfolio(6), fetchCategories()]);
+    if (list.length > 0 && grid) {
+      grid.innerHTML = list
+        .map((p, i) => portfolioCardHTML(p, i > 3 ? 'max-md:hidden' : ''))
+        .join('');
+      bindCards();
+    }
+    const names = cats.length > 0 ? cats.map((c) => c.name) : categoriesFrom(list);
+    if (names.length > 0) renderFilters(['All', ...names]);
   })();
 </script>

@@ -11,7 +11,19 @@ import TestimonialCard from '../components/TestimonialCard.astro';
 import FAQ from '../components/FAQ.astro';
 import CTABanner from '../components/CTABanner.astro';
 import Footer from '../components/Footer.astro';
-import { FALLBACK_CASES } from '../lib/api';
+import { API, FALLBACK_CASES, type CaseStudy } from '../lib/api';
+
+// Case study diambil saat build supaya yang diubah admin ikut tampil.
+// API mati = kartu contoh di lib/api.ts tetap dipakai.
+let cases: CaseStudy[] = FALLBACK_CASES;
+try {
+  const r = await fetch(`${API}/case-studies?limit=4`);
+  if (r.ok) {
+    const j = await r.json();
+    const list: CaseStudy[] = (j?.data ?? j) ?? [];
+    if (Array.isArray(list) && list.length > 0) cases = list;
+  }
+} catch { /* build offline — fallback */ }
 ---
 <BaseLayout>
   <Navbar />
@@ -30,8 +42,8 @@ import { FALLBACK_CASES } from '../lib/api';
         <a href="/case-studies" data-site="sections.cases_all" class="btn-active rounded-full bg-white px-5 py-2.5 text-sm font-bold ring-1 ring-slate-200 hover:ring-primary hover:text-primary">All case studies →</a>
       </div>
       <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
-        {FALLBACK_CASES.map((c, i) => (
-          <CaseStudyCard index={i} slug={c.slug} title={c.title} client={c.client} industry={c.industry} result={c.result} mockup={c.mockup} logo={c.logo} excerpt={c.excerpt} />
+        {cases.map((c, i) => (
+          <CaseStudyCard index={i} slug={c.slug} title={c.title} client={c.client ?? c.title} industry={c.industry ?? ''} result={c.result ?? ''} mockup={c.mockup ?? c.hero_image ?? ''} logo={c.logo ?? ''} excerpt={c.excerpt ?? c.content ?? ''} />
         ))}
       </div>
     </section>

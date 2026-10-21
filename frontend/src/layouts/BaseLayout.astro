@@ -21,8 +21,14 @@ try {
     if (d && typeof d.seo === 'object') seo = d.seo;
   }
 } catch { /* offline — fallback */ }
-const title = titleProp ?? seo.default_title ?? 'BrandingPulse — Logo & Brand Identity in 48 Hours';
-const description = descProp ?? seo.default_description ?? 'Custom logo & brand identity. From $49, ready in 48 hours, 100% money-back guarantee.';
+// Nilai kosong dari admin harus jatuh ke fallback: pakai ||, bukan ??,
+// karena site_settings.seo menyimpan string kosong saat field dikosongkan.
+const title =
+  titleProp || seo.default_title || 'BrandingPulse — Logo & Brand Identity in 48 Hours';
+const description =
+  descProp || seo.default_description ||
+  'Custom logo & brand identity. From $49, ready in 48 hours, 100% money-back guarantee.';
+const ogImage = seo.og_image || `${site}/og-cover.jpg`;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -43,12 +49,12 @@ const jsonLd = {
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={site + Astro.url.pathname} />
-  <meta property="og:image" data-site-content="media.og_image" content={seo.og_image || site + '/og-cover.jpg'} />
+  <meta property="og:image" data-site-content="media.og_image" content={ogImage} />
   {seo.twitter_handle && <meta name="twitter:site" content={'@' + seo.twitter_handle.replace(/^@/, '')} />}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
-  <meta name="twitter:image" content={seo.og_image || site + '/og-cover.jpg'} />
+  <meta name="twitter:image" content={ogImage} />
   <meta name="theme-color" content="#0158FE" />
   {seo.keywords && <meta name="keywords" content={seo.keywords} />}
   {seo.google_verification && <meta name="google-site-verification" content={seo.google_verification} />}
