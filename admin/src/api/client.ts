@@ -221,6 +221,12 @@ export interface CaseStudy {
   mockup?: string;
   year?: string;
   website?: string;
+  service?: string;
+  deliverables?: string[];
+  gallery?: { url: string; alt: string }[];
+  testimonial_quote?: string;
+  testimonial_author?: string;
+  testimonial_role?: string;
   created_at?: string;
 }
 

@@ -4,13 +4,12 @@ import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import CTABanner from '../../components/CTABanner.astro';
 import CaseStudyCard from '../../components/CaseStudyCard.astro';
-import { FALLBACK_CASES } from '../../lib/api';
+import { API, FALLBACK_CASES, type CaseStudy } from '../../lib/api';
 
 export async function getStaticPaths() {
   const slugs = new Set(FALLBACK_CASES.map((c) => c.slug));
   try {
-    const base = import.meta.env.PUBLIC_API_URL ?? '/api/v1';
-    const r = await fetch(`${base}/case-studies?limit=100`);
+    const r = await fetch(`${API}/case-studies?limit=100`);
     if (r.ok) {
       const j = await r.json();
       for (const c of j?.data ?? []) if (c?.slug) slugs.add(String(c.slug));
@@ -19,19 +18,30 @@ export async function getStaticPaths() {
   return [...slugs].map((slug) => ({ params: { slug } }));
 }
 
-const API = import.meta.env.PUBLIC_API_URL ?? '/api/v1';
 const { slug } = Astro.params;
 const found = FALLBACK_CASES.find((c) => c.slug === slug) ?? FALLBACK_CASES[0];
-let item: any = found;
+let item: CaseStudy = found;
 try {
   const r = await fetch(`${API}/case-studies/${slug}`);
   if (r.ok) item = (await r.json())?.data ?? found;
 } catch { /* fallback to static */ }
 
+// Daftar lengkap untuk "Next case study" dan "More case studies".
+let all: CaseStudy[] = FALLBACK_CASES;
+try {
+  const r = await fetch(`${API}/case-studies?limit=100`);
+  if (r.ok) {
+    const list: CaseStudy[] = ((await r.json())?.data) ?? [];
+    if (Array.isArray(list) && list.length > 0) all = list;
+  }
+} catch { /* build offline — fallback */ }
+
 const client = item.client ?? item.title;
 const industry = item.industry ?? 'Brand identity';
+const service = item.service || 'Brand identity';
 const result = item.result ?? '';
 const excerpt = item.excerpt ?? item.content ?? '';
+
 // Gambar lokal diutamakan untuk case bawaan (picsum di DB sering diblokir);
 // case custom dari admin tetap pakai gambarnya sendiri.
 const KNOWN_GALLERIES: Record<string, string> = {
@@ -41,22 +51,40 @@ const KNOWN_GALLERIES: Record<string, string> = {
   'vitalcare': 'vital',
 };
 const gslug = KNOWN_GALLERIES[item.slug ?? slug] ?? '';
-const mockup = gslug ? `/cases/${gslug}-mockup.svg` : (item.mockup ?? item.hero_image ?? '');
-const logo = gslug ? `/cases/${gslug}-logo.svg` : (item.logo ?? '');
+// Admin menyimpan kolom kosong sebagai string "", bukan NULL: pakai || agar
+// hero_image tetap dipakai saat mockup belum diisi.
+const mockup = gslug ? `/cases/${gslug}-mockup.svg` : (item.mockup || item.hero_image || '');
+const logo = gslug ? `/cases/${gslug}-logo.svg` : (item.logo || '');
 const year = item.year ?? '2026';
 const website = item.website ?? '';
-const idx = FALLBACK_CASES.findIndex((c) => c.slug === (item.slug ?? slug));
-const next = idx >= 0 ? FALLBACK_CASES[(idx + 1) % FALLBACK_CASES.length] : null;
-const others = idx >= 0
-  ? Array.from({ length: Math.min(4, FALLBACK_CASES.length) }, (_, k) => FALLBACK_CASES[(idx + 1 + k) % FALLBACK_CASES.length])
-  : FALLBACK_CASES.slice(0, 4);
+
+const deliverables: string[] = Array.isArray(item.deliverables) ? item.deliverables.filter(Boolean) : [];
+const quote = item.testimonial_quote ?? '';
+const quoteAuthor = item.testimonial_author ?? '';
+const quoteRole = item.testimonial_role ?? '';
+
+let gallery: { url: string; alt: string }[] = Array.isArray(item.gallery)
+  ? item.gallery.filter((g) => g && g.url)
+  : [];
+if (gallery.length === 0 && gslug) {
+  gallery = [
+    ...(logo ? [{ url: logo, alt: `${client} logo variations` }] : []),
+    { url: `/cases/${gslug}-palette.svg`, alt: `${client} color palette` },
+    { url: `/cases/${gslug}-type.svg`, alt: `${client} typography specimen` },
+    { url: `/cases/${gslug}-pattern.svg`, alt: `${client} brand pattern` },
+  ];
+}
+
+const idx = all.findIndex((c) => c.slug === (item.slug ?? slug));
+const next = all.length > 1 && idx >= 0 ? all[(idx + 1) % all.length] : null;
+const nextPos = idx >= 0 ? ((idx + 1) % all.length) + 1 : 1;
+const others = all.filter((c) => c.slug !== (item.slug ?? slug)).slice(0, 4);
+
 function esc(s: unknown) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
 }
 const rawContent = typeof item.content === 'string' ? item.content : '';
-const aboutHtml = /<[a-z][\s>]/i.test(rawContent)
-  ? rawContent
-  : `<p>${esc(excerpt)}</p><p>The brand had to earn trust at first glance — modern, distinctive, and flexible enough to work everywhere from favicons to signage.</p>`;
+const aboutHtml = /<[a-z][\s>]/i.test(rawContent) ? rawContent : `<p>${esc(excerpt)}</p>`;
 const SHARE_BTNS = [
   { k: 'x', label: 'Share on X', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.3 22h-6.3l-4.9-6.4L6.5 22H3.4l7.3-8.3L1 2h6.5l4.4 5.9L18.9 2zm-1.1 17.8h1.7L7.6 3.9H5.8l12 16z"/></svg>' },
   { k: 'facebook', label: 'Share on Facebook', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.7c0-.9.3-1.6 1.6-1.6h1.7V4.2c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.4V14h2.7v8h3.4z"/></svg>' },
@@ -64,17 +92,12 @@ const SHARE_BTNS = [
   { k: 'whatsapp', label: 'Share on WhatsApp', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 00-8.6 15.1L2 22l5-1.3A10 10 0 1012 2zm0 18.2a8.2 8.2 0 01-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1112 20.2zm4.6-6.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 01-3.3-2.9c-.3-.4 0-.5.1-.7l.5-.6c.1-.2.1-.4 0-.5L9.4 8c-.2-.5-.5-.4-.6-.4h-.5c-.2 0-.5.2-.7.6-.9 1-.3 2.7.6 4.1a11.2 11.2 0 004.3 3.8c1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.1-.4-.2z"/></svg>' },
   { k: 'copy', label: 'Copy link', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>' },
 ];
-const deliverables = ['Logo design', 'Logo variations', 'Typography', 'Color palette', 'Brand mockups', 'Social media kit'];
-const gallery: { src: string; alt: string }[] = logo ? [{ src: logo, alt: `${client} logo variations` }] : [];
-if (gslug) {
-  gallery.push(
-    { src: `/cases/${gslug}-palette.svg`, alt: `${client} color palette` },
-    { src: `/cases/${gslug}-type.svg`, alt: `${client} typography specimen` },
-    { src: `/cases/${gslug}-pattern.svg`, alt: `${client} brand pattern` },
-  );
-}
 ---
-<BaseLayout title={`${client} — BrandingPulse Case Study`}>
+<BaseLayout
+  title={client}
+  description={excerpt}
+  image={mockup || undefined}
+>
   <Navbar />
   <main class="pt-32 pb-20 overflow-x-clip">
     <div class="mx-auto max-w-3xl px-5">
@@ -85,7 +108,7 @@ if (gslug) {
         <span aria-hidden="true">/</span>
         <span class="font-semibold text-slate-900 truncate max-w-[60vw]">{client}</span>
       </nav>
-      <p class="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-primary">{industry} · Brand identity</p>
+      <p class="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-primary">{service} · {industry}</p>
       <h1 class="mt-2 text-4xl sm:text-5xl font-extrabold tracking-tight">{client}</h1>
       <p class="mt-4 text-lg text-slate-600 leading-relaxed">{excerpt}</p>
       <dl class="mt-8 grid grid-cols-2 gap-6 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 sm:grid-cols-4" style="border-radius:20px">
@@ -103,37 +126,68 @@ if (gslug) {
         <img src={mockup} alt={`${client} brand mockup`} loading="eager" decoding="async" class="w-full object-cover" style="border-radius:20px" />
       </div>
     )}
-    <div class="mx-auto max-w-3xl px-5">
-      <h2 class="mt-12 text-2xl sm:text-3xl font-extrabold tracking-tight">About the project</h2>
-      <div class="post-body mt-4 text-slate-600 leading-relaxed" set:html={aboutHtml} />
-      <h2 class="mt-10 text-2xl sm:text-3xl font-extrabold tracking-tight">What we designed</h2>
-      <p class="mt-4 text-slate-600 leading-relaxed">We designed the {client} logo to communicate professionalism and character in a crowded market — a custom mark with thoughtful construction, paired with typography and colors that scale from a 16-pixel favicon to a full storefront.</p>
-      <h2 class="mt-10 text-2xl sm:text-3xl font-extrabold tracking-tight">What we delivered</h2>
-      <ul class="mt-4 grid gap-2.5 sm:grid-cols-2">
-        {deliverables.map((d) => (
-          <li class="flex items-center gap-2.5 rounded-xl bg-white px-4 py-3 text-sm font-semibold ring-1 ring-slate-900/10">
-            <svg class="h-4 w-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M4 10.5 8.5 15 16 6" stroke-linecap="round" stroke-linejoin="round"/></svg>{d}
-          </li>
-        ))}
-      </ul>
-      <div class="mt-10 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 sm:p-8" style="border-radius:20px">
-        <p class="text-xl font-extrabold">Want a brand like {client}?</p>
-        <p class="mt-1 text-sm text-slate-500">First concepts in 48 hours, from $49, or your money back.</p>
-        <a href="/#pricing" class="btn-active mt-4 inline-block rounded-full bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary-hover">View Pricing</a>
+
+    <div class="mx-auto mt-12 grid max-w-5xl gap-10 px-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">About the project</h2>
+        <div class="post-body mt-4 text-slate-600 leading-relaxed" set:html={aboutHtml} />
       </div>
+      <aside class="space-y-6">
+        {deliverables.length > 0 && (
+          <div>
+            <h2 class="text-sm font-bold">What we delivered</h2>
+            <ul class="mt-3 flex flex-wrap gap-2">
+              {deliverables.map((d) => (
+                <li class="rounded-full bg-slate-100 px-3 py-1.5 text-sm font-semibold text-slate-700">{d}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div class="rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200" style="border-radius:20px">
+          <p class="text-lg font-extrabold">Want a brand like {client}?</p>
+          <p class="mt-1 text-sm text-slate-500">First concepts in 48 hours, from $49, or your money back.</p>
+          <a href="/#pricing" class="btn-active mt-4 inline-block rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-hover">View Pricing</a>
+        </div>
+      </aside>
     </div>
+
     {gallery.length > 0 && (
-      <div class="mx-auto mt-10 max-w-5xl space-y-6 px-5">
-        {gallery.map((g) => (
-          <img src={g.src} alt={g.alt} loading="lazy" decoding="async" class="w-full object-cover" style="border-radius:20px" />
-        ))}
+      <div class="mx-auto mt-12 max-w-5xl px-5">
+        <div class="columns-1 gap-4 sm:columns-2 sm:gap-6">
+          {gallery.map((g) => (
+            <figure class="mb-4 break-inside-avoid sm:mb-6">
+              <button
+                type="button"
+                data-zoom={g.url}
+                data-alt={g.alt}
+                aria-label={`View larger: ${g.alt}`}
+                class="block w-full overflow-hidden rounded-2xl bg-slate-100"
+                style="border-radius:20px"
+              >
+                <img src={g.url} alt={g.alt} loading="lazy" decoding="async" class="h-auto w-full object-cover" />
+              </button>
+            </figure>
+          ))}
+        </div>
       </div>
     )}
+
+    {quote && (
+      <div class="mx-auto mt-14 max-w-3xl px-5">
+        <figure class="rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200 sm:p-8" style="border-radius:20px">
+          <blockquote class="text-xl font-extrabold leading-snug sm:text-2xl">“{quote}”</blockquote>
+          <figcaption class="mt-4 text-sm text-slate-500">
+            <cite class="font-bold not-italic text-slate-900">{quoteAuthor}</cite>{quoteRole ? ` · ${quoteRole}` : ''}
+          </figcaption>
+        </figure>
+      </div>
+    )}
+
     {next && (
       <div class="mx-auto mt-14 max-w-3xl px-5">
         <a href={`/case-studies/${next.slug}`} class="group flex min-w-0 items-center justify-between gap-4 rounded-2xl bg-dark px-5 py-5 text-white transition hover:bg-slate-800 sm:px-6" style="border-radius:20px">
-          <span class="min-w-0 truncate text-xs font-semibold text-white/60 sm:text-sm">Next case study · {idx + 1} / {FALLBACK_CASES.length}</span>
-          <span class="shrink-0 truncate text-base font-extrabold transition group-hover:translate-x-1 sm:text-lg">{next.client} →</span>
+          <span class="min-w-0 truncate text-xs font-semibold text-white/60 sm:text-sm">Next case study · {nextPos} / {all.length}</span>
+          <span class="shrink-0 truncate text-base font-extrabold transition group-hover:translate-x-1 sm:text-lg">{next.client ?? next.title} →</span>
         </a>
       </div>
     )}
@@ -156,6 +210,14 @@ if (gslug) {
       </div>
     </div>
   </main>
+
+  <dialog id="cs-zoom" class="rounded-2xl p-0 backdrop:bg-slate-950/70 max-w-4xl w-[calc(100%-2rem)]">
+    <div class="relative">
+      <img id="cs-zoom-img" src="" alt="" class="w-full rounded-t-2xl object-contain" />
+      <button id="cs-zoom-close" type="button" aria-label="Close" class="btn-active absolute right-3 top-3 rounded-full bg-dark/80 px-4 py-2 text-sm font-bold text-white">✕</button>
+    </div>
+  </dialog>
+
   <script type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@graph': [
@@ -164,7 +226,13 @@ if (gslug) {
         headline: `${client} — brand identity case study`,
         description: excerpt,
         image: mockup ? [mockup] : undefined,
+        dateCreated: year,
+        genre: service,
+        about: { '@type': 'Organization', name: client },
         author: { '@type': 'Organization', name: 'BrandingPulse' },
+        ...(quote
+          ? { review: { '@type': 'Review', reviewBody: quote, author: { '@type': 'Person', name: quoteAuthor } } }
+          : {}),
       },
       {
         '@type': 'BreadcrumbList',
@@ -179,24 +247,41 @@ if (gslug) {
   <CTABanner />
   <Footer />
   <script>
+    // Lightbox galeri: delegasi klik pada tombol [data-zoom].
+    (function () {
+      var dlg = document.getElementById('cs-zoom') as HTMLDialogElement | null;
+      var img = document.getElementById('cs-zoom-img') as HTMLImageElement | null;
+      if (!dlg || !img) return;
+      document.addEventListener('click', function (ev) {
+        var target = ev.target as Element | null;
+        var btn = target && target.closest ? target.closest('[data-zoom]') : null;
+        if (!btn) return;
+        img.src = btn.getAttribute('data-zoom') || '';
+        img.alt = btn.getAttribute('data-alt') || '';
+        dlg.showModal();
+      });
+      document.getElementById('cs-zoom-close')?.addEventListener('click', function () { dlg.close(); });
+      dlg.addEventListener('click', function (ev) { if (ev.target === dlg) dlg.close(); });
+    })();
+
     // Tombol share (delegasi).
     document.addEventListener('click', function (e) {
-      var b = e.target && e.target.closest ? e.target.closest('[data-share]') : null;
+      var b = e.target && (e.target as Element).closest ? (e.target as Element).closest('[data-share]') : null;
       if (!b) return;
       var type = b.getAttribute('data-share');
       var url = location.href, text = document.title;
       var enc = encodeURIComponent;
       if (type === 'copy') {
         var done = function () {
-          var old = b.innerHTML;
-          b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>';
-          setTimeout(function () { b.innerHTML = old; }, 1500);
+          var old = b!.innerHTML;
+          b!.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>';
+          setTimeout(function () { b!.innerHTML = old; }, 1500);
         };
         if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(done);
         else done();
         return;
       }
-      var links = {
+      var links: Record<string, string> = {
         x: 'https://twitter.com/intent/tweet?text=' + enc(text) + '&url=' + enc(url),
         facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + enc(url),
         linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + enc(url),

@@ -145,7 +145,7 @@ func AdminUpdateTestimonial(pool *pgxpool.Pool) http.HandlerFunc {
 			"photo_url": "photo_url", "quote": "quote", "rating": "rating",
 			"featured": "featured", "published": "published",
 		}
-		if err := genericUpdate(w, r, pool, "testimonials", id, b, allowed); err != nil {
+		if err := genericUpdate(w, r, pool, "testimonials", id, b, allowed, nil); err != nil {
 			return
 		}
 		ok(w, map[string]any{"id": id})

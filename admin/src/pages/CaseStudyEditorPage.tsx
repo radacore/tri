@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { get, post, put, type CaseStudy } from "../api/client";
+import GalleryEditor from "../components/GalleryEditor";
 import ImageUploader from "../components/ImageUploader";
 import RichEditor from "../components/RichEditor";
 import { toast } from "../components/Layout";
@@ -16,9 +17,39 @@ function slugify(s: string) {
 const EMPTY = {
   title: "", slug: "", industry: "", hero_image: "", content: "", published: false,
   client: "", result: "", excerpt: "", logo: "", mockup: "", year: "", website: "",
+  service: "",
+  deliverables: [] as string[],
+  gallery: [] as { url: string; alt: string }[],
+  testimonial_quote: "", testimonial_author: "", testimonial_role: "",
 };
 
 type Form = typeof EMPTY;
+
+/** Normalisasi respons API ke bentuk form; array tidak boleh di-cast ke string. */
+function fromServer(c: CaseStudy | null | undefined): Form {
+  return {
+    ...EMPTY,
+    title: c?.title ?? "",
+    slug: c?.slug ?? "",
+    industry: c?.industry ?? "",
+    hero_image: c?.hero_image ?? "",
+    content: c?.content ?? "",
+    published: c?.published ?? false,
+    client: c?.client ?? "",
+    result: c?.result ?? "",
+    excerpt: c?.excerpt ?? "",
+    logo: c?.logo ?? "",
+    mockup: c?.mockup ?? "",
+    year: c?.year ?? "",
+    website: c?.website ?? "",
+    service: c?.service ?? "",
+    deliverables: Array.isArray(c?.deliverables) ? c.deliverables : [],
+    gallery: Array.isArray(c?.gallery) ? c.gallery : [],
+    testimonial_quote: c?.testimonial_quote ?? "",
+    testimonial_author: c?.testimonial_author ?? "",
+    testimonial_role: c?.testimonial_role ?? "",
+  };
+}
 
 export default function CaseStudyEditorPage() {
   const { id } = useParams();
@@ -41,8 +72,7 @@ export default function CaseStudyEditorPage() {
 
   useEffect(() => {
     if (!isNew && existing) {
-      const e = existing as Partial<Record<keyof Form, string | boolean>>;
-      setForm({ ...EMPTY, ...Object.fromEntries(Object.keys(EMPTY).map((k) => [k, (e[k as keyof Form] as string) ?? (k === "published" ? false : "")])) } as Form);
+      setForm(fromServer(existing));
       setReady(true);
     }
   }, [isNew, existing]);
@@ -50,9 +80,7 @@ export default function CaseStudyEditorPage() {
   const dirty = useMemo(() => {
     if (isNew) return JSON.stringify(form) !== JSON.stringify(EMPTY);
     if (!existing) return false;
-    const e = existing as Partial<Record<keyof Form, string | boolean>>;
-    const base = { ...EMPTY, ...Object.fromEntries(Object.keys(EMPTY).map((k) => [k, (e[k as keyof Form] as string) ?? (k === "published" ? false : "")])) };
-    return JSON.stringify(form) !== JSON.stringify(base);
+    return JSON.stringify(form) !== JSON.stringify(fromServer(existing));
   }, [form, existing, isNew]);
 
   useEffect(() => {
@@ -74,8 +102,11 @@ export default function CaseStudyEditorPage() {
     onError: (e: any) => toast(`Save failed: ${e?.message ?? "error"}`),
   });
 
-  const set = (k: keyof Form, v: string | boolean) =>
+  const set = <K extends keyof Form,>(k: K, v: Form[K]) =>
     setForm((f) => ({ ...f, [k]: v, ...(k === "title" && typeof v === "string" && isNew ? { slug: slugify(v) } : {}) }));
+
+  const setDeliverable = (i: number, v: string) =>
+    set("deliverables", form.deliverables.map((d, j) => (j === i ? v : d)));
 
   const html = form.content || "";
 
@@ -121,6 +152,10 @@ export default function CaseStudyEditorPage() {
               <input className="input" value={form.industry} onChange={(e) => set("industry", e.target.value)} />
             </div>
             <div>
+              <label className="label">Service</label>
+              <input className="input" value={form.service} onChange={(e) => set("service", e.target.value)} placeholder="Brand identity" />
+            </div>
+            <div>
               <label className="label">Client</label>
               <input className="input" value={form.client} onChange={(e) => set("client", e.target.value)} />
             </div>
@@ -159,6 +194,76 @@ export default function CaseStudyEditorPage() {
             <label className="label">Content</label>
             <RichEditor value={form.content} onChange={(v) => set("content", v)} />
           </div>
+
+          <div>
+            <label className="label">What we delivered</label>
+            {form.deliverables.length === 0 ? (
+              <p className="rounded-[14px] bg-surface-muted p-4 text-center text-sm text-ink-secondary">
+                No deliverables yet.
+              </p>
+            ) : (
+              <ul className="space-y-2">
+                {form.deliverables.map((d, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <input
+                      className="input flex-1 text-sm"
+                      value={d}
+                      placeholder="Logo design"
+                      onChange={(e) => setDeliverable(i, e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      aria-label="Remove deliverable"
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#fee2e2] text-[#991b1b] transition hover:bg-[#fee2e2]"
+                      onClick={() => set("deliverables", form.deliverables.filter((_, j) => j !== i))}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button
+              type="button"
+              className="btn-secondary mt-2 inline-flex items-center gap-2"
+              onClick={() => set("deliverables", [...form.deliverables, ""])}
+            >
+              <Plus className="h-4 w-4" /> Add deliverable
+            </button>
+          </div>
+
+          <div>
+            <label className="label">Gallery</label>
+            <GalleryEditor value={form.gallery} onChange={(v) => set("gallery", v)} baseUrl={LANDING} />
+          </div>
+
+          <div>
+            <p className="label">Testimonial</p>
+            <div className="space-y-3">
+              <textarea
+                className="input"
+                rows={3}
+                value={form.testimonial_quote}
+                onChange={(e) => set("testimonial_quote", e.target.value)}
+                placeholder="What the client said about the project"
+              />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <input
+                  className="input"
+                  value={form.testimonial_author}
+                  onChange={(e) => set("testimonial_author", e.target.value)}
+                  placeholder="Author name"
+                />
+                <input
+                  className="input"
+                  value={form.testimonial_role}
+                  onChange={(e) => set("testimonial_role", e.target.value)}
+                  placeholder="Founder of Graab"
+                />
+              </div>
+            </div>
+          </div>
+
           <label className="flex items-center gap-2 text-sm text-ink-primary">
             <input type="checkbox" className="h-[18px] w-[18px] accent-[#0f3738]" checked={form.published} onChange={(e) => set("published", e.target.checked)} /> Published
           </label>
@@ -173,10 +278,17 @@ export default function CaseStudyEditorPage() {
             )}
             <div className="p-5">
               <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                {(form.industry || "Brand identity") + (form.result ? ` · ${form.result}` : "")}
+                {(form.service || "Brand identity") + (form.industry ? ` · ${form.industry}` : "")}
               </p>
               <h2 className="mt-1 font-extrabold">{form.title || "Untitled case study"}</h2>
               <p className="mt-1 text-sm text-slate-500">{form.excerpt || form.content.slice(0, 140) || "…"}</p>
+              {form.deliverables.filter(Boolean).length > 0 && (
+                <ul className="mt-3 flex flex-wrap gap-1.5">
+                  {form.deliverables.filter(Boolean).map((d, i) => (
+                    <li key={i} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">{d}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
 {(mockup || form.logo) && (
@@ -184,6 +296,22 @@ export default function CaseStudyEditorPage() {
               {mockup && <img src={mockup} alt="mockup preview" className="w-full rounded-[16px] object-cover" />}
               {form.logo && <img src={form.logo} alt="logo preview" className="mx-auto max-h-28 rounded-[12px] object-contain bg-white p-2 ring-1 ring-slate-900/10" />}
             </div>
+          )}
+          {form.gallery.length > 0 && (
+            <div className="mt-4 grid grid-cols-4 gap-2">
+              {form.gallery.slice(0, 4).map((g, i) => (
+                <img key={`${i}-${g.url}`} src={g.url.startsWith("/") ? LANDING + g.url : g.url} alt={g.alt} className="aspect-square w-full rounded-[10px] object-cover ring-1 ring-slate-900/10" />
+              ))}
+            </div>
+          )}
+          {form.testimonial_quote.trim() !== "" && (
+            <figure className="mt-4 rounded-[20px] bg-slate-50 p-5 ring-1 ring-slate-200">
+              <blockquote className="text-sm font-extrabold leading-snug">“{form.testimonial_quote}”</blockquote>
+              <figcaption className="mt-2 text-xs text-slate-500">
+                <cite className="font-bold not-italic text-slate-900">{form.testimonial_author || "—"}</cite>
+                {form.testimonial_role ? ` · ${form.testimonial_role}` : ""}
+              </figcaption>
+            </figure>
           )}
           <dl className="mt-4 grid grid-cols-2 gap-3 rounded-[20px] bg-slate-50 p-5 ring-1 ring-slate-200">
             {[["Client", form.client], ["Industry", form.industry], ["Year", form.year], ["Result", form.result]].map(([k, v]) => (

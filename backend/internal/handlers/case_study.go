@@ -1,15 +1,57 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"brandingpulse/backend/internal/sanitize"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"brandingpulse/backend/internal/sanitize"
 )
 
 func itoa(n int) string { return strconv.Itoa(n) }
+
+// caseStudyCols dipakai ketiga query baca agar urutan scan selalu sama.
+const caseStudyCols = `id, title, slug, industry, hero_image, content, published,
+	client, result, excerpt, logo, mockup, year, website, service, deliverables,
+	gallery, testimonial_quote, testimonial_author, testimonial_role,
+	created_at, updated_at`
+
+// scanCaseStudy memindai satu baris case_studies menjadi map respons API.
+func scanCaseStudy(row interface{ Scan(...any) error }) (map[string]any, error) {
+	var id, title, slug string
+	var ind, hero, content *string
+	var client, result, excerpt, logo, mockup, year, website *string
+	var pub bool
+	var service, tquote, tauthor, trole *string
+	var delivs []string
+	var galleryRaw []byte
+	var ca, ua tsString
+	if err := row.Scan(&id, &title, &slug, &ind, &hero, &content, &pub,
+		&client, &result, &excerpt, &logo, &mockup, &year, &website,
+		&service, &delivs, &galleryRaw, &tquote, &tauthor, &trole,
+		&ca, &ua); err != nil {
+		return nil, err
+	}
+	gallery := []map[string]any{}
+	if len(galleryRaw) > 0 {
+		_ = json.Unmarshal(galleryRaw, &gallery)
+	}
+	if delivs == nil {
+		delivs = []string{}
+	}
+	return map[string]any{
+		"id": id, "title": title, "slug": slug, "industry": strp(ind),
+		"hero_image": strp(hero), "content": sanitize.Clean(strp(content)), "published": pub,
+		"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
+		"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
+		"service": strp(service), "deliverables": delivs, "gallery": gallery,
+		"testimonial_quote": strp(tquote), "testimonial_author": strp(tauthor),
+		"testimonial_role": strp(trole),
+		"created_at":       ca.String(), "updated_at": ua.String(),
+	}, nil
+}
 
 // ListCaseStudies returns published case studies with pagination.
 func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
@@ -20,7 +62,7 @@ func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		rows, err := pool.Query(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website, created_at, updated_at FROM case_studies WHERE published=TRUE ORDER BY created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
+		rows, err := pool.Query(r.Context(), `SELECT `+caseStudyCols+` FROM case_studies WHERE published=TRUE ORDER BY created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
 		if err != nil {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
@@ -28,22 +70,12 @@ func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 		defer rows.Close()
 		items := []map[string]any{}
 		for rows.Next() {
-			var id, title, slug string
-			var ind, hero, content *string
-			var client, result, excerpt, logo, mockup, year, website *string
-			var pub bool
-			var ca, ua tsString
-			if err := rows.Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &client, &result, &excerpt, &logo, &mockup, &year, &website, &ca, &ua); err != nil {
+			m, err := scanCaseStudy(rows)
+			if err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
 			}
-			items = append(items, map[string]any{
-				"id": id, "title": title, "slug": slug, "industry": strp(ind),
-				"hero_image": strp(hero), "content": sanitize.Clean(strp(content)), "published": pub,
-				"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
-				"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
-				"created_at": ca.String(), "updated_at": ua.String(),
-			})
+			items = append(items, m)
 		}
 		if items == nil {
 			items = []map[string]any{}
@@ -56,23 +88,12 @@ func ListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 func GetCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
-		var id, title string
-		var ind, hero, content *string
-		var client, result, excerpt, logo, mockup, year, website *string
-		var pub bool
-		var ca, ua tsString
-		err := pool.QueryRow(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website, created_at, updated_at FROM case_studies WHERE slug=$1 AND published=TRUE`, slug).Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &client, &result, &excerpt, &logo, &mockup, &year, &website, &ca, &ua)
+		m, err := scanCaseStudy(pool.QueryRow(r.Context(), `SELECT `+caseStudyCols+` FROM case_studies WHERE slug=$1 AND published=TRUE`, slug))
 		if err != nil {
 			fail(w, http.StatusNotFound, "case study not found")
 			return
 		}
-		ok(w, map[string]any{
-			"id": id, "title": title, "slug": slug, "industry": strp(ind),
-			"hero_image": strp(hero), "content": sanitize.Clean(strp(content)), "published": pub,
-			"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
-			"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
-			"created_at": ca.String(), "updated_at": ua.String(),
-		})
+		ok(w, m)
 	}
 }
 
@@ -85,7 +106,7 @@ func AdminListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		rows, err := pool.Query(r.Context(), `SELECT id, title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website, created_at, updated_at FROM case_studies ORDER BY created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
+		rows, err := pool.Query(r.Context(), `SELECT `+caseStudyCols+` FROM case_studies ORDER BY created_at DESC LIMIT $1 OFFSET $2`, limit, offset)
 		if err != nil {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
@@ -93,22 +114,12 @@ func AdminListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 		defer rows.Close()
 		items := []map[string]any{}
 		for rows.Next() {
-			var id, title, slug string
-			var ind, hero, content *string
-			var client, result, excerpt, logo, mockup, year, website *string
-			var pub bool
-			var ca, ua tsString
-			if err := rows.Scan(&id, &title, &slug, &ind, &hero, &content, &pub, &client, &result, &excerpt, &logo, &mockup, &year, &website, &ca, &ua); err != nil {
+			m, err := scanCaseStudy(rows)
+			if err != nil {
 				fail(w, http.StatusInternalServerError, "scan failed")
 				return
 			}
-			items = append(items, map[string]any{
-				"id": id, "title": title, "slug": slug, "industry": strp(ind),
-				"hero_image": strp(hero), "content": sanitize.Clean(strp(content)), "published": pub,
-				"client": strp(client), "result": strp(result), "excerpt": strp(excerpt),
-				"logo": strp(logo), "mockup": strp(mockup), "year": strp(year), "website": strp(website),
-				"created_at": ca.String(), "updated_at": ua.String(),
-			})
+			items = append(items, m)
 		}
 		if items == nil {
 			items = []map[string]any{}
@@ -121,19 +132,25 @@ func AdminListCaseStudies(pool *pgxpool.Pool) http.HandlerFunc {
 func AdminCreateCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var b struct {
-			Title     string  `json:"title"`
-			Slug      string  `json:"slug"`
-			Industry  *string `json:"industry"`
-			HeroImage *string `json:"hero_image"`
-			Content   *string `json:"content"`
-			Published *bool   `json:"published"`
-			Client    *string `json:"client"`
-			Result    *string `json:"result"`
-			Excerpt   *string `json:"excerpt"`
-			Logo      *string `json:"logo"`
-			Mockup    *string `json:"mockup"`
-			Year      *string `json:"year"`
-			Website   *string `json:"website"`
+			Title             string          `json:"title"`
+			Slug              string          `json:"slug"`
+			Industry          *string         `json:"industry"`
+			HeroImage         *string         `json:"hero_image"`
+			Content           *string         `json:"content"`
+			Published         *bool           `json:"published"`
+			Client            *string         `json:"client"`
+			Result            *string         `json:"result"`
+			Excerpt           *string         `json:"excerpt"`
+			Logo              *string         `json:"logo"`
+			Mockup            *string         `json:"mockup"`
+			Year              *string         `json:"year"`
+			Website           *string         `json:"website"`
+			Service           *string         `json:"service"`
+			Deliverables      []string        `json:"deliverables"`
+			Gallery           json.RawMessage `json:"gallery"`
+			TestimonialQuote  *string         `json:"testimonial_quote"`
+			TestimonialAuthor *string         `json:"testimonial_author"`
+			TestimonialRole   *string         `json:"testimonial_role"`
 		}
 		if !decodeJSON(w, r, &b) {
 			return
@@ -150,8 +167,24 @@ func AdminCreateCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 			clean := sanitize.SanitizeHTML(*b.Content)
 			b.Content = &clean
 		}
+		if b.Deliverables == nil {
+			b.Deliverables = []string{}
+		}
+		galleryJSON := "[]"
+		if len(b.Gallery) > 0 {
+			galleryJSON = string(b.Gallery)
+		}
 		var id string
-		err := pool.QueryRow(r.Context(), `INSERT INTO case_studies (title, slug, industry, hero_image, content, published, client, result, excerpt, logo, mockup, year, website) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`, b.Title, b.Slug, b.Industry, b.HeroImage, b.Content, pub, b.Client, b.Result, b.Excerpt, b.Logo, b.Mockup, b.Year, b.Website).Scan(&id)
+		err := pool.QueryRow(r.Context(), `INSERT INTO case_studies
+			(title, slug, industry, hero_image, content, published, client, result, excerpt,
+			 logo, mockup, year, website, service, deliverables, gallery,
+			 testimonial_quote, testimonial_author, testimonial_role)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::text::jsonb,
+				$17,$18,$19)
+			RETURNING id`,
+			b.Title, b.Slug, b.Industry, b.HeroImage, b.Content, pub, b.Client, b.Result, b.Excerpt,
+			b.Logo, b.Mockup, b.Year, b.Website, b.Service, b.Deliverables, galleryJSON,
+			b.TestimonialQuote, b.TestimonialAuthor, b.TestimonialRole).Scan(&id)
 		if err != nil {
 			fail(w, http.StatusConflict, "create failed (slug may exist)")
 			return
@@ -173,11 +206,26 @@ func AdminUpdateCaseStudy(pool *pgxpool.Pool) http.HandlerFunc {
 				b["content"] = sanitize.SanitizeHTML(s)
 			}
 		}
+		// gallery dikirim sebagai array objek; kolomnya jsonb sehingga parameter
+		// diubah ke teks JSON lalu di-cast ::text::jsonb di query.
+		if raw, present := b["gallery"]; present {
+			jb, err := json.Marshal(raw)
+			if err != nil {
+				fail(w, http.StatusBadRequest, "invalid gallery")
+				return
+			}
+			b["gallery"] = string(jb)
+		}
 		allowed := map[string]string{
 			"title": "title", "slug": "slug", "industry": "industry",
-			"hero_image": "hero_image", "content": "content", "published": "published", "client": "client", "result": "result", "excerpt": "excerpt", "logo": "logo", "mockup": "mockup", "year": "year", "website": "website",
+			"hero_image": "hero_image", "content": "content", "published": "published",
+			"client": "client", "result": "result", "excerpt": "excerpt",
+			"logo": "logo", "mockup": "mockup", "year": "year", "website": "website",
+			"service": "service", "deliverables": "deliverables", "gallery": "gallery",
+			"testimonial_quote": "testimonial_quote", "testimonial_author": "testimonial_author",
+			"testimonial_role": "testimonial_role",
 		}
-		if err := genericUpdate(w, r, pool, "case_studies", id, b, allowed); err != nil {
+		if err := genericUpdate(w, r, pool, "case_studies", id, b, allowed, map[string]string{"gallery": "text::jsonb"}); err != nil {
 			return
 		}
 		ok(w, map[string]any{"id": id})

@@ -13,6 +13,14 @@ export interface CaseStudy {
   excerpt?: string;
   hero_image?: string;
   content?: string;
+  year?: string;
+  website?: string;
+  service?: string;
+  deliverables?: string[];
+  gallery?: { url: string; alt: string }[];
+  testimonial_quote?: string;
+  testimonial_author?: string;
+  testimonial_role?: string;
 }
 
 export interface BlogPost {

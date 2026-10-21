@@ -43,7 +43,7 @@ try {
       </div>
       <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4">
         {cases.map((c, i) => (
-          <CaseStudyCard index={i} slug={c.slug} title={c.title} client={c.client ?? c.title} industry={c.industry ?? ''} result={c.result ?? ''} mockup={c.mockup ?? c.hero_image ?? ''} logo={c.logo ?? ''} excerpt={c.excerpt ?? c.content ?? ''} />
+          <CaseStudyCard index={i} slug={c.slug} title={c.title} client={c.client ?? c.title} industry={c.industry ?? ''} result={c.result ?? ''} mockup={c.mockup || c.hero_image || ''} logo={c.logo || ''} excerpt={c.excerpt ?? c.content ?? ''} />
         ))}
       </div>
     </section>

@@ -8,13 +8,19 @@ import (
 )
 
 // genericUpdate builds a dynamic UPDATE with updated_at=NOW().
-func genericUpdate(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, table, id string, b map[string]any, allowed map[string]string) error {
+// casts memetakan nama field ke cast SQL (mis. {"gallery": "text::jsonb"}) untuk
+// kolom yang butuh konversi eksplisit dari parameter teks.
+func genericUpdate(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, table, id string, b map[string]any, allowed map[string]string, casts map[string]string) error {
 	set := []string{}
 	args := []any{}
 	for k, col := range allowed {
 		if v, present := b[k]; present {
 			args = append(args, v)
-			set = append(set, col+`=$`+itoa(len(args)))
+			expr := col + `=$` + itoa(len(args))
+			if c := casts[k]; c != "" {
+				expr += `::` + c
+			}
+			set = append(set, expr)
 		}
 	}
 	if len(set) == 0 {
