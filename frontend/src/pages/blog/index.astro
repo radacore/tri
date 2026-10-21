@@ -45,7 +45,7 @@ import { FALLBACK_POSTS } from '../../lib/api';
         var list = (j && (j.data || j)) || [];
         if (!Array.isArray(list) || list.length === 0) return;
         grid.innerHTML = list.map(function (p) {
-          var excerpt = p.meta_description || (p.content || '').slice(0, 140);
+          var excerpt = String(p.content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
           return '<a href="/blog/' + esc(p.slug) + '" class="block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:shadow-xl transition hover:-translate-y-1" style="border-radius:20px">'
             + (p.thumbnail_url ? '<img src="' + esc(p.thumbnail_url) + '" alt="' + esc(p.title) + '" loading="lazy" class="aspect-[16/9] w-full object-cover" />' : '')
             + '<div class="p-5">'

@@ -237,8 +237,6 @@ export interface BlogPost {
   category?: string;
   thumbnail?: string;
   content?: string;
-  meta_title?: string;
-  meta_description?: string;
   published?: boolean;
   published_at?: string | null;
   created_at?: string;

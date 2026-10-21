@@ -2,10 +2,13 @@
 interface Props {
   title?: string;
   description?: string;
+  /** og:image khusus halaman (case study, blog). Path relatif diabsolutkan. */
+  image?: string;
 }
 const {
   title: titleProp,
   description: descProp,
+  image: imageProp,
 } = Astro.props as Props;
 import '../styles/global.css';
 import { API as LP_API_BASE } from '../lib/api';
@@ -28,7 +31,8 @@ const title =
 const description =
   descProp || seo.default_description ||
   'Custom logo & brand identity. From $49, ready in 48 hours, 100% money-back guarantee.';
-const ogImage = seo.og_image || `${site}/og-cover.jpg`;
+const absolute = (u: string) => (/^https?:\/\//i.test(u) ? u : site.replace(/\/$/, '') + (u.startsWith('/') ? u : `/${u}`));
+const ogImage = imageProp ? absolute(imageProp) : seo.og_image || `${site}/og-cover.jpg`;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -49,7 +53,8 @@ const jsonLd = {
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={site + Astro.url.pathname} />
-  <meta property="og:image" data-site-content="media.og_image" content={ogImage} />
+  {/* Halaman yang punya gambar sendiri tidak boleh ditimpa og_image dari settings saat hidrasi. */}
+  <meta property="og:image" data-site-content={imageProp ? undefined : 'media.og_image'} content={ogImage} />
   {seo.twitter_handle && <meta name="twitter:site" content={'@' + seo.twitter_handle.replace(/^@/, '')} />}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={title} />

@@ -84,7 +84,7 @@ import Footer from '../components/Footer.astro';
           var main = document.querySelector('main');
           if (!main) return;
           if (kind === 'blog') {
-            var title = d.meta_title || d.title || 'Untitled';
+            var title = d.title || 'Untitled';
             var cover = d.thumbnail_url || '';
             var date = fmt(d.published_at || d.created_at || '');
             document.title = title + ' — BrandingPulse Blog';
@@ -97,7 +97,7 @@ import Footer from '../components/Footer.astro';
               + '<p class="text-sm text-slate-500">Written by <span class="font-semibold text-slate-700">Admin</span> on ' + esc(date) + '</p>'
               + '</div>'
               + '<hr class="my-6 border-slate-200" />'
-              + '<div class="post-body text-slate-700 leading-relaxed">' + bodyHtml(d.content || d.meta_description || '') + '</div>'
+              + '<div class="post-body text-slate-700 leading-relaxed">' + bodyHtml(d.content || '') + '</div>'
               + '<div class="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200" style="border-radius:20px">'
               + '<p class="text-sm font-extrabold">Share this article</p>'
               + '<div class="flex items-center gap-2">' + shareBtns() + '</div>'

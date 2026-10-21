@@ -32,9 +32,18 @@ function fmtDate(iso: string) {
   return d.length === 3 ? `${d[2]}/${d[1]}/${d[0]}` : String(iso || '');
 }
 
-const title = post?.meta_title || post?.title || fb.title;
-const desc = post?.meta_description || post?.content?.slice(0, 160) || fb.excerpt;
-const cover = post?.thumbnail_url || fb.cover;
+const title = post?.title || fb.title;
+// Thumbnail kosong bukan alasan memakai cover artikel lain: pakai default situs.
+const cover = post?.thumbnail_url || (post ? '' : fb.cover);
+/** Description diturunkan dari isi artikel: buang tag, rapikan spasi, potong 160. */
+function plain(html: unknown) {
+  return String(html ?? '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+const desc = plain(post?.content).slice(0, 160) || fb.excerpt;
 const date = fmtDate(post?.published_at || post?.created_at || fb.date || '');
 const body = post?.content || '';
 
@@ -46,7 +55,7 @@ const SHARE_BTNS = [
   { k: 'copy', label: 'Copy link', svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></svg>' },
 ];
 ---
-<BaseLayout title={`${title} — BrandingPulse Blog`} description={desc}>
+<BaseLayout title={`${title} — BrandingPulse Blog`} description={desc} image={cover}>
   <Navbar />
   <main class="mx-auto max-w-3xl px-5 pt-32 pb-20">
     {cover && <img id="post-cover" src={cover} alt={title} class="w-full object-cover" style="border-radius:16px" />}
@@ -153,10 +162,18 @@ const SHARE_BTNS = [
           var img = document.getElementById('post-cover');
           if (img) { img.src = p.thumbnail_url; img.alt = p.title || ''; }
         }
+        var text = String(p.content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
         var meta = document.querySelector('meta[name="description"]');
-        if (meta && (p.meta_description || p.content)) meta.setAttribute('content', p.meta_description || String(p.content).slice(0, 160));
+        if (meta && text) meta.setAttribute('content', text.slice(0, 160));
+        if (p.thumbnail_url) {
+          var abs = p.thumbnail_url.indexOf('http') === 0 ? p.thumbnail_url : location.origin + p.thumbnail_url;
+          var og = document.querySelector('meta[property="og:image"]');
+          var tw = document.querySelector('meta[name="twitter:image"]');
+          if (og) og.setAttribute('content', abs);
+          if (tw) tw.setAttribute('content', abs);
+        }
         if (p.content) render(p.content);
-        else if (p.meta_description) document.getElementById('post-body').innerHTML = '<p class="text-lg">' + esc(p.meta_description) + '</p>';
+        else if (text) document.getElementById('post-body').innerHTML = '<p class="text-lg">' + esc(text) + '</p>';
       }).catch(function () {});
     })();
   </script>

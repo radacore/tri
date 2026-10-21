@@ -14,11 +14,28 @@ function slugify(s: string) {
 }
 
 const EMPTY = {
-  title: "", slug: "", category: "", thumbnail: "", content: "",
-  meta_title: "", meta_description: "", published: false,
+  title: "", slug: "", category: "", thumbnail: "", content: "", published: false,
 };
 
 type Form = typeof EMPTY;
+
+/** Normalisasi respons API ke bentuk form (satu sumber untuk hidrasi & dirty). */
+function fromServer(p: BlogPost | null | undefined): Form {
+  return {
+    ...EMPTY,
+    title: p?.title ?? "",
+    slug: p?.slug ?? "",
+    category: p?.category ?? "",
+    thumbnail: (p as any)?.thumbnail ?? (p as any)?.thumbnail_url ?? "",
+    content: p?.content ?? "",
+    published: !!p?.published,
+  };
+}
+
+/** Teks polos untuk preview/description: buang tag HTML dan rapikan spasi. */
+function plainText(html: string) {
+  return html.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+}
 
 export default function BlogEditorPage() {
   const { id } = useParams();
@@ -41,24 +58,15 @@ export default function BlogEditorPage() {
 
   useEffect(() => {
     if (!isNew && existing) {
-      setForm({
-        title: existing.title ?? "", slug: existing.slug ?? "",
-        category: existing.category ?? "", thumbnail: (existing as any).thumbnail ?? (existing as any).thumbnail_url ?? "",
-        content: existing.content ?? "", meta_title: existing.meta_title ?? "",
-        meta_description: existing.meta_description ?? "", published: !!existing.published,
-      });
+      setForm(fromServer(existing));
       setReady(true);
     }
   }, [isNew, existing]);
 
   const dirty = useMemo(() => {
-    const base = isNew ? EMPTY : existing ? {
-      title: existing.title ?? "", slug: existing.slug ?? "",
-      category: existing.category ?? "", thumbnail: (existing as any).thumbnail ?? (existing as any).thumbnail_url ?? "",
-      content: existing.content ?? "", meta_title: existing.meta_title ?? "",
-      meta_description: existing.meta_description ?? "", published: !!existing.published,
-    } : EMPTY;
-    return JSON.stringify(form) !== JSON.stringify(base);
+    if (isNew) return JSON.stringify(form) !== JSON.stringify(EMPTY);
+    if (!existing) return false;
+    return JSON.stringify(form) !== JSON.stringify(fromServer(existing));
   }, [form, existing, isNew]);
 
   useEffect(() => {
@@ -90,7 +98,7 @@ export default function BlogEditorPage() {
   const html = form.content || "";
 
   const valid = form.title.trim() !== "" && form.slug.trim() !== "";
-  const excerpt = form.meta_description || form.content.slice(0, 140);
+  const excerpt = plainText(form.content).slice(0, 140);
 
   if (!ready) return <p className="text-sm text-ink-secondary">Loading…</p>;
 
@@ -138,16 +146,6 @@ export default function BlogEditorPage() {
           <div>
             <label className="label">Content</label>
             <RichEditor value={form.content} onChange={(v) => set("content", v)} />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label className="label">Meta title</label>
-              <input className="input" value={form.meta_title} onChange={(e) => set("meta_title", e.target.value)} />
-            </div>
-            <div>
-              <label className="label">Meta description</label>
-              <textarea className="input" rows={2} value={form.meta_description} onChange={(e) => set("meta_description", e.target.value)} />
-            </div>
           </div>
           <label className="flex items-center gap-2 text-sm text-ink-primary">
             <input type="checkbox" className="h-[18px] w-[18px] accent-[#0f3738]" checked={form.published} onChange={(e) => set("published", e.target.checked)} /> Published
