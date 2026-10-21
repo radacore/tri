@@ -48,6 +48,9 @@ SERVER=root@IP_VPS ./deploy/deploy.sh dev --only=web       # landing+admin saja
 SERVER=root@IP_VPS ./deploy/deploy.sh dev --skip-db        # tanpa migrasi+seed
 ```
 Build backend/landing/admin jalan paralel + satu koneksi SSH dipakai ulang.
+Pra-penerbangan migrasi (opsional): set `PREFLIGHT_DB_URL` ke database scratch
+superuser lokal, mis. `postgres://postgres@localhost:5432/postgres?sslmode=disable`.
+Tanpa variabel itu langkah tersebut dilewati.
 Opsional: purge cache Cloudflare otomatis — isi `~/.brandingpulse-deploy`:
 ```bash
 CF_API_TOKEN=token_dengan_izin_Cache_Purge

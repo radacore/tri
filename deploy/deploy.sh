@@ -200,19 +200,27 @@ else
   echo "== migrasi DB $TARGET =="
   DBNAME="brandingpulse"; [ "$TARGET" = dev ] && DBNAME="brandingpulse_dev"
   # Pra-penerbangan: uji semua migrasi ke database scratch lokal.
-  if command -v psql >/dev/null 2>&1 && psql "postgres://brandingpulse:logopulse@localhost:5432/postgres?sslmode=disable" -tAc "SELECT 1" >/dev/null 2>&1; then
-    psql "postgres://brandingpulse:logopulse@localhost:5432/postgres?sslmode=disable" -qc "DROP DATABASE IF EXISTS mig_check;" -qc "CREATE DATABASE mig_check;" >/dev/null 2>&1
+  # Butuh koneksi superuser lokal; set PREFLIGHT_DB_URL (mis.
+  # postgres://postgres@localhost:5432/postgres?sslmode=disable).
+  # Tanpa itu, langkah ini dilewati — migrasi tetap dijalankan ke server.
+  PREFLIGHT_DB_URL="${PREFLIGHT_DB_URL:-}"
+  if [[ -n "$PREFLIGHT_DB_URL" ]] && command -v psql >/dev/null 2>&1 && psql "$PREFLIGHT_DB_URL" -tAc "SELECT 1" >/dev/null 2>&1; then
+    psql "$PREFLIGHT_DB_URL" -qc "DROP DATABASE IF EXISTS mig_check;" -qc "CREATE DATABASE mig_check;" >/dev/null 2>&1
+    PG_QS=""
+    [[ "$PREFLIGHT_DB_URL" == *"?"* ]] && PG_QS="?${PREFLIGHT_DB_URL#*\?}"
+    SCRATCH="${PREFLIGHT_DB_URL%%\?*}"
+    SCRATCH="${SCRATCH%/*}/mig_check${PG_QS}"
     MIG_OK=1
     for m in "$WORK"/backend/scripts/migrate_*.sql; do
-      if ! psql "postgres://brandingpulse:logopulse@localhost:5432/mig_check?sslmode=disable" -q -v ON_ERROR_STOP=1 -f "$m" >/tmp/lp-migcheck.log 2>&1; then
+      if ! psql "$SCRATCH" -q -v ON_ERROR_STOP=1 -f "$m" >/tmp/lp-migcheck.log 2>&1; then
         echo "  GAGAL pra-penerbangan: $(basename "$m")"; tail -5 /tmp/lp-migcheck.log; MIG_OK=0; break
       fi
     done
-    psql "postgres://brandingpulse:logopulse@localhost:5432/postgres?sslmode=disable" -qc "DROP DATABASE IF EXISTS mig_check;" >/dev/null 2>&1
+    psql "$PREFLIGHT_DB_URL" -qc "DROP DATABASE IF EXISTS mig_check;" >/dev/null 2>&1
     if [[ "$MIG_OK" == 0 ]]; then echo "perbaiki migrasi dulu — deploy dibatalkan."; exit 1; fi
     echo "  pra-penerbangan lolos"
   else
-    echo "  (postgres lokal tak tersedia — pra-penerbangan dilewati)"
+    echo "  (pra-penerbangan dilewati — set PREFLIGHT_DB_URL untuk mengaktifkan)"
   fi
   run_mig() { # $1 = file, $2 = db
     local out
