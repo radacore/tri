@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Check, ChevronDown, List, MessageCircle, Search, X,
 } from "lucide-react";
-import { centsToUSD, get, put, type Order } from "../api/client";
+import { centsToUSD, fetchAllOrders, put, type Order } from "../api/client";
 import { useConfirm } from "../components/ConfirmDialog";
 import { toast } from "../components/Layout";
 
@@ -48,10 +48,7 @@ export default function BoardPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["orders"],
-    queryFn: async (): Promise<Order[]> => {
-      const r = await get<Order[] | { orders: Order[] }>("/admin/orders");
-      return Array.isArray(r) ? r : (r.orders ?? []);
-    },
+    queryFn: fetchAllOrders,
   });
   const orders = data ?? [];
 

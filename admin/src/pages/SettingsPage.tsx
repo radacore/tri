@@ -38,12 +38,11 @@ export default function SettingsPage() {
         </button>
       </div>
       <div className="rounded-[24px] bg-white p-5 text-sm text-ink-secondary shadow-sm">
-        <h2 className="font-semibold text-ink-primary">Email templates</h2>
+        <h2 className="font-semibold text-ink-primary">Customer notifications</h2>
         <p className="mt-1">
-          Notification emails are sent automatically when an order status changes
-          (pending → paid → in_progress → revision → completed → delivered).
-          Templates are managed in the backend; here just make sure
-          customer email addresses are valid on the Orders page.
+          This build sends no email automatically. Status changes are recorded on the
+          order timeline; reach the customer with the pre-filled WhatsApp links on the
+          Orders page (payment received, delivery).
         </p>
       </div>
     </div>

@@ -141,6 +141,20 @@ export async function uploadFile(file: File): Promise<UploadResult> {
   return out;
 }
 
+/**
+ * Ambil seluruh order, bukan hanya halaman pertama. Backend membatasi limit
+ * 100 per request, jadi loop sampai halaman terakhir yang tidak penuh.
+ */
+export async function fetchAllOrders(): Promise<Order[]> {
+  const all: Order[] = [];
+  for (let page = 1; page <= 100; page++) {
+    const rows = await get<Order[]>(`/admin/orders?limit=100&page=${page}`);
+    all.push(...rows);
+    if (rows.length < 100) break;
+  }
+  return all;
+}
+
 /* ---------- Types ---------- */
 
 export type OrderStatus =
@@ -149,7 +163,9 @@ export type OrderStatus =
   | "in_progress"
   | "revision"
   | "completed"
-  | "delivered";
+  | "delivered"
+  | "cancelled"
+  | "refunded";
 
 export type OrderTier = "starter" | "professional" | "premium";
 

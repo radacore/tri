@@ -21,7 +21,7 @@ function siteBase(): string {
     /* ignore */
   }
   const h = window.location.hostname;
-  if (h === "127.0.0.1" || h === "localhost") return "http://127.0.0.1:4321";
+  if (h === "127.0.0.1" || h === "localhost") return "http://localhost:4321";
   return window.location.origin;
 }
 

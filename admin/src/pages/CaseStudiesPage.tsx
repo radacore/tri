@@ -27,6 +27,15 @@ export default function CaseStudiesPage() {
   });
   const items = data ?? [];
 
+  const delMut = useMutation({
+    mutationFn: (id: string) => del(`/admin/case-studies/${id}`),
+    onSuccess: () => {
+      toast("Case study deleted");
+      void qc.invalidateQueries({ queryKey: ["case-studies"] });
+    },
+    onError: (e: any) => toast(`Delete failed: ${e?.message ?? "error"}`),
+  });
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-bold tracking-tight text-ink-primary">Case Studies</h1>

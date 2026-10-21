@@ -5,6 +5,7 @@ import { ChevronDown, ExternalLink, Filter, LayoutGrid, MessageCircle, Plus, Sea
 import {
   ORDER_STATUSES,
   centsToUSD,
+  fetchAllOrders,
   get,
   post,
   put,
@@ -155,14 +156,7 @@ export default function OrdersPage() {
 
   const { data } = useQuery({
     queryKey: ["orders"],
-    queryFn: async (): Promise<Order[]> => {
-      try {
-        const r = await get<Order[] | { orders: Order[] }>("/admin/orders");
-        return Array.isArray(r) ? r : (r.orders ?? []);
-      } catch {
-        return [];
-      }
-    },
+    queryFn: fetchAllOrders,
   });
   const orders = data ?? [];
 

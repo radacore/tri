@@ -8,6 +8,8 @@ const MAP: Record<OrderStatus, string> = {
   revision: "bg-[#fef3c7] text-[#92400e]",
   completed: "bg-[#d1fae5] text-[#065f46]",
   delivered: "bg-[#d1fae5] text-[#065f46]",
+  cancelled: "bg-[#fee2e2] text-[#991b1b]",
+  refunded: "bg-[#f4f8f8] text-[#5c7676]",
 };
 
 export default function Badge({ status }: { status: string }) {

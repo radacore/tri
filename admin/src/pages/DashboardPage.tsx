@@ -35,7 +35,9 @@ function Donut({ segments }: { segments: { value: number; color: string; label: 
   }, []);
   let acc = 0;
   const move = (e: React.MouseEvent, i: number) => {
-    const box = (e.currentTarget.ownerSVGElement?.getBoundingClientRect() ?? e.currentTarget.getBoundingClientRect());
+    // currentTarget di sini selalu <circle>; ownerSVGElement memberi kotak chart.
+    const target = e.currentTarget as SVGElement;
+    const box = (target.ownerSVGElement ?? target).getBoundingClientRect();
     setTip({ x: e.clientX - box.left, y: e.clientY - box.top, i });
   };
   return (
