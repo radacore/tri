@@ -52,7 +52,8 @@ var publicSettingsAllowlist = map[string]bool{
 	"sections": true, "hero_images": true, "media": true, "pages": true,
 	"pricing": true, "hero": true, "footer": true, "testimonials": true,
 	"clients": true, "order": true, "contact": true, "about": true,
-	"legal": true, "identity": true, "seo": true,
+	"legal": true, "identity": true, "seo": true, "nav": true,
+	"faqs": true, "how_steps": true,
 }
 
 // GetPublicSettings returns allowlisted site_settings for public consumption.
@@ -103,29 +104,28 @@ func UpdateSetting(pool *pgxpool.Pool) http.HandlerFunc {
 			fail(w, http.StatusBadRequest, "invalid JSON body")
 			return
 		}
-		// support envelope {value: ...} or raw value
+		// Envelope opsional: {"value": X} atau {"replace": true, "value": X}.
+		replace := false
 		if m, isMap := v.(map[string]any); isMap {
-			if inner, present := m["value"]; present && len(m) == 1 {
+			inner, hasValue := m["value"]
+			r, hasReplace := m["replace"].(bool)
+			if hasValue && (len(m) == 1 || (len(m) == 2 && hasReplace)) {
+				replace = r
 				v = inner
 			}
+		}
+		// Array tidak pernah di-merge: jsonb `||` menggabungkan array sehingga
+		// setiap save menambah duplikat. Array selalu menimpa penuh.
+		if _, isArray := v.([]any); isArray {
+			replace = true
 		}
 		raw, err := json.Marshal(v)
 		if err != nil {
 			fail(w, http.StatusBadRequest, "invalid value")
 			return
 		}
-		// H3: gabung objek (jsonb ||) agar update satu field tak menghapus lainnya.
-		// Kirim {"replace": true, "value": ...} untuk menimpa penuh secara eksplisit.
-		replace := false
-		if m, isMap := v.(map[string]any); isMap {
-			if r, _ := m["replace"].(bool); r {
-				replace = true
-				if inner, present := m["value"]; present {
-					v = inner
-				}
-				raw, _ = json.Marshal(v)
-			}
-		}
+		// H3: objek digabung (jsonb ||) agar update satu field tak menghapus
+		// field lain. Array dan {"replace":true} menimpa penuh.
 		var execErr error
 		if replace {
 			_, execErr = pool.Exec(r.Context(), `INSERT INTO site_settings (key, value, updated_at) VALUES ($1, $2::jsonb, NOW()) ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, updated_at=NOW()`, key, string(raw))

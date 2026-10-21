@@ -27,16 +27,15 @@ func ListPortfolio(pool *pgxpool.Pool) http.HandlerFunc {
 			args = append(args, category)
 			where += ` AND category = $1`
 		}
-		countArgs := append([]any{}, args...)
+		if featured == "true" {
+			where += ` AND featured = TRUE`
+		}
 		var total int64
-		if err := pool.QueryRow(r.Context(), `SELECT COUNT(*) FROM portfolio_items WHERE `+where, countArgs...).Scan(&total); err != nil {
+		if err := pool.QueryRow(r.Context(), `SELECT COUNT(*) FROM portfolio_items WHERE `+where, args...).Scan(&total); err != nil {
 			fail(w, http.StatusInternalServerError, "query failed")
 			return
 		}
 		q := `SELECT id, title, category, image_url, description, featured, published, sort_order, created_at, updated_at FROM portfolio_items WHERE ` + where
-		if featured == "true" {
-			q += ` AND featured = TRUE`
-		}
 		args = append(args, limit, offset)
 		q += ` ORDER BY sort_order ASC, created_at DESC LIMIT $` + itoa(len(args)-1) + ` OFFSET $` + itoa(len(args))
 		rows, err := pool.Query(r.Context(), q, args...)

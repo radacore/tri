@@ -19,11 +19,3 @@ type Order struct {
 	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time       `json:"updated_at" db:"updated_at"`
 }
-
-type OrderStatusHistory struct {
-	ID         string    `json:"id" db:"id"`
-	OrderID    string    `json:"order_id" db:"order_id"`
-	FromStatus *string   `json:"from_status,omitempty" db:"from_status"`
-	ToStatus   string    `json:"to_status" db:"to_status"`
-	CreatedAt  time.Time `json:"created_at" db:"created_at"`
-}

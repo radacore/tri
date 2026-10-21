@@ -108,5 +108,3 @@ func EnsureSeedAdmin(pool *pgxpool.Pool, cfg *config.Config) {
 		log.Printf("WARN: seed admin failed: %v", err)
 	}
 }
-
-var _ = pgxpool.Pool{}

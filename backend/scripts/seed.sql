@@ -4,7 +4,10 @@
 -- Admin TIDAK di-seed di sini (keamanan C4): dibuat via ADMIN_PASSWORD_HASH
 -- + langkah tutorial langkah 5.
 -- Portfolio (8 item, sama seperti homepage)
-INSERT INTO portfolio_items (title, category, image_url, description, featured, published, sort_order) VALUES
+-- Tabel ini tidak punya unique key, jadi ON CONFLICT DO NOTHING tidak menolong:
+-- blok hanya dijalankan bila tabel masih kosong.
+INSERT INTO portfolio_items (title, category, image_url, description, featured, published, sort_order)
+SELECT * FROM (VALUES
   ('Nexora SaaS', 'Tech', 'https://picsum.photos/seed/nexora/600/450.webp', 'SaaS rebrand', TRUE, TRUE, 1),
   ('Kopi Lantai', 'F&B', 'https://picsum.photos/seed/kopi/600/450.webp', 'Coffee brand', TRUE, TRUE, 2),
   ('Maison Rue', 'Fashion', 'https://picsum.photos/seed/maison/600/450.webp', 'Fashion identity', TRUE, TRUE, 3),
@@ -13,7 +16,8 @@ INSERT INTO portfolio_items (title, category, image_url, description, featured, 
   ('Saffron House', 'F&B', 'https://picsum.photos/seed/saffron/600/450.webp', 'Restaurant brand', FALSE, TRUE, 6),
   ('Atelier Nord', 'Fashion', 'https://picsum.photos/seed/atelier/600/450.webp', 'Atelier mark', FALSE, TRUE, 7),
   ('PulseFit', 'Health', 'https://picsum.photos/seed/pulsefit/600/450.webp', 'Fitness brand', FALSE, TRUE, 8)
-ON CONFLICT DO NOTHING;
+) AS v(title, category, image_url, description, featured, published, sort_order)
+WHERE NOT EXISTS (SELECT 1 FROM portfolio_items);
 
 -- Case studies (4)
 INSERT INTO case_studies (title, slug, industry, hero_image, content, published, client, result, excerpt, year, website) VALUES
@@ -31,17 +35,20 @@ INSERT INTO blog_posts (title, slug, content, category, thumbnail_url, published
 ON CONFLICT (slug) DO NOTHING;
 
 -- Testimonials (6, sama seperti hanging marquee)
-INSERT INTO testimonials (name, position, company, photo_url, quote, rating, featured, published) VALUES
+INSERT INTO testimonials (name, position, company, photo_url, quote, rating, featured, published)
+SELECT * FROM (VALUES
   ('Sarah Chen', 'Founder', 'Nexora', 'https://i.pravatar.cc/96?img=47', 'Two concepts on day one, final files on day two. Our signup page finally looks like the product we built.', 5, TRUE, TRUE),
   ('Daniel Okafor', 'CEO', 'Cloudgrid', 'https://i.pravatar.cc/96?img=12', 'The money-back guarantee sold me. The quality kept me. Best $149 I have spent on this company.', 5, TRUE, TRUE),
   ('Maria Santos', 'Owner', 'Saffron House', 'https://i.pravatar.cc/96?img=32', 'Customers photograph our cups now. The logo paid for itself within a month.', 5, FALSE, TRUE),
   ('James Wright', 'CMO', 'VitalCare', 'https://i.pravatar.cc/96?img=59', 'Professional process, zero chasing. Revisions came back fast and actually better.', 5, FALSE, TRUE),
   ('Aisha Rahman', 'Founder', 'Atelier Nord', 'https://i.pravatar.cc/96?img=45', 'It feels like a $5k agency identity. Investors noticed immediately.', 5, FALSE, TRUE),
   ('Tom Becker', 'Founder', 'PulseFit', 'https://i.pravatar.cc/96?img=68', 'Delivered in 48 hours as promised. The brand kit saved our designer weeks.', 5, FALSE, TRUE)
-ON CONFLICT DO NOTHING;
+) AS v(name, position, company, photo_url, quote, rating, featured, published)
+WHERE NOT EXISTS (SELECT 1 FROM testimonials);
 
 -- Client logos (8, marquee homepage)
-INSERT INTO client_logos (name, logo_url, sort_order) VALUES
+INSERT INTO client_logos (name, logo_url, sort_order)
+SELECT * FROM (VALUES
   ('NEXORA', 'https://picsum.photos/seed/logo-nexora/200/80.webp', 1),
   ('Cloudgrid', 'https://picsum.photos/seed/logo-cloud/200/80.webp', 2),
   ('Saffron&Co', 'https://picsum.photos/seed/logo-saffron/200/80.webp', 3),
@@ -50,23 +57,26 @@ INSERT INTO client_logos (name, logo_url, sort_order) VALUES
   ('PulseFit', 'https://picsum.photos/seed/logo-pulse/200/80.webp', 6),
   ('Kopi Lantai', 'https://picsum.photos/seed/logo-kopi/200/80.webp', 7),
   ('Maison Rue', 'https://picsum.photos/seed/logo-maison/200/80.webp', 8)
-ON CONFLICT DO NOTHING;
+) AS v(name, logo_url, sort_order)
+WHERE NOT EXISTS (SELECT 1 FROM client_logos);
 
 -- Orders contoh di tiap status
-INSERT INTO orders (customer_name, customer_email, package_tier, status, brief, amount, currency, paid_at) VALUES
+INSERT INTO orders (customer_name, customer_email, package_tier, status, brief, amount, currency, paid_at)
+SELECT * FROM (VALUES
   ('Sarah Chen', 'sarah@nexora.io', 'professional', 'completed',
-   '{"name":"Sarah Chen","business":"Nexora","industry":"SaaS","vibes":["minimalis","berani"],"colors":["Blue"],"notes":"Modern fintech look"}',
+   '{"name":"Sarah Chen","business":"Nexora","industry":"SaaS","vibes":["minimalis","berani"],"colors":["Blue"],"notes":"Modern fintech look"}'::jsonb,
    14900, 'USD', NOW() - INTERVAL '5 days'),
   ('Daniel Okafor', 'dan@cloudgrid.io', 'professional', 'paid',
-   '{"name":"Daniel Okafor","business":"Cloudgrid","industry":"Tech","vibes":["futuristis"],"colors":["Black","Blue"]}',
+   '{"name":"Daniel Okafor","business":"Cloudgrid","industry":"Tech","vibes":["futuristis"],"colors":["Black","Blue"]}'::jsonb,
    14900, 'USD', NOW() - INTERVAL '1 day'),
   ('Maria Santos', 'maria@saffronhouse.id', 'starter', 'in_progress',
-   '{"name":"Maria Santos","business":"Saffron House","industry":"F&B","vibes":["elegan","mewah"],"colors":["Emas"]}',
+   '{"name":"Maria Santos","business":"Saffron House","industry":"F&B","vibes":["elegan","mewah"],"colors":["Emas"]}'::jsonb,
    4900, 'USD', NOW() - INTERVAL '2 hours'),
   ('Tom Becker', 'tom@pulsefit.co', 'premium', 'pending',
-   '{"name":"Tom Becker","business":"PulseFit","industry":"Health","vibes":["berani","futuristis"],"colors":["Green","Black"]}',
+   '{"name":"Tom Becker","business":"PulseFit","industry":"Health","vibes":["berani","futuristis"],"colors":["Green","Black"]}'::jsonb,
    39900, 'USD', NULL)
-ON CONFLICT DO NOTHING;
+) AS v(customer_name, customer_email, package_tier, status, brief, amount, currency, paid_at)
+WHERE NOT EXISTS (SELECT 1 FROM orders);
 
 -- Website Identity defaults (dikelola dari admin /identity, dibaca landing)
 INSERT INTO site_settings (key, value) VALUES

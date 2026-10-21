@@ -291,8 +291,8 @@ func AdminUpdateOrder(pool *pgxpool.Pool) http.HandlerFunc {
 			return
 		}
 		ctx := r.Context()
-		var prev string
-		err := pool.QueryRow(ctx, `SELECT status FROM orders WHERE id=$1`, id).Scan(&prev)
+		var prev, prevStage string
+		err := pool.QueryRow(ctx, `SELECT status, COALESCE(stage,'brief') FROM orders WHERE id=$1`, id).Scan(&prev, &prevStage)
 		if err != nil {
 			fail(w, http.StatusNotFound, "order not found")
 			return
@@ -309,6 +309,12 @@ func AdminUpdateOrder(pool *pgxpool.Pool) http.HandlerFunc {
 				fail(w, http.StatusInternalServerError, "update failed")
 				return
 			}
+			prevStage = stageTo
+		}
+		var note *string
+		if body.Note != nil && strings.TrimSpace(*body.Note) != "" {
+			n := strings.TrimSpace(*body.Note)
+			note = &n
 		}
 		if body.Status != nil {
 			st := strings.ToLower(strings.TrimSpace(*body.Status))
@@ -317,11 +323,9 @@ func AdminUpdateOrder(pool *pgxpool.Pool) http.HandlerFunc {
 				fail(w, http.StatusBadRequest, "invalid status")
 				return
 			}
+			var newStage string
 			if st == "paid" {
-				_, err = pool.Exec(ctx, `UPDATE orders SET status='paid', paid_at=COALESCE(paid_at, NOW()), stage=CASE WHEN stage='brief' THEN 'concepts' ELSE stage END, updated_at=NOW() WHERE id=$1`, id)
-				if err == nil && stageTo == "" {
-					_, _ = pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status, stage_to, note) VALUES ($1,'pending','paid','concepts','accepted, moved to concepts')`, id)
-				}
+				err = pool.QueryRow(ctx, `UPDATE orders SET status='paid', paid_at=COALESCE(paid_at, NOW()), stage=CASE WHEN stage='brief' THEN 'concepts' ELSE stage END, updated_at=NOW() WHERE id=$1 RETURNING stage`, id).Scan(&newStage)
 			} else {
 				_, err = pool.Exec(ctx, `UPDATE orders SET status=$1, updated_at=NOW() WHERE id=$2`, st, id)
 			}
@@ -329,19 +333,23 @@ func AdminUpdateOrder(pool *pgxpool.Pool) http.HandlerFunc {
 				fail(w, http.StatusInternalServerError, "update failed")
 				return
 			}
-			var note *string
-			if body.Note != nil && strings.TrimSpace(*body.Note) != "" {
-				note = body.Note
+			// Satu baris history per transisi status; stage_to hanya diisi bila
+			// tahap benar-benar ikut berpindah.
+			var stageArg any
+			if newStage != "" && newStage != prevStage {
+				stageArg = newStage
+				prevStage = newStage
+				stageTo = "" // sudah tercatat di baris ini
 			}
-			_, _ = pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status, note) VALUES ($1,$2,$3,$4)`, id, prev, st, note)
+			_, _ = pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status, stage_to, note) VALUES ($1,$2,$3,$4,$5)`, id, prev, st, stageArg, note)
 			prev = st
 		}
 		if stageTo != "" {
-			note := "moved to " + stageTo + " via kanban"
-			if body.Note != nil && strings.TrimSpace(*body.Note) != "" {
-				note = strings.TrimSpace(*body.Note)
+			n := "moved to " + stageTo + " via kanban"
+			if note != nil {
+				n = *note
 			}
-			_, _ = pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status, stage_to, note) VALUES ($1,$2,$2,$3,$4)`, id, prev, stageTo, note)
+			_, _ = pool.Exec(ctx, `INSERT INTO order_status_history (order_id, from_status, to_status, stage_to, note) VALUES ($1,$2,$2,$3,$4)`, id, prev, stageTo, n)
 		}
 		if body.Deliverables != nil {
 			if _, err := pool.Exec(ctx, `UPDATE orders SET deliverables=$1, updated_at=NOW() WHERE id=$2`, body.Deliverables, id); err != nil {

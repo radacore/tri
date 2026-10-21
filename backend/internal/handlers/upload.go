@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -127,5 +126,3 @@ func UploadFile(cfg *config.Config) http.HandlerFunc {
 		})
 	}
 }
-
-var _ = fmt.Sprintf

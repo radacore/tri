@@ -10,12 +10,6 @@ import (
 	"brandingpulse/backend/internal/models"
 )
 
-func Pagination(r interface {
-	Query() map[string][]string
-}) (page, limit int) {
-	return 1, 12
-}
-
 // ParsePageLimit parses page/limit query params with sane bounds.
 func ParsePageLimit(pageStr, limitStr string) (page, limit, offset int) {
 	page = atoiOr(pageStr, 1)
