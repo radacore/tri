@@ -141,7 +141,11 @@ export default function BlogEditorPage() {
           </div>
           <div>
             <label className="label">Thumbnail</label>
-            <ImageUploader value={form.thumbnail} onChange={(url) => set("thumbnail", url)} />
+            <ImageUploader
+              value={form.thumbnail}
+              onChange={(url) => set("thumbnail", url)}
+              recommended="1600 × 900 px (16:9) — also used as the social share image"
+            />
           </div>
           <div>
             <label className="label">Content</label>

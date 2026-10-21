@@ -12,11 +12,14 @@ export default function GalleryEditor({
   value,
   onChange,
   baseUrl,
+  recommended,
 }: {
   value: GalleryItem[];
   onChange: (v: GalleryItem[]) => void;
   /** Origin landing untuk pratinjau path relatif (/cases/…, /uploads/…). */
   baseUrl?: string;
+  /** Rekomendasi dimensi gambar yang tampil di form upload. */
+  recommended?: string;
 }) {
   const [picking, setPicking] = useState(false);
   const items = value ?? [];
@@ -101,6 +104,7 @@ export default function GalleryEditor({
         <div className="mt-3">
           <ImageUploader
             value=""
+            recommended={recommended}
             onChange={(url) => {
               if (url && !url.startsWith("blob:")) {
                 onChange([...items, { url, alt: "" }]);

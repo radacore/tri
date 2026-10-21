@@ -700,6 +700,7 @@ export default function IdentityPage() {
             <ImageUploader
               value={cur.media?.logo_url ?? ""}
               onChange={(url) => set("media", "logo_url", url)}
+              recommended="512 × 512 px (icon only) or 480 × 120 px (logo that already includes the name)"
             />
           </div>
           <div>
@@ -707,13 +708,15 @@ export default function IdentityPage() {
             <ImageUploader
               value={cur.media?.og_image ?? ""}
               onChange={(url) => set("media", "og_image", url)}
+              recommended="1200 × 630 px (1.91:1)"
             />
           </div>
           <div>
-            <label className="label">Favicon (tab browser)</label>
+            <label className="label">Favicon (browser tab icon)</label>
             <ImageUploader
               value={cur.media?.favicon ?? ""}
               onChange={(url) => set("media", "favicon", url)}
+              recommended="512 × 512 px (square) — browsers scale it down"
             />
             <p className="mt-1 text-xs text-ink-secondary">SVG, PNG, or WebP square image. Browsers pick it up automatically after landing rebuild.</p>
           </div>
@@ -723,13 +726,7 @@ export default function IdentityPage() {
               value={cur.hero_images?.images ?? []}
               saving={saveMut.isPending}
               onSave={(imgs) => saveMut.mutate({ key: "hero_images", body: { images: imgs } })}
-            />
-          </div>
-          <div>
-            <label className="label">Favicon (browser tab icon)</label>
-            <ImageUploader
-              value={cur.media?.favicon ?? ""}
-              onChange={(url) => set("media", "favicon", url)}
+              recommended="800 × 700 px (or any ratio, at least 800 px wide)"
             />
           </div>
           <SaveBar k="media" />

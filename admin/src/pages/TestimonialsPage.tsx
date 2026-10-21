@@ -162,7 +162,11 @@ export default function TestimonialsPage() {
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Photo</label>
-                <ImageUploader value={modal.avatar_url} onChange={(url) => setModal({ ...modal, avatar_url: url })} />
+                <ImageUploader
+                  value={modal.avatar_url}
+                  onChange={(url) => setModal({ ...modal, avatar_url: url })}
+                  recommended="200 × 200 px (1:1)"
+                />
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Quote</label>

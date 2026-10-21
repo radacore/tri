@@ -178,16 +178,28 @@ export default function CaseStudyEditorPage() {
           </div>
           <div>
             <label className="label">Hero image</label>
-            <ImageUploader value={form.hero_image} onChange={(url) => set("hero_image", url)} />
+            <ImageUploader
+              value={form.hero_image}
+              onChange={(url) => set("hero_image", url)}
+              recommended="1600 × 900 px (16:9) — shown full width at 1024 px"
+            />
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="label">Logo image</label>
-              <ImageUploader value={form.logo} onChange={(url) => set("logo", url)} />
+              <ImageUploader
+                value={form.logo}
+                onChange={(url) => set("logo", url)}
+                recommended="800 × 800 px (1:1, transparent background)"
+              />
             </div>
             <div>
               <label className="label">Mockup image</label>
-              <ImageUploader value={form.mockup} onChange={(url) => set("mockup", url)} />
+              <ImageUploader
+                value={form.mockup}
+                onChange={(url) => set("mockup", url)}
+                recommended="1000 × 940 px (≈1.06:1) — matches the card frame"
+              />
             </div>
           </div>
           <div>
@@ -234,7 +246,12 @@ export default function CaseStudyEditorPage() {
 
           <div>
             <label className="label">Gallery</label>
-            <GalleryEditor value={form.gallery} onChange={(v) => set("gallery", v)} baseUrl={LANDING} />
+            <GalleryEditor
+              value={form.gallery}
+              onChange={(v) => set("gallery", v)}
+              baseUrl={LANDING}
+              recommended="1600 px wide, any height (each image keeps its own ratio)"
+            />
           </div>
 
           <div>

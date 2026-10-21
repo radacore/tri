@@ -7,10 +7,13 @@ export default function HeroImages({
   value,
   onSave,
   saving,
+  recommended,
 }: {
   value: string[];
   onSave: (imgs: string[]) => void;
   saving?: boolean;
+  /** Rekomendasi dimensi gambar yang tampil di form upload. */
+  recommended?: string;
 }) {
   const [picking, setPicking] = useState(false);
   const [list, setList] = useState<string[] | null>(null);
@@ -77,6 +80,7 @@ export default function HeroImages({
         <div className="mt-3">
           <ImageUploader
             value=""
+            recommended={recommended}
             onChange={(url) => {
               if (url && !url.startsWith("blob:")) {
                 setList([...imgs, url]);

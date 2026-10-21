@@ -382,7 +382,13 @@ export default function OrdersPage() {
                 <ExternalLink className="h-3.5 w-3.5" /> View proof
               </a>
             ) : <p className="mt-1 text-xs text-ink-secondary">None yet.</p>}
-            <div className="mt-2"><ImageUploader value={proof} onChange={setProof} /></div>
+            <div className="mt-2">
+              <ImageUploader
+                value={proof}
+                onChange={setProof}
+                recommended="Up to 1600 px wide (screenshot, any height)"
+              />
+            </div>
 
             <h3 className="mt-4 text-sm font-semibold text-ink-primary">Deliverables</h3>
             <ul className="text-xs">

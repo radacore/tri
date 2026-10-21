@@ -5,9 +5,12 @@ import { uploadFile, type UploadResult } from "../api/client";
 export default function ImageUploader({
   value,
   onChange,
+  recommended,
 }: {
   value: string;
   onChange: (url: string) => void;
+  /** Rekomendasi dimensi gambar dalam piksel, mis. "1600 × 900 px (16:9)". */
+  recommended?: string;
 }) {
   const [drag, setDrag] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -81,14 +84,19 @@ export default function ImageUploader({
           </div>
         )}
       </div>
+      {recommended && (
+        <p className="mt-1.5 text-xs text-ink-secondary">
+          <span className="font-semibold text-ink-primary">Recommended size:</span>{" "}
+          {recommended}
+        </p>
+      )}
       {value && (
         <p className="mt-1 break-all text-xs text-ink-secondary">{value}</p>
       )}
       {info && (
         <p className="tabular mt-1 text-xs text-[#065f46]">
-          {info.format ?? "webp"}
-          {info.width ? ` · ${info.width}x${info.height}` : ""}
-          {info.size_kb ? ` · ${info.size_kb} KB` : ""}
+          Uploaded: {info.format ?? "webp"}
+          {info.width ? ` · ${info.width}×${info.height} px` : ""}
         </p>
       )}
       {error && <p className="mt-1 text-xs text-[#92400e]">{error}</p>}

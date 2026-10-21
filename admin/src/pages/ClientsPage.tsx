@@ -146,7 +146,11 @@ export default function ClientsPage() {
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Logo image (SVG or PNG)</label>
-                <ImageUploader value={(modal as any).logo_url} onChange={(url) => setModal({ ...modal, logo_url: url })} />
+                <ImageUploader
+                  value={(modal as any).logo_url}
+                  onChange={(url) => setModal({ ...modal, logo_url: url })}
+                  recommended="400 × 160 px (2.5:1, transparent background)"
+                />
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">

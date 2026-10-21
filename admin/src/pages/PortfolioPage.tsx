@@ -191,7 +191,11 @@ export default function PortfolioPage() {
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Image</label>
-                <ImageUploader value={modal.image_url} onChange={(url) => setModal({ ...modal, image_url: url })} />
+                <ImageUploader
+                  value={modal.image_url}
+                  onChange={(url) => setModal({ ...modal, image_url: url })}
+                  recommended="1200 × 900 px (4:3)"
+                />
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Description</label>
