@@ -40,7 +40,7 @@ const cards = items.map((p) => portfolioCardHTML(p)).join('');
   <main class="mx-auto max-w-content px-5 pt-32 pb-20">
     <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Portfolio</p>
     <h1 class="mt-2 text-4xl font-extrabold tracking-tight">Selected work</h1>
-    <div id="pf-filters" class="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="Filter portfolio">
+    <div id="pf-filters" class="mt-6 flex flex-wrap gap-2" role="tablist" aria-label="Filter portfolio" hidden={items.length === 0}>
       {filters.map((f, i) => (
         <button
           type="button"
@@ -53,7 +53,7 @@ const cards = items.map((p) => portfolioCardHTML(p)).join('');
     <div id="pf-grid" class="relative mt-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 [grid-auto-flow:dense]" set:html={cards}>
     </div>
     {items.length === 0 && (
-      <p class="mt-10 text-sm text-slate-500">No published work yet. Add items from the admin portfolio page.</p>
+      <p class="mt-10 text-sm text-slate-500">Work is being added — check back soon, or <a href="/contact" class="font-semibold text-primary hover:underline">get in touch</a> for samples.</p>
     )}
   </main>
   <Footer />
