@@ -1,9 +1,25 @@
 ---
-const rowA = ['wks.svg', 'f631.avif', 'cart.svg', 'f632.avif', 'f633.avif', 'f634.avif', 'f635.avif', 'f636.avif', 'f637.avif'];
-const rowB = ['fujifilm.svg', 'f638.avif', 'f639.avif', 'f640.avif', 'f641.avif', 'f642.avif', 'f643.avif', 'f644.avif', 'f645.avif'];
+import { DEMO_CONTENT, fetchList } from '../lib/api';
+
+interface ClientLogo { name?: string; logo_url?: string }
+
+// Logo klien datang dari admin. Tanpa data, section disembunyikan: menampilkan
+// logo perusahaan yang bukan klien adalah klaim palsu.
+const { ok, items } = await fetchList<ClientLogo>('/client-logos?limit=60');
+let logos = items.filter((c) => c && c.logo_url);
+if (!ok && DEMO_CONTENT) {
+  logos = ['wks.svg', 'f631.avif', 'cart.svg', 'f632.avif', 'f633.avif', 'f634.avif', 'f635.avif', 'f636.avif', 'f637.avif',
+    'fujifilm.svg', 'f638.avif', 'f639.avif', 'f640.avif', 'f641.avif', 'f642.avif', 'f643.avif', 'f644.avif', 'f645.avif']
+    .map((f) => ({ name: '', logo_url: `/logos/${f}` }));
+}
+const half = Math.max(1, Math.ceil(logos.length / 2));
+const rowA = logos.slice(0, half);
+const rowB = logos.slice(half).length > 0 ? logos.slice(half) : logos;
 const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 grayscale transition hover:opacity-100 hover:grayscale-0";
 ---
-<section id="clients" class="reveal relative bg-slate-50/60 py-12" aria-label="Trusted by">
+
+{/* Selalu ada di DOM agar hidrasi bisa menampilkannya saat admin mengisi logo. */}
+<section id="clients" class="reveal relative bg-slate-50/60 py-12" aria-label="Trusted by" hidden={logos.length === 0}>
   <p class="whitespace-nowrap text-center text-base sm:text-xl font-extrabold tracking-tight text-slate-700" data-site="sections.logos_heading">Trusted by 2,400+ startups</p>
   <div class="relative mt-5 space-y-4">
     <span class="logo-fade-l" aria-hidden="true"></span>
@@ -12,8 +28,8 @@ const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 gray
       <div class="marquee-track-rev" data-logo-row="0">
         {[0, 1, 2].map((dup) => (
           <div class="logo-group" aria-hidden={dup > 0 ? 'true' : undefined}>
-            {rowA.map((f) => (
-              <img src={`/logos/${f}`} alt="" width="160" height="64" loading="eager" decoding="async" class={imgCls} />
+            {rowA.map((c) => (
+              <img src={c.logo_url} alt={c.name ?? ''} width="160" height="64" loading="eager" decoding="async" class={imgCls} />
             ))}
           </div>
         ))}
@@ -23,8 +39,8 @@ const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 gray
       <div class="marquee-track items-center" data-logo-row="1">
         {[0, 1, 2].map((dup) => (
           <div class="logo-group" aria-hidden={dup > 0 ? 'true' : undefined}>
-            {rowB.map((f) => (
-              <img src={`/logos/${f}`} alt="" width="160" height="64" loading={dup === 0 ? 'eager' : 'lazy'} decoding="async" class={imgCls} />
+            {rowB.map((c) => (
+              <img src={c.logo_url} alt={c.name ?? ''} width="160" height="64" loading={dup === 0 ? 'eager' : 'lazy'} decoding="async" class={imgCls} />
             ))}
           </div>
         ))}
@@ -49,7 +65,9 @@ const imgCls = "h-14 w-auto shrink-0 bg-slate-100 object-contain opacity-80 gray
       var list = (j && (j.data || j)) || [];
       if (!Array.isArray(list)) list = list.items || [];
       list = list.filter(function (c) { return c && c.logo_url; });
-      if (list.length === 0) return;
+      var sec = document.getElementById('clients');
+      if (list.length === 0) { sec?.setAttribute('hidden', ''); return; }
+      sec?.removeAttribute('hidden');
       var half = Math.max(1, Math.ceil(list.length / 2));
       [list.slice(0, half), list.slice(half)].forEach(function (part, ri) {
         if (part.length === 0) part = list;

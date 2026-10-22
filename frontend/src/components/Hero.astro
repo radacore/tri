@@ -1,8 +1,35 @@
 ---
+import { API, DEMO_CONTENT } from '../lib/api';
+
+// Kolase hero hanya berisi gambar milik sendiri, diisi dari admin
+// (Website Identity → Hero collage). Tanpa gambar, kolase tidak dirender dan
+// hero memakai satu kolom — lebih baik daripada memajang foto stok pihak lain.
+let collage: string[] = [];
+try {
+  const r = await fetch(`${API}/settings`, { headers: { Accept: 'application/json' } });
+  if (r.ok) {
+    const j = await r.json();
+    const d = (j?.data ?? j) ?? {};
+    const imgs = d?.hero_images?.images ?? d?.hero_images;
+    if (Array.isArray(imgs)) collage = imgs.filter((u) => typeof u === 'string' && u !== '');
+  }
+} catch { /* build offline */ }
+if (collage.length === 0 && DEMO_CONTENT) {
+  collage = [
+    '/hero/leo-1.jpg',
+    ...Array.from({ length: 11 }, (_, i) => `https://picsum.photos/seed/lp-c${i % 3}-${Math.floor(i / 3)}/400/350.webp`),
+  ];
+}
+const perCol = Math.max(1, Math.ceil(collage.length / 3));
+// Tiap kolom digandakan agar animasi gulir terlihat mulus (loop tanpa jeda).
+const columns = [0, 1, 2].map((c) => {
+  const slice = collage.slice(c * perCol, c * perCol + perCol);
+  return slice.length > 0 ? slice.concat(slice) : [];
+});
 ---
 <section class="reveal reveal-stagger relative overflow-hidden pt-32 pb-12 sm:pt-44">
   <div class="relative mx-auto max-w-content px-5">
-    <div class="grid items-center gap-10 lg:grid-cols-2">
+    <div class={`grid items-center gap-10 ${collage.length > 0 ? 'lg:grid-cols-2' : ''}`}>
       <div>
         <h1 class="font-display max-w-xl font-extrabold leading-[1.0] tracking-tight" style="--i:0">
           <span class="block text-4xl sm:text-6xl" data-site="hero.t1">A logo that sells,</span>
@@ -17,23 +44,21 @@
           <a href="/#portfolio" data-site="hero.cta2" class="btn-active rounded-full bg-dark px-8 py-4 text-base font-bold text-white hover:bg-slate-800 text-center max-md:px-6 max-md:py-3 max-md:text-sm">See Our Work</a>
         </div>
       </div>
+      {collage.length > 0 && (
       <div class="relative" style="--i:3" aria-hidden="true">
         <div class="v-collage v-mask relative mx-auto grid max-h-[630px] grid-cols-2 gap-4 overflow-hidden sm:grid-cols-3">
-          {[0, 1, 2].map((col) => (
-            <div class={`overflow-hidden ${col === 2 ? 'hidden sm:block' : ''}`}>
-              <div class={`v-track ${col % 2 === 0 ? 'v-track-up' : 'v-track-down'}`} data-site-collage={col}>
-                {[0, 1, 2, 3].map((k) => [0, 1].map((dup) => (
-                  col === 0 && k === 0 ? (
-                    <img src="/hero/leo-1.jpg" alt="Leo airline brand identity" width="400" height="350" loading="eager" decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />
-                  ) : (
-                    <img src={`https://picsum.photos/seed/lp-c${col}-${k}/400/${k % 2 === 0 ? 350 : 266}.webp`} alt="" width="400" height={k % 2 === 0 ? 350 : 266} loading="lazy" decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />
-                  )
-                )))}
+          {columns.map((col, ci) => (
+            <div class={`overflow-hidden ${ci === 2 ? 'hidden sm:block' : ''}`}>
+              <div class={`v-track ${ci % 2 === 0 ? 'v-track-up' : 'v-track-down'}`} data-site-collage={ci}>
+                {col.map((src, k) => (
+                  <img src={src} alt="" width="400" height="350" loading={k === 0 && ci === 0 ? 'eager' : 'lazy'} decoding="async" class="w-full rounded-2xl object-cover ring-1 ring-slate-900/10" style="border-radius:16px" />
+                ))}
               </div>
             </div>
           ))}
         </div>
       </div>
+      )}
     </div>
   </div>
 </section>

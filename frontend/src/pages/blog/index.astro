@@ -2,7 +2,12 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
-import { FALLBACK_POSTS } from '../../lib/api';
+import { DEMO_CONTENT, FALLBACK_POSTS, fetchList } from '../../lib/api';
+interface ApiPost { slug: string; title: string; content?: string; thumbnail_url?: string; published_at?: string; created_at?: string; category?: string }
+
+const { ok, items } = await fetchList<ApiPost>('/blog?limit=24');
+const posts = ok ? items : [];
+const demoPosts = !ok && DEMO_CONTENT ? FALLBACK_POSTS : [];
 ---
 <BaseLayout title="Blog — BrandingPulse">
   <Navbar />
@@ -10,7 +15,7 @@ import { FALLBACK_POSTS } from '../../lib/api';
     <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">Blog</p>
     <h1 class="mt-2 text-4xl font-extrabold tracking-tight" data-site="pages.blog_title">Branding advice for founders</h1>
     <div id="blog-grid" class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {FALLBACK_POSTS.map((p) => (
+      {demoPosts.map((p) => (
         <a href={`/blog/${p.slug}`} class="block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:shadow-xl transition hover:-translate-y-1" style="border-radius:20px">
           <img src={p.cover} alt={p.title} loading="lazy" class="aspect-[16/9] w-full object-cover" />
           <div class="p-5">
@@ -21,6 +26,7 @@ import { FALLBACK_POSTS } from '../../lib/api';
         </a>
       ))}
     </div>
+    <p id="blog-empty" class="mt-8 rounded-2xl bg-slate-50 p-6 text-center text-sm text-slate-500" hidden={posts.length > 0 || demoPosts.length > 0}>No articles yet.</p>
   </main>
   <Footer />
   <script>
@@ -43,7 +49,13 @@ import { FALLBACK_POSTS } from '../../lib/api';
         return r.ok ? r.json() : null;
       }).then(function (j) {
         var list = (j && (j.data || j)) || [];
-        if (!Array.isArray(list) || list.length === 0) return;
+        var empty = document.getElementById('blog-empty');
+        if (!Array.isArray(list) || list.length === 0) {
+          if (empty) empty.hidden = false;
+          grid.innerHTML = '';
+          return;
+        }
+        if (empty) empty.hidden = true;
         grid.innerHTML = list.map(function (p) {
           var excerpt = String(p.content || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
           return '<a href="/blog/' + esc(p.slug) + '" class="block overflow-hidden bg-white ring-1 ring-slate-900/10 hover:shadow-xl transition hover:-translate-y-1" style="border-radius:20px">'

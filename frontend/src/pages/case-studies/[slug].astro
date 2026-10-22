@@ -4,35 +4,32 @@ import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
 import CTABanner from '../../components/CTABanner.astro';
 import CaseStudyCard from '../../components/CaseStudyCard.astro';
-import { API, FALLBACK_CASES, type CaseStudy } from '../../lib/api';
+import { API, DEMO_CONTENT, FALLBACK_CASES, fetchList, type CaseStudy } from '../../lib/api';
 
 export async function getStaticPaths() {
-  const slugs = new Set(FALLBACK_CASES.map((c) => c.slug));
-  try {
-    const r = await fetch(`${API}/case-studies?limit=100`);
-    if (r.ok) {
-      const j = await r.json();
-      for (const c of j?.data ?? []) if (c?.slug) slugs.add(String(c.slug));
-    }
-  } catch { /* build offline — fallback slugs */ }
-  return [...slugs].map((slug) => ({ params: { slug } }));
+  // Hanya slug yang benar-benar ada di admin. Case study contoh tidak pernah
+  // dibuatkan halaman kecuali PUBLIC_DEMO_CONTENT=1.
+  const { ok, items } = await fetchList<CaseStudy>('/case-studies?limit=100');
+  const list = ok ? items : DEMO_CONTENT ? FALLBACK_CASES : [];
+  return list.filter((c) => c?.slug).map((c) => ({ params: { slug: String(c.slug) } }));
 }
 
 const { slug } = Astro.params;
-const found = FALLBACK_CASES.find((c) => c.slug === slug) ?? FALLBACK_CASES[0];
-let item: CaseStudy = found;
+const demo = DEMO_CONTENT ? FALLBACK_CASES.find((c) => c.slug === slug) : undefined;
+// Placeholder netral: jangan pernah menampilkan case study lain saat data gagal.
+let item: CaseStudy = demo ?? { slug: String(slug), title: String(slug) };
 try {
   const r = await fetch(`${API}/case-studies/${slug}`);
-  if (r.ok) item = (await r.json())?.data ?? found;
-} catch { /* fallback to static */ }
+  if (r.ok) item = (await r.json())?.data ?? item;
+} catch { /* build offline */ }
 
 // Daftar lengkap untuk "Next case study" dan "More case studies".
-let all: CaseStudy[] = FALLBACK_CASES;
+let all: CaseStudy[] = DEMO_CONTENT ? FALLBACK_CASES : [];
 try {
   const r = await fetch(`${API}/case-studies?limit=100`);
   if (r.ok) {
     const list: CaseStudy[] = ((await r.json())?.data) ?? [];
-    if (Array.isArray(list) && list.length > 0) all = list;
+    if (Array.isArray(list)) all = list;
   }
 } catch { /* build offline — fallback */ }
 

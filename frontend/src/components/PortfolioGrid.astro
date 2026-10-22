@@ -39,7 +39,9 @@ const PILL_BASE = 'pf-btn btn-active shrink-0 rounded-full border px-3 py-1.5 te
 const PILL_ON = 'bg-black text-white border-black';
 const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
 ---
-<section class="reveal mx-auto max-w-content px-5 py-16 sm:py-20">
+{/* Section selalu ada di DOM agar hidrasi runtime bisa menampilkannya setelah
+    admin menambah karya, tanpa perlu rebuild landing. */}
+<section id="portfolio" class="reveal mx-auto max-w-content px-5 py-16 sm:py-20" hidden={items.length === 0}>
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
       <p class="text-xs sm:text-sm font-semibold uppercase tracking-wide text-slate-500" data-site="sections.pf_kicker">Portfolio</p>
@@ -166,7 +168,14 @@ const PILL_OFF = 'border-gray-300 text-gray-700 hover:bg-gray-100 bg-white';
   // Segarkan dari API: item baru dari admin muncul tanpa rebuild landing.
   void (async () => {
     const [list, cats] = await Promise.all([fetchPortfolio(6), fetchCategories()]);
-    if (list.length > 0 && grid) {
+    const section = grid?.closest('section');
+    // Admin belum punya karya: sembunyikan section, jangan tampilkan kotak kosong.
+    if (list.length === 0) {
+      section?.setAttribute('hidden', '');
+      return;
+    }
+    section?.removeAttribute('hidden');
+    if (grid) {
       grid.innerHTML = list
         .map((p, i) => portfolioCardHTML(p, i > 3 ? 'max-md:hidden' : ''))
         .join('');

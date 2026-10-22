@@ -2,25 +2,20 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Navbar from '../../components/Navbar.astro';
 import Footer from '../../components/Footer.astro';
-import { FALLBACK_POSTS } from '../../lib/api';
+import { DEMO_CONTENT, FALLBACK_POSTS, fetchList } from '../../lib/api';
 
 const API = import.meta.env.PUBLIC_API_URL ?? '/api/v1';
 
 export async function getStaticPaths() {
-  const base = import.meta.env.PUBLIC_API_URL ?? '/api/v1';
-  const slugs = new Set(FALLBACK_POSTS.map((p) => p.slug));
-  try {
-    const r = await fetch(`${base}/blog?limit=100`);
-    if (r.ok) {
-      const j = await r.json();
-      for (const p of j?.data ?? []) if (p?.slug) slugs.add(String(p.slug));
-    }
-  } catch { /* build offline — fallback slugs */ }
-  return [...slugs].map((slug) => ({ params: { slug } }));
+  // Hanya artikel yang ada di admin; contoh hanya bila PUBLIC_DEMO_CONTENT=1.
+  const { ok, items } = await fetchList<{ slug?: string }>('/blog?limit=100');
+  const list = ok ? items : DEMO_CONTENT ? FALLBACK_POSTS : [];
+  return list.filter((p) => p?.slug).map((p) => ({ params: { slug: String(p.slug) } }));
 }
 
 const { slug } = Astro.params;
-const fb = FALLBACK_POSTS.find((p) => p.slug === slug) ?? FALLBACK_POSTS[0];
+const demo = DEMO_CONTENT ? FALLBACK_POSTS.find((p) => p.slug === slug) : undefined;
+const fb = demo ?? { slug: String(slug), title: String(slug), excerpt: '', date: '', cover: '' };
 let post: any = null;
 try {
   const r = await fetch(`${API}/blog/${slug}`);

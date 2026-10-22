@@ -11,19 +11,16 @@ import TestimonialCard from '../components/TestimonialCard.astro';
 import FAQ from '../components/FAQ.astro';
 import CTABanner from '../components/CTABanner.astro';
 import Footer from '../components/Footer.astro';
-import { API, FALLBACK_CASES, type CaseStudy } from '../lib/api';
+import { DEMO_CONTENT, FALLBACK_CASES, fetchList, type CaseStudy } from '../lib/api';
 
 // Case study diambil saat build supaya yang diubah admin ikut tampil.
-// API mati = kartu contoh di lib/api.ts tetap dipakai.
-let cases: CaseStudy[] = FALLBACK_CASES;
-try {
-  const r = await fetch(`${API}/case-studies?limit=4`);
-  if (r.ok) {
-    const j = await r.json();
-    const list: CaseStudy[] = (j?.data ?? j) ?? [];
-    if (Array.isArray(list) && list.length > 0) cases = list;
-  }
-} catch { /* build offline — fallback */ }
+// API menjawab = datanya otoritatif, termasuk saat kosong: section disembunyikan
+// daripada menampilkan case study contoh yang bukan milik klien. Kartu contoh
+// hanya dipakai bila PUBLIC_DEMO_CONTENT=1.
+const caseRes = await fetchList<CaseStudy>('/case-studies?limit=4');
+const cases: CaseStudy[] = caseRes.ok ? caseRes.items : DEMO_CONTENT ? FALLBACK_CASES : [];
+const tstRes = await fetchList<{ id: string }>('/testimonials?limit=1');
+const hasTestimonials = tstRes.ok ? tstRes.items.length > 0 : DEMO_CONTENT;
 ---
 <BaseLayout>
   <Navbar />
@@ -33,6 +30,7 @@ try {
     <!-- 02 / CLIENT LOGOS -->
     <ClientLogos />
     <!-- 03 / CASE STUDIES -->
+    {cases.length > 0 && (
     <section id="case-studies" class="reveal mx-auto max-w-content px-5 py-16 sm:py-20">
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -47,14 +45,15 @@ try {
         ))}
       </div>
     </section>
+    )}
     <!-- 05 / PORTFOLIO -->
-    <div id="portfolio" class="reveal"><PortfolioGrid /></div>
+    <PortfolioGrid />
     <!-- 06 / HOW IT WORKS -->
     <div id="how-it-works" class="reveal"><HowItWorks /></div>
     <!-- 07 / PRICING -->
     <div id="pricing" class="reveal"><PricingTable /></div>
     <!-- 08 / TESTIMONIALS -->
-    <section id="testimonials" class="reveal pt-12 pb-4 text-center">
+    <section id="testimonials" class="reveal pt-12 pb-4 text-center" hidden={!hasTestimonials}>
       <div class="mx-auto max-w-content px-5">
       <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary" data-site="sections.rev_kicker">Reviews</p>
       <h2 class="mt-2 text-2xl sm:text-4xl font-extrabold tracking-tight" data-site="sections.rev_title">Loved by founders worldwide</h2>

@@ -2,6 +2,28 @@ export const API: string =
   (import.meta as unknown as { env: Record<string, string | undefined> }).env.PUBLIC_API_URL ??
   '/api/v1';
 
+/**
+ * Konten contoh (stok foto, logo klien pihak lain, case study fiktif) hanya
+ * dipakai bila diminta eksplisit. Produksi tidak boleh menampilkan klaim
+ * "trusted by" atau karya yang bukan milik klien.
+ */
+export const DEMO_CONTENT: boolean =
+  (import.meta as unknown as { env: Record<string, string | undefined> }).env
+    .PUBLIC_DEMO_CONTENT === '1';
+
+/** Ambil daftar dari API. `ok` false = build offline; `items` kosong = memang kosong. */
+export async function fetchList<T>(path: string): Promise<{ ok: boolean; items: T[] }> {
+  try {
+    const r = await fetch(`${API}${path}`, { headers: { Accept: 'application/json' } });
+    if (!r.ok) return { ok: false, items: [] };
+    const j = await r.json();
+    const list = (j?.data ?? j) ?? [];
+    return { ok: true, items: Array.isArray(list) ? (list as T[]) : [] };
+  } catch {
+    return { ok: false, items: [] };
+  }
+}
+
 export interface CaseStudy {
   slug: string;
   title: string;
