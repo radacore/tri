@@ -113,11 +113,13 @@ export function applySite(s: Settings) {
   document.querySelectorAll("[data-site-collage]").forEach((track) => {
     const all = get(s, "hero_images.images");
     const list = Array.isArray(all) && all.length > 0 ? all : get(s, "hero_images");
+    const wrap = track.closest("[data-collage-wrap]") as HTMLElement | null;
     if (!Array.isArray(list) || list.length === 0) {
-      // Admin belum mengisi kolase: jangan biarkan gambar contoh menetap.
-      track.closest(".v-collage")?.parentElement?.remove();
+      // Admin belum mengisi kolase: sembunyikan, jangan tampilkan gambar contoh.
+      wrap?.setAttribute("hidden", "");
       return;
     }
+    wrap?.removeAttribute("hidden");
     const col = Number(track.getAttribute("data-site-collage") || "0");
     const per = Math.ceil(list.length / 3);
     const slice = list.slice(col * per, col * per + per);
